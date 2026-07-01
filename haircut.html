@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>✂️ 理发游戏 - Century</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/haircut.css">
+</head>
+<body>
+  <!-- Back button -->
+  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
+
+  <div id="game-container">
+    <!-- Canvas -->
+    <canvas id="haircut-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="hud-round">第 1 轮</div>
+      <div id="hud-score">0</div>
+    </div>
+
+    <!-- Target zone hint -->
+    <div id="zone-hint">🎯 瞄准金色区域</div>
+
+    <!-- Speech bubble for insults -->
+    <div id="speech-bubble" class="hidden"></div>
+
+    <!-- Scissors Button -->
+    <button id="scissors-btn">
+      <span id="scissors-icon">✂️</span>
+      <span id="scissors-label">剪！</span>
+    </button>
+
+    <!-- Round Result -->
+    <div id="round-result" class="hidden">
+      <div id="round-result-text"></div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results" class="hidden">
+      <div class="results-card">
+        <h2 class="results-title">理发完成！</h2>
+        <div class="results-grade" id="results-grade">S</div>
+        <div class="results-stats">
+          <div class="stat-row">
+            <span class="stat-label">总分</span>
+            <span class="stat-value" id="res-score">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">完成轮数</span>
+            <span class="stat-value" id="res-rounds">0/8</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Perfect</span>
+            <span class="stat-value perfect-color" id="res-perfect">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">辱骂次数</span>
+            <span class="stat-value miss-color" id="res-insults">0</span>
+          </div>
+        </div>
+        <div class="results-buttons">
+          <button class="btn" onclick="location.reload()">再来一次</button>
+          <a href="index.html" class="btn btn-small" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <noscript>
+    <div>请启用 JavaScript 以运行此游戏。</div>
+  </noscript>
+
+  <script src="js/common.js"></script>
+  <script src="js/haircut.js"></script>
+</body>
+</html>

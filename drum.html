@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🥁 打鼓游戏 - Century</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/drum.css">
+</head>
+<body>
+  <!-- Back button -->
+  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
+
+  <!-- Game Container -->
+  <div id="game-container">
+    <!-- Canvas -->
+    <canvas id="drum-canvas"></canvas>
+
+    <!-- Touch Zones (Mobile) -->
+    <div id="touch-don" class="touch-zone touch-don"></div>
+    <div id="touch-ka" class="touch-zone touch-ka"></div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+      <div id="hud-score">0</div>
+      <div id="hud-combo"></div>
+      <div id="hud-accuracy">--%</div>
+    </div>
+
+    <!-- Countdown -->
+    <div id="countdown"></div>
+
+    <!-- Judgment Popup -->
+    <div id="judgment-popup"></div>
+
+    <!-- Results Screen -->
+    <div id="results" class="hidden">
+      <div class="results-card">
+        <h2 class="results-title">演奏结束</h2>
+        <div class="results-grade" id="results-grade">S</div>
+        <div class="results-stats">
+          <div class="stat-row">
+            <span class="stat-label">总分</span>
+            <span class="stat-value" id="res-score">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">最大连击</span>
+            <span class="stat-value" id="res-maxcombo">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">准确率</span>
+            <span class="stat-value" id="res-accuracy">0%</span>
+          </div>
+          <div class="stat-row stat-breakdown">
+            <span class="stat-label">Perfect</span>
+            <span class="stat-value perfect-color" id="res-perfect">0</span>
+          </div>
+          <div class="stat-row stat-breakdown">
+            <span class="stat-label">Good</span>
+            <span class="stat-value good-color" id="res-good">0</span>
+          </div>
+          <div class="stat-row stat-breakdown">
+            <span class="stat-label">OK</span>
+            <span class="stat-value ok-color" id="res-ok">0</span>
+          </div>
+          <div class="stat-row stat-breakdown">
+            <span class="stat-label">Miss</span>
+            <span class="stat-value miss-color" id="res-miss">0</span>
+          </div>
+        </div>
+        <div class="results-buttons">
+          <button class="btn" onclick="location.reload()">再来一次</button>
+          <a href="index.html" class="btn btn-small" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <noscript>
+    <div>请启用 JavaScript 以运行此游戏。</div>
+  </noscript>
+
+  <script src="js/common.js"></script>
+  <script src="js/drum.js"></script>
+</body>
+</html>

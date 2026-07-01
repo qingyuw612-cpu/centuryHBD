@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Century · 生日快乐</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/homepage.css">
+</head>
+<body>
+
+  <!-- Starfield Canvas -->
+  <canvas id="starfield"></canvas>
+
+  <!-- Main Scene Container -->
+  <main id="scene">
+
+    <!-- Floating Object: Snare Drum (top-right) -->
+    <a href="drum.html" class="floating-object" id="obj-drum" aria-label="打鼓游戏"
+       onclick="event.preventDefault(); CenturyApp.navigateTo('drum.html')">
+      <svg viewBox="0 0 120 120" class="obj-svg">
+        <!-- Drum body (cylinder) -->
+        <ellipse cx="60" cy="75" rx="45" ry="12" fill="#3a2a1a" stroke="#d4a853" stroke-width="2"/>
+        <rect x="15" y="35" width="90" height="40" fill="url(#drum-body)" stroke="#d4a853" stroke-width="2"/>
+        <ellipse cx="60" cy="35" rx="45" ry="12" fill="#f5f0e8" stroke="#d4a853" stroke-width="2"/>
+        <!-- Drum head pattern -->
+        <ellipse cx="60" cy="35" rx="38" ry="9" fill="none" stroke="#ccc" stroke-width="0.5" stroke-dasharray="3,3"/>
+        <ellipse cx="60" cy="35" rx="20" ry="5" fill="none" stroke="#ccc" stroke-width="0.5"/>
+        <!-- Snares -->
+        <line x1="20" y1="45" x2="100" y2="45" stroke="#c0b090" stroke-width="0.8"/>
+        <line x1="22" y1="50" x2="98" y2="50" stroke="#c0b090" stroke-width="0.8"/>
+        <line x1="24" y1="55" x2="96" y2="55" stroke="#c0b090" stroke-width="0.8"/>
+        <!-- Drum legs -->
+        <line x1="35" y1="70" x2="25" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
+        <line x1="85" y1="70" x2="95" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
+        <!-- Glow -->
+        <ellipse cx="60" cy="75" rx="50" ry="35" fill="none" stroke="rgba(240,215,140,0.15)" stroke-width="4"/>
+        <defs>
+          <linearGradient id="drum-body" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#4a3520"/>
+            <stop offset="30%" stop-color="#6b4d30"/>
+            <stop offset="70%" stop-color="#6b4d30"/>
+            <stop offset="100%" stop-color="#3a2a1a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </a>
+
+    <!-- Floating Object: Phone (bottom-left) -->
+    <a href="phone.html" class="floating-object" id="obj-phone" aria-label="修手机"
+       onclick="event.preventDefault(); CenturyApp.navigateTo('phone.html')">
+      <svg viewBox="0 0 100 180" class="obj-svg">
+        <!-- Phone body -->
+        <rect x="20" y="10" width="60" height="160" rx="12" ry="12" fill="#1c1c2e" stroke="#d4a853" stroke-width="2.5"/>
+        <!-- Screen -->
+        <rect x="27" y="25" width="46" height="100" rx="4" ry="4" fill="#0a0a1e"/>
+        <rect x="30" y="28" width="40" height="94" rx="3" ry="3" fill="#12122a"/>
+        <!-- Screen content glow -->
+        <circle cx="50" cy="65" r="15" fill="none" stroke="rgba(126,184,218,0.3)" stroke-width="2"/>
+        <circle cx="50" cy="65" r="8" fill="rgba(126,184,218,0.2)"/>
+        <!-- Home button -->
+        <circle cx="50" cy="142" r="8" fill="none" stroke="#555" stroke-width="1.5"/>
+        <!-- Camera dot -->
+        <circle cx="50" cy="18" r="3" fill="#d4a853"/>
+        <!-- Speaker -->
+        <rect x="40" y="12" width="20" height="3" rx="1.5" fill="#444"/>
+        <!-- Glow -->
+        <rect x="15" y="5" width="70" height="170" rx="16" fill="none" stroke="rgba(179,157,218,0.15)" stroke-width="4"/>
+      </svg>
+    </a>
+
+    <!-- Floating Object: Scissors (top-left) -->
+    <a href="haircut.html" class="floating-object" id="obj-scissors" aria-label="理发游戏"
+       onclick="event.preventDefault(); CenturyApp.navigateTo('haircut.html')">
+      <svg viewBox="0 0 140 140" class="obj-svg">
+        <!-- Blade 1 -->
+        <path d="M 40 20 L 105 85 L 100 90 L 35 25 Z" fill="#d0d5e0" stroke="#999" stroke-width="1"/>
+        <path d="M 40 20 L 105 85" stroke="#fff" stroke-width="0.8" opacity="0.6"/>
+        <!-- Blade 2 -->
+        <path d="M 100 20 L 35 85 L 40 90 L 105 25 Z" fill="#c0c5d0" stroke="#999" stroke-width="1"/>
+        <path d="M 100 20 L 35 85" stroke="#fff" stroke-width="0.8" opacity="0.4"/>
+        <!-- Pivot screw -->
+        <circle cx="70" cy="55" r="5" fill="#d4a853" stroke="#a67c30" stroke-width="1"/>
+        <!-- Handle 1 -->
+        <ellipse cx="28" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(-20, 28, 112)"/>
+        <!-- Handle 2 -->
+        <ellipse cx="112" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(20, 112, 112)"/>
+        <!-- Glow -->
+        <circle cx="70" cy="65" r="55" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="5"/>
+      </svg>
+    </a>
+
+    <!-- Century Character (inline SVG) -->
+    <div id="character-container">
+      <svg viewBox="0 0 360 520" id="century-character" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Gradients -->
+          <radialGradient id="aura-glow" cx="50%" cy="40%" r="50%">
+            <stop offset="0%" stop-color="rgba(179,157,218,0.2)"/>
+            <stop offset="50%" stop-color="rgba(126,184,218,0.08)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+          </radialGradient>
+          <linearGradient id="hair-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1a1028"/>
+            <stop offset="60%" stop-color="#120820"/>
+            <stop offset="100%" stop-color="#0c0418"/>
+          </linearGradient>
+          <linearGradient id="robe-grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#1c1a28"/>
+            <stop offset="50%" stop-color="#141220"/>
+            <stop offset="100%" stop-color="#0e0c18"/>
+          </linearGradient>
+          <linearGradient id="gold-trim" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#a67c30"/>
+            <stop offset="50%" stop-color="#f0d78c"/>
+            <stop offset="100%" stop-color="#a67c30"/>
+          </linearGradient>
+          <filter id="soft-glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Aura circle -->
+        <circle cx="180" cy="240" r="200" fill="url(#aura-glow)"/>
+
+        <!-- === HAIR BACK (flowing behind body) === -->
+        <g id="hair-back" fill="url(#hair-grad)">
+          <path d="M 140 95 Q 100 180 80 280 Q 70 340 90 390 Q 100 400 95 380 Q 75 330 90 270 Q 100 200 140 120 Z" opacity="0.9"/>
+          <path d="M 220 95 Q 260 180 280 280 Q 290 340 270 390 Q 260 400 265 380 Q 285 330 270 270 Q 260 200 220 120 Z" opacity="0.9"/>
+          <path d="M 150 90 Q 110 200 100 300 Q 95 370 110 420 Q 115 430 108 410 Q 90 340 105 260 Q 115 170 155 105 Z" opacity="0.7"/>
+          <path d="M 210 90 Q 250 200 260 300 Q 265 370 250 420 Q 245 430 252 410 Q 270 340 255 260 Q 245 170 205 105 Z" opacity="0.7"/>
+        </g>
+
+        <!-- === LEGS (relaxed, bent in floating pose) === -->
+        <g id="legs">
+          <!-- Left leg -->
+          <path d="M 150 360 Q 140 400 120 430 Q 110 450 125 455 Q 140 448 145 425 Q 155 395 165 365 Z" fill="#0e0c18"/>
+          <!-- Right leg -->
+          <path d="M 195 360 Q 200 395 215 425 Q 225 450 240 445 Q 250 440 235 420 Q 220 395 210 365 Z" fill="#0e0c18"/>
+          <!-- Boots -->
+          <path d="M 115 440 Q 100 455 108 465 Q 120 470 130 460 L 140 450 Z" fill="#1a1028" stroke="url(#gold-trim)" stroke-width="1.5"/>
+          <path d="M 225 435 Q 240 445 248 460 Q 245 470 232 465 L 220 455 Z" fill="#1a1028" stroke="url(#gold-trim)" stroke-width="1.5"/>
+        </g>
+
+        <!-- === BODY / ROBE === -->
+        <g id="body">
+          <!-- Main robe -->
+          <path d="M 145 160 Q 130 220 135 300 Q 137 350 148 370 Q 155 375 180 370 Q 205 375 212 370 Q 223 350 225 300 Q 230 220 215 160 Z"
+                fill="url(#robe-grad)" stroke="url(#gold-trim)" stroke-width="1.5"/>
+          <!-- Inner robe / tunic -->
+          <path d="M 155 165 Q 150 220 155 280 Q 158 340 165 360 L 195 360 Q 202 340 205 280 Q 210 220 205 165 Z"
+                fill="#1a1624" opacity="0.8"/>
+          <!-- Gold belt / sash -->
+          <path d="M 142 280 Q 180 290 218 280 Q 220 295 180 305 Q 142 295 142 280 Z" fill="url(#gold-trim)"/>
+          <!-- Sash flowing end -->
+          <path d="M 215 290 Q 235 310 230 345 Q 228 360 240 355 Q 248 340 240 310 Q 235 295 218 285 Z" fill="url(#gold-trim)" opacity="0.8"/>
+          <!-- Gold shoulder brooch -->
+          <circle cx="165" cy="168" r="6" fill="url(#gold-trim)" filter="url(#soft-glow)"/>
+          <!-- Collar detail -->
+          <path d="M 155 160 Q 165 175 180 180 Q 195 175 205 160" fill="none" stroke="url(#gold-trim)" stroke-width="1.5"/>
+        </g>
+
+        <!-- === LEFT ARM (extended, relaxed) === -->
+        <g id="arm-left">
+          <path d="M 148 175 Q 120 200 100 230 Q 90 250 95 265 Q 100 272 108 268 Q 115 260 118 245 Q 125 220 150 195 Z"
+                fill="url(#robe-grad)" stroke="rgba(240,215,140,0.3)" stroke-width="1"/>
+          <!-- Hand -->
+          <path d="M 93 262 Q 84 272 78 280 Q 74 286 82 288 Q 90 290 95 282 Q 98 275 108 268 Z"
+                fill="#e0c8b0"/>
+          <!-- Gold bracelet -->
+          <ellipse cx="109" cy="248" rx="12" ry="4" fill="none" stroke="url(#gold-trim)" stroke-width="3" transform="rotate(-30, 109, 248)"/>
+        </g>
+
+        <!-- === RIGHT ARM (slightly raised) === -->
+        <g id="arm-right">
+          <path d="M 212 175 Q 235 200 250 215 Q 260 228 255 238 Q 250 244 242 240 Q 235 232 230 220 Q 218 200 210 185 Z"
+                fill="url(#robe-grad)" stroke="rgba(240,215,140,0.3)" stroke-width="1"/>
+          <!-- Hand holding pose -->
+          <path d="M 257 235 Q 266 230 274 234 Q 278 238 272 244 Q 264 248 256 244 Q 252 240 257 235 Z"
+                fill="#e0c8b0"/>
+          <!-- Gold bracelet -->
+          <ellipse cx="240" cy="228" rx="12" ry="4" fill="none" stroke="url(#gold-trim)" stroke-width="3" transform="rotate(20, 240, 228)"/>
+        </g>
+
+        <!-- === HEAD === -->
+        <g id="head">
+          <!-- Neck -->
+          <rect x="170" y="135" width="20" height="25" rx="5" fill="#d8c0a8"/>
+          <!-- Face -->
+          <ellipse cx="180" cy="105" rx="42" ry="52" fill="#e8d5c2"/>
+          <!-- Ears (hidden by hair mostly, just hints) -->
+          <ellipse cx="138" cy="105" rx="8" ry="14" fill="#e0c8b0"/>
+          <ellipse cx="222" cy="105" rx="8" ry="14" fill="#e0c8b0"/>
+          <!-- Eyebrows -->
+          <path d="M 155 85 Q 162 80 170 83" stroke="#3a2a1a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 190 83 Q 198 80 205 85" stroke="#3a2a1a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Eyes (closed, peaceful) -->
+          <path d="M 153 96 Q 160 101 168 96" stroke="#3a2a1a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          <path d="M 192 96 Q 199 101 207 96" stroke="#3a2a1a" fill="none" stroke-width="2" stroke-linecap="round"/>
+          <!-- Eyelashes -->
+          <path d="M 168 96 L 172 93" stroke="#3a2a1a" fill="none" stroke-width="0.8" stroke-linecap="round"/>
+          <path d="M 192 96 L 188 93" stroke="#3a2a1a" fill="none" stroke-width="0.8" stroke-linecap="round"/>
+          <!-- Nose -->
+          <path d="M 180 98 L 180 108 Q 180 113 177 116" stroke="#d0b090" fill="none" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- Mouth (subtle smile) -->
+          <path d="M 170 122 Q 180 130 190 122" stroke="#c4956a" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- Slight blush -->
+          <ellipse cx="155" cy="112" rx="10" ry="6" fill="rgba(220,150,150,0.15)"/>
+          <ellipse cx="205" cy="112" rx="10" ry="6" fill="rgba(220,150,150,0.15)"/>
+        </g>
+
+        <!-- === HAIR FRONT (bangs & face-framing) === -->
+        <g id="hair-front" fill="url(#hair-grad)">
+          <!-- Center bangs -->
+          <path d="M 142 85 Q 150 50 180 45 Q 210 50 218 85 Q 210 65 195 55 Q 180 50 165 55 Q 150 65 142 85 Z"/>
+          <path d="M 140 90 Q 145 60 165 52 Q 180 48 195 52 Q 215 60 220 90 Q 210 75 195 65 Q 180 58 165 65 Q 150 75 140 90 Z" opacity="0.8"/>
+          <!-- Side strands (left) -->
+          <path d="M 142 90 Q 130 120 128 150 Q 126 170 130 185 Q 132 180 130 165 Q 132 140 140 115 Z"/>
+          <path d="M 140 95 Q 135 130 133 160 Q 134 180 136 195 Q 138 188 136 170 Q 137 140 142 115 Z" opacity="0.7"/>
+          <!-- Side strands (right) -->
+          <path d="M 218 90 Q 230 120 232 150 Q 234 170 230 185 Q 228 180 230 165 Q 228 140 220 115 Z"/>
+          <path d="M 220 95 Q 225 130 227 160 Q 226 180 224 195 Q 222 188 224 170 Q 223 140 218 115 Z" opacity="0.7"/>
+          <!-- Wispy strands -->
+          <path d="M 170 48 Q 175 55 170 62" fill="none" stroke="#2a1430" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M 185 47 Q 190 54 186 60" fill="none" stroke="#2a1430" stroke-width="1.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- === STAR PARTICLES around character === -->
+        <g id="char-particles" fill="#f0d78c" opacity="0.6">
+          <circle cx="100" cy="200" r="1.5">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="260" cy="180" r="1">
+            <animate attributeName="opacity" values="1;0.2;1" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="80" cy="300" r="1.5">
+            <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="270" cy="320" r="2">
+            <animate attributeName="opacity" values="0.2;0.9;0.2" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="130" cy="400" r="1">
+            <animate attributeName="opacity" values="0.7;0.1;0.7" dur="2.8s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="240" cy="420" r="1.5">
+            <animate attributeName="opacity" values="0.4;1;0.4" dur="3.2s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      </svg>
+    </div>
+  </main>
+
+  <!-- BGM Init Overlay -->
+  <div id="bgm-overlay">
+    <div id="bgm-overlay-content">
+      <div class="overlay-star">✦</div>
+      <p class="overlay-text">点击任意处开始</p>
+      <p class="overlay-sub">Tap anywhere to begin</p>
+    </div>
+  </div>
+
+  <!-- BGM Toggle Button -->
+  <button id="bgm-toggle" aria-label="音乐开关" title="音乐开关">
+    <span id="bgm-icon">♪</span>
+  </button>
+
+  <!-- Ending Portal (hidden until all games complete) -->
+  <a href="ending.html" id="ending-portal" aria-label="生日祝福"
+     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">
+    <svg viewBox="0 0 60 60" width="60" height="60">
+      <circle cx="30" cy="30" r="25" fill="none" stroke="#f0d78c" stroke-width="1.5">
+        <animate attributeName="r" values="25;28;25" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="30" cy="30" r="18" fill="none" stroke="#f0d78c" stroke-width="1">
+        <animate attributeName="r" values="18;15;18" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <text x="30" y="35" text-anchor="middle" fill="#f0d78c" font-size="14">⭐</text>
+    </svg>
+  </a>
+
+  <noscript>
+    <div>请启用 JavaScript 以查看此页面。</div>
+    <div>Please enable JavaScript to view this page.</div>
+  </noscript>
+
+  <script src="js/common.js"></script>
+  <script src="js/homepage.js"></script>
+</body>
+</html>

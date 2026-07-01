@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🎂 生日快乐 Century!</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/ending.css">
+</head>
+<body>
+  <!-- Canvas for fireworks & confetti -->
+  <canvas id="ending-canvas"></canvas>
+
+  <!-- Text overlay -->
+  <div id="text-overlay">
+    <div id="happy-birthday" class="reveal-text">Happy Birthday</div>
+    <div id="century-name" class="reveal-text">Century</div>
+    <div id="sub-message" class="reveal-text">✨ 祝你生日快乐 ✨</div>
+  </div>
+
+  <!-- Score card -->
+  <div id="score-card" class="hidden">
+    <h3>冒险记录</h3>
+    <div id="score-drum" class="score-row">
+      <span>🥁 打鼓</span>
+      <span id="sc-drum">--</span>
+    </div>
+    <div id="score-phone" class="score-row">
+      <span>📱 修手机</span>
+      <span id="sc-phone">--</span>
+    </div>
+    <div id="score-haircut" class="score-row">
+      <span>✂️ 理发</span>
+      <span id="sc-haircut">--</span>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <div id="ending-links" class="reveal-text">
+    <a href="index.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
+  </div>
+
+  <noscript>
+    <div>请启用 JavaScript 以查看此页面。</div>
+  </noscript>
+
+  <script src="js/common.js"></script>
+  <script src="js/ending.js"></script>
+</body>
+</html>

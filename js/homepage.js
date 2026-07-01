@@ -1,0 +1,253 @@
+/* ============================================
+   Century Birthday - Homepage JS
+   ============================================ */
+
+(function() {
+  const { BGM, STORE, SoundEngine } = window.CenturyApp;
+
+  // ===========================================
+  // Starfield Canvas
+  // ===========================================
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+
+  let stars = [];
+  let shootingStars = [];
+  let width, height;
+  let animId;
+
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  function createStars() {
+    stars = [];
+    // Far layer: many small dim stars
+    for (let i = 0; i < 180; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 0.5 + Math.random() * 1.2,
+        baseOpacity: 0.2 + Math.random() * 0.4,
+        twinkleSpeed: 0.5 + Math.random() * 1.5,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        layer: 'far'
+      });
+    }
+    // Mid layer: medium stars
+    for (let i = 0; i < 80; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 1.0 + Math.random() * 1.5,
+        baseOpacity: 0.4 + Math.random() * 0.4,
+        twinkleSpeed: 0.8 + Math.random() * 2.0,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        layer: 'mid'
+      });
+    }
+    // Near layer: few bright stars
+    for (let i = 0; i < 20; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 1.5 + Math.random() * 2.0,
+        baseOpacity: 0.6 + Math.random() * 0.4,
+        twinkleSpeed: 1.0 + Math.random() * 3.0,
+        twinkleOffset: Math.random() * Math.PI * 2,
+        layer: 'near'
+      });
+    }
+  }
+
+  function drawStars(time) {
+    const t = time * 0.001; // seconds
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Background gradient
+    const grad = ctx.createRadialGradient(width * 0.4, height * 0.35, 0, width * 0.5, height * 0.5, Math.max(width, height) * 0.7);
+    grad.addColorStop(0, '#1a1540');
+    grad.addColorStop(0.5, '#0f0d28');
+    grad.addColorStop(1, '#080818');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw stars
+    for (const star of stars) {
+      const opacity = star.baseOpacity + Math.sin(t * star.twinkleSpeed + star.twinkleOffset) * 0.25;
+      const alpha = Math.max(0.1, Math.min(1, opacity));
+
+      ctx.beginPath();
+
+      if (star.layer === 'near' && star.r > 2.5) {
+        // 4-point star sparkle
+        const cx = star.x, cy = star.y, s = star.r * 2.5;
+        ctx.moveTo(cx, cy - s);
+        ctx.lineTo(cx + star.r * 0.5, cy - star.r * 0.5);
+        ctx.lineTo(cx + s, cy);
+        ctx.lineTo(cx + star.r * 0.5, cy + star.r * 0.5);
+        ctx.lineTo(cx, cy + s);
+        ctx.lineTo(cx - star.r * 0.5, cy + star.r * 0.5);
+        ctx.lineTo(cx - s, cy);
+        ctx.lineTo(cx - star.r * 0.5, cy - star.r * 0.5);
+        ctx.closePath();
+      } else {
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+      }
+
+      const color = star.layer === 'near'
+        ? `rgba(240,215,140,${alpha})`
+        : star.layer === 'mid'
+        ? `rgba(200,190,230,${alpha})`
+        : `rgba(180,200,230,${alpha * 0.7})`;
+
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+
+    // Shooting stars
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      ss.age += 0.016;
+      const progress = ss.age / ss.lifetime;
+      const alpha = progress < 0.1 ? progress / 0.1 : (1 - progress);
+
+      const tailLen = 80 * (1 - progress);
+      const sx = ss.x - Math.cos(ss.angle) * tailLen;
+      const sy = ss.y - Math.sin(ss.angle) * tailLen;
+
+      const grad2 = ctx.createLinearGradient(sx, sy, ss.x, ss.y);
+      grad2.addColorStop(0, 'rgba(240,215,140,0)');
+      grad2.addColorStop(0.6, `rgba(240,215,140,${alpha * 0.3})`);
+      grad2.addColorStop(1, `rgba(255,255,255,${alpha})`);
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(ss.x, ss.y);
+      ctx.strokeStyle = grad2;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ss.x += Math.cos(ss.angle) * ss.speed;
+      ss.y += Math.sin(ss.angle) * ss.speed;
+
+      if (progress >= 1) shootingStars.splice(i, 1);
+    }
+
+    // Spawn shooting stars randomly
+    if (Math.random() < 0.003) {
+      shootingStars.push({
+        x: Math.random() * width,
+        y: Math.random() * height * 0.4,
+        angle: Math.PI * 0.25 + Math.random() * Math.PI * 0.5,
+        speed: 4 + Math.random() * 6,
+        lifetime: 0.8 + Math.random() * 1.2,
+        age: 0
+      });
+    }
+  }
+
+  function animate(time) {
+    drawStars(time);
+    animId = requestAnimationFrame(animate);
+  }
+
+  resize();
+  createStars();
+  animId = requestAnimationFrame(animate);
+
+  window.addEventListener('resize', () => {
+    resize();
+    createStars();
+  });
+
+  // ===========================================
+  // BGM Overlay
+  // ===========================================
+  const overlay = document.getElementById('bgm-overlay');
+  const bgmToggle = document.getElementById('bgm-toggle');
+  const bgmIcon = document.getElementById('bgm-icon');
+
+  function hideOverlay() {
+    if (overlay && !overlay.classList.contains('hidden')) {
+      overlay.classList.add('hidden');
+      // Remove overlay after transition
+      setTimeout(() => {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 1000);
+    }
+  }
+
+  // First interaction handler
+  function onFirstInteraction(e) {
+    hideOverlay();
+    BGM.play();
+    // Also init SoundEngine context
+    SoundEngine._ensure();
+    document.removeEventListener('click', onFirstInteraction);
+    document.removeEventListener('touchstart', onFirstInteraction);
+    document.removeEventListener('keydown', onFirstInteraction);
+  }
+
+  if (overlay) {
+    document.addEventListener('click', onFirstInteraction, { once: false });
+    document.addEventListener('touchstart', onFirstInteraction, { once: false, passive: true });
+    document.addEventListener('keydown', onFirstInteraction, { once: false });
+  }
+
+  // BGM Toggle
+  if (bgmToggle) {
+    bgmToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (BGM.audio && !BGM.audio.paused) {
+        BGM.pause();
+        bgmToggle.classList.add('muted');
+      } else {
+        BGM.play();
+        bgmToggle.classList.remove('muted');
+      }
+    });
+  }
+
+  // ===========================================
+  // Ending Portal
+  // ===========================================
+  const endingPortal = document.getElementById('ending-portal');
+
+  function checkPortal() {
+    const drum = STORE.getBool('drum_complete');
+    const phone = STORE.getBool('phone_complete');
+    const haircut = STORE.getBool('haircut_complete');
+
+    if (endingPortal) {
+      if (drum && phone && haircut) {
+        endingPortal.classList.add('visible');
+      } else if (endingPortal.classList.contains('visible')) {
+        endingPortal.classList.remove('visible');
+      }
+    }
+  }
+
+  // Check on load and periodically
+  checkPortal();
+  setInterval(checkPortal, 2000);
+
+  // ===========================================
+  // Floating object hover sound hint
+  // ===========================================
+  const floatingObjects = document.querySelectorAll('.floating-object');
+  floatingObjects.forEach(obj => {
+    obj.addEventListener('mouseenter', () => {
+      // Subtle visual-only feedback, no sound to avoid annoyance
+    });
+  });
+
+})();

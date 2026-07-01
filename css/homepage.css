@@ -1,0 +1,251 @@
+/* ============================================
+   Century Birthday - Homepage Styles
+   ============================================ */
+
+/* --- Starfield Canvas --- */
+#starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* --- Main Scene --- */
+#scene {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-lg);
+}
+
+/* --- Character Container --- */
+#character-container {
+  position: relative;
+  width: min(360px, 80vw);
+  max-width: 400px;
+  animation: charFloat 4s ease-in-out infinite,
+             charTilt 6s ease-in-out infinite;
+  z-index: 2;
+  filter: drop-shadow(0 0 30px rgba(179, 157, 218, 0.3))
+          drop-shadow(0 0 60px rgba(126, 184, 218, 0.15));
+}
+
+#century-character {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@keyframes charFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+@keyframes charTilt {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+}
+
+/* --- Floating Objects --- */
+.floating-object {
+  position: absolute;
+  z-index: 3;
+  cursor: pointer;
+  transition: filter var(--transition-normal),
+              transform var(--transition-fast);
+}
+
+.floating-object:hover {
+  filter: drop-shadow(0 0 18px rgba(240, 215, 140, 0.7))
+          drop-shadow(0 0 40px rgba(240, 215, 140, 0.3));
+  transform: scale(1.12);
+}
+
+.floating-object:active {
+  transform: scale(0.95);
+}
+
+.obj-svg {
+  display: block;
+}
+
+/* Snare drum - top right area */
+#obj-drum {
+  top: 8%;
+  right: 8%;
+  width: min(120px, 22vw);
+  animation: selfRotate 8s linear infinite;
+}
+
+/* Phone - bottom left area */
+#obj-phone {
+  bottom: 12%;
+  left: 10%;
+  width: min(80px, 15vw);
+  animation: selfRotate 10s linear infinite;
+}
+
+/* Scissors - top left area */
+#obj-scissors {
+  top: 12%;
+  left: 8%;
+  width: min(110px, 20vw);
+  animation: selfRotate 7s linear infinite;
+}
+
+@keyframes selfRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Hover override - combine rotation + hover */
+#obj-drum:hover,
+#obj-phone:hover,
+#obj-scissors:hover {
+  animation-play-state: running;
+  filter: drop-shadow(0 0 18px rgba(240, 215, 140, 0.7))
+          drop-shadow(0 0 40px rgba(240, 215, 140, 0.3));
+}
+
+/* --- BGM Overlay --- */
+#bgm-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(10, 10, 30, 0.85);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.8s ease-out;
+}
+
+#bgm-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#bgm-overlay-content {
+  text-align: center;
+}
+
+.overlay-star {
+  font-size: 3rem;
+  color: var(--color-gold-light);
+  animation: overlayPulse 2s ease-in-out infinite;
+  margin-bottom: var(--space-lg);
+}
+
+@keyframes overlayPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+.overlay-text {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-gold-light);
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-sm);
+}
+
+.overlay-sub {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-text-dim);
+  font-style: italic;
+}
+
+/* --- BGM Toggle --- */
+#bgm-toggle {
+  position: fixed;
+  bottom: var(--space-md);
+  right: var(--space-md);
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(26, 16, 64, 0.7);
+  border: 1px solid rgba(212, 168, 83, 0.4);
+  color: var(--color-gold-light);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  transition: all var(--transition-fast);
+}
+
+#bgm-toggle:hover {
+  background: rgba(42, 26, 80, 0.8);
+  border-color: var(--color-gold);
+}
+
+#bgm-toggle.muted #bgm-icon {
+  opacity: 0.4;
+}
+
+/* --- Ending Portal --- */
+#ending-portal {
+  position: fixed;
+  bottom: 40%;
+  right: var(--space-md);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease-out;
+}
+
+#ending-portal.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  #obj-drum {
+    top: 5%;
+    right: 4%;
+    width: min(90px, 20vw);
+  }
+
+  #obj-phone {
+    bottom: 8%;
+    left: 4%;
+    width: min(60px, 14vw);
+  }
+
+  #obj-scissors {
+    top: 6%;
+    left: 4%;
+    width: min(80px, 18vw);
+  }
+
+  #character-container {
+    width: min(280px, 65vw);
+  }
+
+  .overlay-text {
+    font-size: 1.4rem;
+  }
+
+  #ending-portal {
+    bottom: 30%;
+    right: var(--space-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  #obj-drum { width: 70px; }
+  #obj-phone { width: 50px; }
+  #obj-scissors { width: 65px; }
+  #character-container { width: min(220px, 60vw); }
+}
