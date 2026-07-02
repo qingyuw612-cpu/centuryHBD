@@ -85,7 +85,7 @@
     return c;
   }
 
-  const chart = generateChart();
+  const chart = generateChart().sort((a, b) => a.beat - b.beat); // MUST sort by beat!
   const lastBeat = Math.max(...chart.map(n => n.beat));
   const TOTAL_DURATION = (lastBeat + 3) * BEAT_DURATION;
 
@@ -208,7 +208,8 @@
 
     update(et) {
       const dt = this.time - et;
-      this.y = hitY - dt * FALL_SPEED;
+      // Notes always scroll from above: cap max y to just above screen top
+      this.y = Math.min(-NOTE_H, hitY - dt * FALL_SPEED);
     }
 
     draw(ctx) {
@@ -577,11 +578,14 @@
       case State.PLAYING:
         elapsedTime = (performance.now() - startTime) / 1000;
 
-        // Spawn
-        while (nextNoteIdx < chart.length &&
-               (chart[nextNoteIdx].beat + 1) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
-          notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].track));
-          nextNoteIdx++;
+        // Spawn notes (chart sorted by beat, stop at first not-ready)
+        while (nextNoteIdx < chart.length) {
+          if ((chart[nextNoteIdx].beat + 1) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
+            notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].track));
+            nextNoteIdx++;
+          } else {
+            break; // sorted: subsequent beats are even later
+          }
         }
 
         // Update & miss check
