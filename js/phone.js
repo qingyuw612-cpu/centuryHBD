@@ -70,28 +70,7 @@
     },
 
     update(dt) {
-      if (this.rotateSpeed !== 0) {
-        this.filmRot += this.rotateSpeed * dt;
-      }
-      // Gravity: film slowly drifts back toward initial offset if not being dragged
-      if (!this.drag) {
-        const driftSpeed = 30;
-        const rotDrift = 0.3;
-        // Drift X
-        const targetX = this.phoneX + this.initOffsetX;
-        if (Math.abs(this.filmX - targetX) > 0.5) {
-          this.filmX += (targetX - this.filmX) * driftSpeed * dt;
-        }
-        // Drift Y
-        const targetY = this.phoneY + this.initOffsetY;
-        if (Math.abs(this.filmY - targetY) > 0.5) {
-          this.filmY += (targetY - this.filmY) * driftSpeed * dt;
-        }
-        // Drift rotation
-        if (Math.abs(this.filmRot - this.initRot) > 0.002) {
-          this.filmRot += (this.initRot - this.filmRot) * rotDrift * dt;
-        }
-      }
+      // no gravity
     },
 
     draw(ctx, time) {
