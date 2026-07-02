@@ -109,10 +109,10 @@
       scissorY = (scissorMinY + scissorMaxY) / 2;
     }
 
-    // Target: lower portion of hair (where scissors move)
+    // Target: default mid-hair (will be refined in startRound)
     const cfg = ROUND_CONFIG[currentRound] || ROUND_CONFIG[0];
     targetHalfW = cfg.targetHalfW;
-    targetY = headY + 30 + (hairBottomY - headY - 30) * (0.5 + Math.random() * 0.3);
+    targetY = headY + 45 + (hairBottomY - headY - 45) * 0.5;
   }
 
   resize();
@@ -139,9 +139,20 @@
     if (roundPopup) roundPopup.classList.add('hidden');
     if (speechBubble) speechBubble.classList.add('hidden');
 
-    // Vary target
-    targetY = hairTopY + (hairBottomY - hairTopY) * (0.5 + Math.random() * 0.35);
-    targetY = Math.max(hairTopY + 25, Math.min(hairCurrentBottom - 10, targetY));
+    // Vary target: rounds 3-4 move higher (but not above chin ≈ headY+43)
+    const chinY = headY + 45;
+    let tMin, tMax;
+    if (currentRound >= 2) {
+      // Rounds 3-4: higher, just below chin
+      tMin = chinY;
+      tMax = chinY + (hairCurrentBottom - chinY) * 0.4;
+    } else {
+      // Rounds 1-2: mid-lower hair
+      tMin = chinY + 20;
+      tMax = hairCurrentBottom - 30;
+    }
+    targetY = tMin + Math.random() * (tMax - tMin);
+    targetY = Math.max(chinY, Math.min(hairCurrentBottom - 10, targetY));
 
     // Scissors start from above
     scissorY = hairTopY + 20;
@@ -308,7 +319,7 @@
 
     // === Body/shoulders ===
     const shoulderY = hy + 50;
-    ctx.fillStyle = '#1c1a28';
+    ctx.fillStyle = '#4a3a62';
     ctx.beginPath();
     ctx.moveTo(cx - 70, shoulderY + 30);
     ctx.quadraticCurveTo(cx - 55, shoulderY - 5, cx - 22, shoulderY - 20);
@@ -574,9 +585,9 @@
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Layer order: target → hair → character (head covers hair top)
-    drawTargetLine(ctx, timestamp);
+    // Layer order: hair → target line → character (target line on top of hair)
     drawHair(ctx, timestamp);
+    drawTargetLine(ctx, timestamp);
     drawCharacter(ctx);
     drawScissors(ctx);
     drawParticles(ctx, dt);
