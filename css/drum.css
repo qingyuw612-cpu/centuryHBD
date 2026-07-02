@@ -22,27 +22,40 @@
 .touch-zone {
   position: absolute;
   top: 0; bottom: 0;
-  width: 42%;
+  width: 45%;
   z-index: 10;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  opacity: 0;
-  transition: opacity 0.1s;
+  opacity: 0.06;
+  transition: opacity 0.08s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: rgba(255,255,255,0.25);
+  pointer-events: none;
+}
+
+.touch-zone::after {
+  content: '';
+  pointer-events: auto;
+  position: absolute;
+  inset: 0;
 }
 
 .touch-zone:active,
 .touch-zone.flash {
-  opacity: 0.15;
+  opacity: 0.2;
 }
 
 .touch-don {
   left: 0;
-  background: radial-gradient(circle at 20% 55%, rgba(255,80,60,0.6), transparent 60%);
+  background: radial-gradient(circle at 18% 52%, rgba(255,80,60,0.8), transparent 55%);
 }
 
 .touch-ka {
   right: 0;
-  background: radial-gradient(circle at 80% 55%, rgba(60,120,255,0.6), transparent 60%);
+  background: radial-gradient(circle at 82% 52%, rgba(60,140,255,0.8), transparent 55%);
 }
 
 /* --- HUD --- */

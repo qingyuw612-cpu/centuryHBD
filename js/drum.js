@@ -1,6 +1,6 @@
 /* ============================================
    Century Birthday - Drum Game JS
-   Taiko no Tatsujin Style
+   Single Track, Red/Blue Notes
    ============================================ */
 
 (function() {
@@ -24,117 +24,66 @@
   // Constants
   // ===========================================
   const BPM = 120;
-  const BEAT_DURATION = 60 / BPM; // 0.5s per beat
-  const SCROLL_SPEED = 350; // px per second
-  const LOOKAHEAD = 2.0; // seconds ahead to spawn notes
-  const HIT_X = 0.22; // hit zone at 22% of canvas width (left side)
-  const MISS_THRESHOLD = 0.08; // seconds past hit zone = miss
+  const BEAT_DURATION = 60 / BPM;
+  const SCROLL_SPEED = 280; // slower for easier play
+  const LOOKAHEAD = 2.5;
+  const HIT_X = 0.2;
+  const MISS_THRESHOLD = 0.10;
 
-  // Judgment windows (seconds)
-  const PERFECT_WINDOW = 0.025;
-  const GOOD_WINDOW = 0.055;
-  const OK_WINDOW = 0.090;
+  // Wider judgment windows (seconds)
+  const PERFECT_WINDOW = 0.050;
+  const GOOD_WINDOW = 0.100;
+  const OK_WINDOW = 0.150;
 
   // ===========================================
-  // Happy Birthday Beatmap (120 BPM, 4/4)
-  // Melody: G4 G4 A4 G4 C5 B4 (Happy birthday to you)
-  //         G4 G4 A4 G4 D5 C5 (Happy birthday to you)
-  //         G4 G4 G5 E5 C5 B4 A4 (Happy birthday dear Century)
-  //         F5 F5 E5 C5 D5 C5 (Happy birthday to you)
-  // Each entry: { beat, type:'don'|'ka', lane:'left'|'right' }
-  // Beat 0 = first beat of the song
+  // Beatmap - Happy Birthday (simplified, single track)
+  // type: 'don'(red→F/left touch) | 'ka'(blue→J/right touch)
   // ===========================================
   function generateChart() {
-    const chart = [];
-    let b = 0; // beat counter
+    const c = [];
 
-    // Measure 1: pickups + first phrase
-    // "Hap-py Birth-day to you"
-    // G4   G4    A4     G4   C5   B4
-    // beat: 0    1      2     3    4    5
-    chart.push({ beat: 0, type: 'don', lane: 'left' });   // G4
-    b = 1;
-    chart.push({ beat: 1, type: 'don', lane: 'left' });   // G4
-    b = 2;
-    chart.push({ beat: 2, type: 'don', lane: 'right' });  // A4
-    b = 3;
-    chart.push({ beat: 3, type: 'don', lane: 'left' });   // G4
-    b = 4;
-    chart.push({ beat: 4, type: 'ka', lane: 'right' });   // C5
-    b = 5;
-    chart.push({ beat: 5, type: 'don', lane: 'left' });   // B4
-    b = 6;
+    // Phrase 1: Happy birthday to you (beats 0-7)
+    c.push({ beat: 0, type: 'don' });  // Hap-
+    c.push({ beat: 1, type: 'don' });  // -py
+    c.push({ beat: 2, type: 'ka'  });  // Birth-
+    c.push({ beat: 3, type: 'don' });  // -day
+    c.push({ beat: 4, type: 'ka'  });  // to
+    c.push({ beat: 5, type: 'don' });  // you
+    // beat 6-7 rest
 
-    // Rest on beat 6-7
-    b = 8;
+    // Phrase 2: Happy birthday to you (beats 8-15)
+    c.push({ beat: 8,  type: 'don' });
+    c.push({ beat: 9,  type: 'don' });
+    c.push({ beat: 10, type: 'ka'  });
+    c.push({ beat: 11, type: 'don' });
+    c.push({ beat: 12, type: 'ka'  });
+    c.push({ beat: 13, type: 'don' });
+    // beat 14-15 rest
 
-    // Measure 2: "Hap-py Birth-day to you"
-    // G4   G4    A4     G4   D5   C5
-    chart.push({ beat: 8, type: 'don', lane: 'left' });   // G4
-    chart.push({ beat: 9, type: 'don', lane: 'left' });   // G4
-    chart.push({ beat: 10, type: 'ka', lane: 'right' });  // A4
-    chart.push({ beat: 11, type: 'don', lane: 'left' });  // G4
-    chart.push({ beat: 12, type: 'ka', lane: 'right' });  // D5
-    chart.push({ beat: 13, type: 'don', lane: 'left' });  // C5
-    b = 14;
+    // Phrase 3: Happy birthday dear Century (beats 16-23)
+    c.push({ beat: 16, type: 'don' });
+    c.push({ beat: 17, type: 'don' });
+    c.push({ beat: 18, type: 'ka'  });  // high note
+    c.push({ beat: 19, type: 'ka'  });
+    c.push({ beat: 20, type: 'don' });
+    c.push({ beat: 21, type: 'don' });
+    // beat 22-23 rest
 
-    // Rest on beat 14-15
-    b = 16;
+    // Phrase 4: Happy birthday to you (beats 24-31)
+    c.push({ beat: 24, type: 'ka'  });
+    c.push({ beat: 25, type: 'ka'  });
+    c.push({ beat: 26, type: 'don' });
+    c.push({ beat: 27, type: 'don' });
+    c.push({ beat: 28, type: 'ka'  });
+    c.push({ beat: 29, type: 'don' });  // final note
+    // beat 30-31 rest (hold)
 
-    // Measure 3: "Hap-py Birth-day dear Cen-tu-ry"
-    // G4   G4    G5     E5   C5   B4   A4
-    chart.push({ beat: 16, type: 'don', lane: 'left' });  // G4
-    chart.push({ beat: 17, type: 'don', lane: 'left' });  // G4
-    chart.push({ beat: 18, type: 'ka', lane: 'right' });  // G5 (high!)
-    chart.push({ beat: 19, type: 'ka', lane: 'left' });   // E5
-    chart.push({ beat: 20, type: 'don', lane: 'left' });  // C5
-    chart.push({ beat: 20.5, type: 'don', lane: 'right' });// B4 (eighth note)
-    chart.push({ beat: 21, type: 'don', lane: 'left' });  // A4
-    b = 22;
-
-    // Rest on beat 22-23
-    b = 24;
-
-    // Measure 4: "Hap-py Birth-day to you"
-    // F5   F5    E5     C5   D5   C5
-    chart.push({ beat: 24, type: 'ka', lane: 'left' });   // F5
-    chart.push({ beat: 25, type: 'ka', lane: 'left' });   // F5
-    chart.push({ beat: 26, type: 'don', lane: 'right' }); // E5
-    chart.push({ beat: 27, type: 'don', lane: 'left' });  // C5
-    chart.push({ beat: 28, type: 'ka', lane: 'right' });  // D5
-    chart.push({ beat: 29, type: 'don', lane: 'left' });  // C5 (final)
-    b = 30;
-
-    // Add a flourish section (8 more beats)
-    b = 32;
-    // "Happy Birthday!" (energetic finish)
-    chart.push({ beat: 32, type: 'don', lane: 'left' });
-    chart.push({ beat: 32.5, type: 'don', lane: 'right' });
-    chart.push({ beat: 33, type: 'ka', lane: 'left' });
-    chart.push({ beat: 33.5, type: 'ka', lane: 'right' });
-    chart.push({ beat: 34, type: 'don', lane: 'left' });
-    chart.push({ beat: 34.5, type: 'don', lane: 'left' });
-    chart.push({ beat: 35, type: 'don', lane: 'right' });
-    chart.push({ beat: 35.5, type: 'ka', lane: 'right' });
-
-    chart.push({ beat: 36, type: 'don', lane: 'left' });
-    chart.push({ beat: 36.5, type: 'don', lane: 'right' });
-    chart.push({ beat: 37, type: 'ka', lane: 'left' });
-    chart.push({ beat: 37.5, type: 'ka', lane: 'right' });
-    chart.push({ beat: 38, type: 'don', lane: 'left' });
-    chart.push({ beat: 38.5, type: 'don', lane: 'left' });
-    chart.push({ beat: 38.75, type: 'don', lane: 'right' });
-    chart.push({ beat: 39, type: 'ka', lane: 'left' });
-    chart.push({ beat: 39.25, type: 'ka', lane: 'right' });
-    chart.push({ beat: 39.5, type: 'don', lane: 'left' });
-    chart.push({ beat: 39.75, type: 'don', lane: 'right' });
-
-    return chart;
+    return c;
   }
 
   const chart = generateChart();
   const lastBeat = Math.max(...chart.map(n => n.beat));
-  const TOTAL_DURATION = (lastBeat + 2) * BEAT_DURATION; // extra 2 beats buffer
+  const TOTAL_DURATION = (lastBeat + 3) * BEAT_DURATION;
 
   // ===========================================
   // Game State
@@ -156,8 +105,8 @@
   let animId = null;
 
   let width, height;
-  let drumX, drumY, drumW, drumH;
-  let hitLineX;
+  let trackY, hitLineX;
+  let drumShake = 0; // screen shake on hit
 
   // Countdown
   let countdownValue = 0;
@@ -179,11 +128,8 @@
   }
 
   function updateLayout() {
-    drumW = Math.min(140, width * 0.22);
-    drumH = drumW * 1.25;
-    drumX = width * HIT_X - drumW * 0.6;
-    drumY = height * 0.5 - drumH * 0.15;
     hitLineX = width * HIT_X;
+    trackY = height * 0.52;
   }
 
   resize();
@@ -197,72 +143,76 @@
   // ===========================================
   // Note Class
   // ===========================================
+  const NOTE_RADIUS = 32;
+
   class Note {
-    constructor(beat, type, lane) {
-      this.time = (beat + 1) * BEAT_DURATION; // +1 beat offset for count-in
-      this.type = type; // 'don' or 'ka'
-      this.lane = lane; // 'left' or 'right'
+    constructor(beat, type) {
+      this.time = (beat + 1) * BEAT_DURATION;
+      this.type = type; // 'don' (red) or 'ka' (blue)
       this.x = 0;
-      this.y = 0;
+      this.y = trackY;
       this.hit = false;
       this.missed = false;
-      this.radius = Math.min(28, width * 0.04);
     }
 
     update(et) {
       const dt = this.time - et;
       this.x = hitLineX + dt * SCROLL_SPEED;
-      // Alternate y based on type for visual clarity
-      this.y = height * 0.62 + (this.type === 'ka' ? -25 : 15);
     }
 
     draw(ctx) {
       if (this.hit || this.missed) return;
+      if (this.x < -60 || this.x > width + 60) return;
 
-      const alpha = this.x > width + 50 ? 0 : (this.x < -50 ? 0 : 1);
+      const isRed = this.type === 'don';
 
       ctx.save();
-      ctx.globalAlpha = alpha;
 
-      // Shadow
-      ctx.shadowColor = this.type === 'don' ? 'rgba(255,80,60,0.4)' : 'rgba(60,120,255,0.4)';
-      ctx.shadowBlur = 12;
-
-      // Note circle
+      // Glow
+      const glowGrad = ctx.createRadialGradient(this.x, this.y, NOTE_RADIUS * 0.5, this.x, this.y, NOTE_RADIUS * 1.4);
+      glowGrad.addColorStop(0, isRed ? 'rgba(255,100,70,0.5)' : 'rgba(70,140,255,0.5)');
+      glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle = this.type === 'don' ? '#f04a3a' : '#3a7af0';
+      ctx.arc(this.x, this.y, NOTE_RADIUS * 1.4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Inner ring
-      ctx.shadowBlur = 0;
+      // Main circle
+      const bodyGrad = ctx.createRadialGradient(this.x - 6, this.y - 6, NOTE_RADIUS * 0.1, this.x, this.y, NOTE_RADIUS);
+      bodyGrad.addColorStop(0, isRed ? '#ff6b5b' : '#6ba0ff');
+      bodyGrad.addColorStop(0.6, isRed ? '#d04030' : '#3060d0');
+      bodyGrad.addColorStop(1, isRed ? '#902020' : '#204090');
+      ctx.fillStyle = bodyGrad;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius * 0.65, 0, Math.PI * 2);
-      ctx.fillStyle = this.type === 'don' ? '#d03020' : '#2050c0';
+      ctx.arc(this.x, this.y, NOTE_RADIUS, 0, Math.PI * 2);
       ctx.fill();
+
+      // Border
+      ctx.strokeStyle = isRed ? '#ffaaa0' : '#a0c0ff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
       // Label
       ctx.fillStyle = '#fff';
-      ctx.font = `bold ${this.radius * 0.7}px var(--font-display)`;
+      ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(this.type === 'don' ? '咚' : '咔', this.x, this.y);
+      ctx.fillText(isRed ? '咚' : '咔', this.x, this.y);
 
       ctx.restore();
     }
   }
 
   // ===========================================
-  // Effect Class (hit ring, score popup)
+  // Hit Effect
   // ===========================================
   class HitEffect {
-    constructor(x, y, judgment, scorePopup) {
+    constructor(x, y, judgment) {
       this.x = x;
       this.y = y;
-      this.judgment = judgment; // 'perfect', 'good', 'ok', 'miss'
-      this.scorePopup = scorePopup;
+      this.judgment = judgment;
       this.age = 0;
-      this.maxAge = 0.45;
+      this.maxAge = 0.6;
       this.done = false;
     }
 
@@ -274,42 +224,31 @@
     draw(ctx) {
       const progress = this.age / this.maxAge;
       const alpha = 1 - progress;
-      const scale = 1 + progress * 1.5;
 
       ctx.save();
       ctx.globalAlpha = alpha;
 
       // Expanding ring
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, 35 * scale, 0, Math.PI * 2);
-      const colors = {
-        perfect: 'rgba(240,215,140,0.7)',
-        good: 'rgba(126,184,218,0.7)',
-        ok: 'rgba(179,157,218,0.7)',
-        miss: 'rgba(219,90,90,0.7)'
+      const ringColors = {
+        perfect: '#f0d78c',
+        good: '#7eb8da',
+        ok: '#b39dda',
+        miss: '#db5a5a'
       };
-      ctx.strokeStyle = colors[this.judgment] || colors.ok;
-      ctx.lineWidth = 4;
+
+      ctx.strokeStyle = ringColors[this.judgment];
+      ctx.lineWidth = 4 + (1 - progress) * 4;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, NOTE_RADIUS + progress * 50, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Score popup text
-      if (this.scorePopup) {
-        const popColors = {
-          perfect: '#f0d78c',
-          good: '#7eb8da',
-          ok: '#b39dda',
-          miss: '#db5a5a'
-        };
-        ctx.fillStyle = popColors[this.judgment];
-        ctx.font = 'bold 18px var(--font-display)';
-        ctx.textAlign = 'center';
-        ctx.fillText(this.scorePopup, this.x, this.y - 20 - progress * 40);
-
-        // Judgment text
-        const jpText = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss...' };
-        ctx.font = 'bold 22px var(--font-display)';
-        ctx.fillText(jpText[this.judgment], this.x, this.y - 45 - progress * 40);
-      }
+      // Judgment text (big!)
+      const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
+      const fontSize = 28 + (1 - progress) * 20;
+      ctx.font = `bold ${fontSize}px "Cinzel", serif`;
+      ctx.fillStyle = ringColors[this.judgment];
+      ctx.textAlign = 'center';
+      ctx.fillText(texts[this.judgment], this.x, this.y - NOTE_RADIUS - 20 - progress * 30);
 
       ctx.restore();
     }
@@ -320,31 +259,29 @@
   // ===========================================
   function hitDon() {
     if (state !== State.PLAYING) return;
-    judgeHit('left');
-    // Flash touch zone
-    if (touchDon) {
-      touchDon.classList.add('flash');
-      setTimeout(() => touchDon.classList.remove('flash'), 80);
-    }
+    judgeHit('don');
+    flashZone(touchDon);
   }
 
   function hitKa() {
     if (state !== State.PLAYING) return;
-    judgeHit('right');
-    if (touchKa) {
-      touchKa.classList.add('flash');
-      setTimeout(() => touchKa.classList.remove('flash'), 80);
-    }
+    judgeHit('ka');
+    flashZone(touchKa);
   }
 
-  function judgeHit(lane) {
-    // Find closest unhit note in the lane
+  function flashZone(el) {
+    if (!el) return;
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 100);
+  }
+
+  function judgeHit(type) {
     let bestNote = null;
     let bestDelta = Infinity;
 
     for (const note of notes) {
       if (note.hit || note.missed) continue;
-      if (note.lane !== lane) continue;
+      if (note.type !== type) continue;
 
       const delta = Math.abs(note.time - elapsedTime);
       if (delta < bestDelta) {
@@ -357,21 +294,13 @@
 
     let judgment, baseScore;
     if (bestDelta <= PERFECT_WINDOW) {
-      judgment = 'perfect';
-      baseScore = 300;
-      perfects++;
+      judgment = 'perfect'; baseScore = 300; perfects++;
     } else if (bestDelta <= GOOD_WINDOW) {
-      judgment = 'good';
-      baseScore = 200;
-      goods++;
+      judgment = 'good'; baseScore = 200; goods++;
     } else if (bestDelta <= OK_WINDOW) {
-      judgment = 'ok';
-      baseScore = 100;
-      oks++;
+      judgment = 'ok'; baseScore = 100; oks++;
     } else {
-      judgment = 'miss';
-      baseScore = 0;
-      misses++;
+      judgment = 'miss'; baseScore = 0; misses++;
     }
 
     bestNote.hit = true;
@@ -380,38 +309,32 @@
     if (judgment !== 'miss') {
       combo++;
       if (combo > maxCombo) maxCombo = combo;
-      // Combo multiplier
       let mult = 1.0;
-      if (combo >= 50) mult = 2.0;
-      else if (combo >= 30) mult = 1.5;
-      else if (combo >= 10) mult = 1.2;
+      if (combo >= 40) mult = 2.0;
+      else if (combo >= 20) mult = 1.5;
+      else if (combo >= 8) mult = 1.2;
       score += Math.floor(baseScore * mult);
 
-      // Sound
       if (bestNote.type === 'don') SoundEngine.playDon();
       else SoundEngine.playKa();
+
+      drumShake = 0.08;
     } else {
       combo = 0;
     }
 
-    // Update HUD
     updateHUD();
-
-    // Show judgment popup
-    showJudgment(judgment, baseScore);
-
-    // Add hit effect
-    const fxY = height * 0.58;
-    effects.push(new HitEffect(hitLineX, fxY, judgment, judgment === 'miss' ? null : '+' + score));
+    showJudgment(judgment);
+    effects.push(new HitEffect(hitLineX, trackY, judgment));
   }
 
   // ===========================================
-  // HUD & Judgment Display
+  // HUD
   // ===========================================
   function updateHUD() {
     hudScore.textContent = score.toLocaleString();
 
-    if (combo > 0) {
+    if (combo >= 4) {
       hudCombo.textContent = combo + ' 连击';
       hudCombo.classList.add('active');
     } else {
@@ -424,59 +347,51 @@
     }
   }
 
-  function showJudgment(judgment, points) {
-    if (judgmentPopup) {
-      const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
-      judgmentPopup.textContent = texts[judgment];
-      const colors = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
-      judgmentPopup.style.color = colors[judgment];
-      judgmentPopup.style.opacity = '1';
-      judgmentPopup.style.transform = 'translate(-50%, -50%) scale(1.2)';
+  function showJudgment(judgment) {
+    if (!judgmentPopup) return;
+    const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
+    const colors = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
+    judgmentPopup.textContent = texts[judgment];
+    judgmentPopup.style.color = colors[judgment];
+    judgmentPopup.style.fontSize = judgment === 'perfect' ? '3rem' : '2.2rem';
+    judgmentPopup.style.opacity = '1';
+    judgmentPopup.style.transform = 'translate(-50%, -50%) scale(1.3)';
 
-      setTimeout(() => {
-        judgmentPopup.style.transition = 'all 0.4s ease-out';
-        judgmentPopup.style.opacity = '0';
-        judgmentPopup.style.transform = 'translate(-50%, -50%) scale(0.8)';
-      }, 50);
+    setTimeout(() => {
+      judgmentPopup.style.transition = 'all 0.5s ease-out';
+      judgmentPopup.style.opacity = '0';
+      judgmentPopup.style.transform = 'translate(-50%, -50%) scale(0.6)';
+    }, 80);
 
-      setTimeout(() => {
-        judgmentPopup.style.transition = 'none';
-      }, 500);
-    }
+    setTimeout(() => {
+      judgmentPopup.style.transition = 'none';
+      judgmentPopup.style.fontSize = '2rem';
+    }, 600);
   }
 
   // ===========================================
-  // Keyboard Input
+  // Keyboard
   // ===========================================
   document.addEventListener('keydown', (e) => {
-    if (state === State.IDLE) {
-      startGame();
-      return;
-    }
-    if (e.key === 'f' || e.key === 'F') { hitDon(); e.preventDefault(); }
-    if (e.key === 'j' || e.key === 'J') { hitKa(); e.preventDefault(); }
-    if (e.key === 'd' || e.key === 'D') { hitDon(); e.preventDefault(); }
-    if (e.key === 'k' || e.key === 'K') { hitKa(); e.preventDefault(); }
-    // Allow space to restart
+    if (state === State.IDLE) { startGame(); return; }
+    if (e.key === 'f' || e.key === 'F' || e.key === 'd' || e.key === 'D') { hitDon(); e.preventDefault(); }
+    if (e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K') { hitKa(); e.preventDefault(); }
     if (e.key === ' ' && state === State.ENDED) { restartGame(); e.preventDefault(); }
   });
 
   // ===========================================
-  // Touch Input
+  // Touch
   // ===========================================
   if (touchDon) {
     touchDon.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      if (state === State.IDLE) startGame();
-      else hitDon();
+      if (state === State.IDLE) startGame(); else hitDon();
     });
   }
-
   if (touchKa) {
     touchKa.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      if (state === State.IDLE) startGame();
-      else hitKa();
+      if (state === State.IDLE) startGame(); else hitKa();
     });
   }
 
@@ -491,14 +406,9 @@
     nextNoteIdx = 0;
     notes = [];
     effects = [];
-    score = 0;
-    combo = 0;
-    maxCombo = 0;
-    totalHits = 0;
-    perfects = 0;
-    goods = 0;
-    oks = 0;
-    misses = 0;
+    score = 0; combo = 0; maxCombo = 0;
+    totalHits = 0; perfects = 0; goods = 0; oks = 0; misses = 0;
+    drumShake = 0;
     hudScore.textContent = '0';
     hudCombo.classList.remove('active');
     hudAccuracy.textContent = '--%';
@@ -509,17 +419,15 @@
       countdownEl.textContent = '3';
     }
 
-    // Start animation if not running
     if (!animId) animId = requestAnimationFrame(gameLoop);
   }
 
   function restartGame() {
     state = State.IDLE;
-    notes = [];
-    effects = [];
-    nextNoteIdx = 0;
+    notes = []; effects = []; nextNoteIdx = 0;
     score = 0; combo = 0; maxCombo = 0;
     totalHits = 0; perfects = 0; goods = 0; oks = 0; misses = 0;
+    drumShake = 0;
     hudScore.textContent = '0';
     hudCombo.classList.remove('active');
     hudAccuracy.textContent = '--%';
@@ -530,7 +438,6 @@
 
   function endGame() {
     state = State.ENDED;
-    // Show results
     showResults();
   }
 
@@ -539,35 +446,92 @@
     resultsEl.classList.remove('hidden');
 
     const totalNotes = chart.length;
-    const accuracyPercent = totalHits > 0
-      ? ((perfects * 100 + goods * 80 + oks * 50) / (totalNotes * 100) * 100).toFixed(1)
-      : '0.0';
+    const accNum = totalHits > 0
+      ? (perfects * 100 + goods * 80 + oks * 50) / (totalNotes * 100) * 100
+      : 0;
 
-    // Calculate grade
-    const accNum = parseFloat(accuracyPercent);
     let grade;
-    if (accNum >= 95 && misses <= 2) grade = 'S';
-    else if (accNum >= 90) grade = 'A';
-    else if (accNum >= 75) grade = 'B';
-    else if (accNum >= 60) grade = 'C';
+    if (accNum >= 95 && misses <= 1) grade = 'S';
+    else if (accNum >= 85) grade = 'A';
+    else if (accNum >= 70) grade = 'B';
+    else if (accNum >= 50) grade = 'C';
     else grade = 'D';
 
     document.getElementById('results-grade').textContent = grade;
     document.getElementById('res-score').textContent = score.toLocaleString();
     document.getElementById('res-maxcombo').textContent = maxCombo;
-    document.getElementById('res-accuracy').textContent = accuracyPercent + '%';
+    document.getElementById('res-accuracy').textContent = accNum.toFixed(1) + '%';
     document.getElementById('res-perfect').textContent = perfects;
     document.getElementById('res-good').textContent = goods;
     document.getElementById('res-ok').textContent = oks;
     document.getElementById('res-miss').textContent = misses;
 
-    // Save to sessionStorage
     STORE.setBool('drum_complete', true);
     STORE.set('drum_score', score.toString());
     STORE.set('drum_grade', grade);
 
-    // Play chime
     SoundEngine.playChime();
+  }
+
+  // ===========================================
+  // Draw Drum
+  // ===========================================
+  function drawDrum(ctx) {
+    const cx = hitLineX;
+    const cy = trackY;
+    const r = NOTE_RADIUS + 8;
+
+    // Apply drum shake
+    let shakeX = 0, shakeY = 0;
+    if (drumShake > 0) {
+      shakeX = (Math.random() - 0.5) * drumShake * 30;
+      shakeY = (Math.random() - 0.5) * drumShake * 30;
+    }
+    const dx = cx + shakeX;
+    const dy = cy + shakeY;
+
+    // Combo glow
+    if (combo >= 8) {
+      const glowAlpha = Math.min(0.6, combo * 0.02);
+      const glowGrad = ctx.createRadialGradient(dx, dy, r * 0.6, dx, dy, r * 2.5);
+      glowGrad.addColorStop(0, `rgba(240,215,140,${glowAlpha})`);
+      glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(dx, dy, r * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Outer ring
+    ctx.strokeStyle = '#d4a853';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(dx, dy, r, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Inner drum face
+    const faceGrad = ctx.createRadialGradient(dx - 3, dy - 3, r * 0.1, dx, dy, r * 0.9);
+    faceGrad.addColorStop(0, '#f5f0e8');
+    faceGrad.addColorStop(1, '#d8d0c0');
+    ctx.fillStyle = faceGrad;
+    ctx.beginPath();
+    ctx.arc(dx, dy, r - 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Cross pattern (snare)
+    ctx.strokeStyle = 'rgba(200,190,170,0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(dx - r + 12, dy); ctx.lineTo(dx + r - 12, dy);
+    ctx.moveTo(dx, dy - r + 12); ctx.lineTo(dx, dy + r - 12);
+    ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.font = 'bold 12px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('F 咚', dx, dy - r - 22);
+    ctx.fillText('J 咔', dx, dy - r - 6);
   }
 
   // ===========================================
@@ -579,26 +543,26 @@
     const dt = Math.min(0.05, (timestamp - (gameLoop._lastTs || timestamp)) / 1000);
     gameLoop._lastTs = timestamp;
 
-    // --- Clear ---
+    // Update shake
+    if (drumShake > 0) drumShake = Math.max(0, drumShake - dt);
+
+    // --- Clear & Background ---
     ctx.clearRect(0, 0, width, height);
 
-    // Background
-    const bgGrad = ctx.createLinearGradient(0, 0, width, 0);
-    bgGrad.addColorStop(0, '#0a0820');
-    bgGrad.addColorStop(0.3, '#100d2a');
-    bgGrad.addColorStop(1, '#0a0820');
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    bgGrad.addColorStop(0, '#0c0a20');
+    bgGrad.addColorStop(0.5, '#100d28');
+    bgGrad.addColorStop(1, '#0a0818');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Scroll lane line
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([8, 30]);
+    // Subtle track lane
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, height * 0.55);
-    ctx.lineTo(width, height * 0.55);
+    ctx.moveTo(0, trackY);
+    ctx.lineTo(width, trackY);
     ctx.stroke();
-    ctx.setLineDash([]);
 
     // --- Draw Drum ---
     drawDrum(ctx);
@@ -611,17 +575,14 @@
           countdownValue--;
           countdownTimer = 0;
           if (countdownValue <= 0) {
-            // Start playing!
             state = State.PLAYING;
             startTime = performance.now();
-            if (countdownEl) {
-              countdownEl.classList.remove('show');
-            }
+            if (countdownEl) countdownEl.classList.remove('show');
           } else {
             if (countdownEl) {
               countdownEl.textContent = countdownValue;
               countdownEl.classList.add('show');
-              setTimeout(() => countdownEl.classList.remove('show'), 900);
+              setTimeout(() => countdownEl.classList.remove('show'), 850);
             }
           }
         }
@@ -633,39 +594,32 @@
         // Spawn notes
         while (nextNoteIdx < chart.length &&
                (chart[nextNoteIdx].beat + 1) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
-          const c = chart[nextNoteIdx];
-          notes.push(new Note(c.beat, c.type, c.lane));
+          notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].type));
           nextNoteIdx++;
         }
 
-        // Update & check for misses
+        // Update notes & miss check
         for (const note of notes) {
           note.update(elapsedTime);
-          // Miss check
           if (!note.hit && !note.missed && note.x < hitLineX - MISS_THRESHOLD * SCROLL_SPEED) {
             note.missed = true;
             misses++;
             combo = 0;
             totalHits++;
             updateHUD();
-            showJudgment('miss', 0);
-            effects.push(new HitEffect(hitLineX, height * 0.58, 'miss', null));
+            showJudgment('miss');
+            effects.push(new HitEffect(hitLineX, trackY, 'miss'));
           }
         }
 
         // Draw notes
-        for (const note of notes) {
-          note.draw(ctx);
-        }
+        for (const note of notes) note.draw(ctx);
 
-        // End check
-        if (elapsedTime >= TOTAL_DURATION) {
-          endGame();
-        }
+        // Check end
+        if (elapsedTime >= TOTAL_DURATION) endGame();
         break;
 
       case State.ENDED:
-        // Still draw any remaining notes faded
         for (const note of notes) {
           if (!note.hit && !note.missed) {
             note.update(elapsedTime || TOTAL_DURATION);
@@ -675,138 +629,25 @@
         break;
     }
 
-    // --- Update & Draw Effects ---
+    // --- Effects ---
     for (let i = effects.length - 1; i >= 0; i--) {
       effects[i].update(dt);
       effects[i].draw(ctx);
       if (effects[i].done) effects.splice(i, 1);
     }
 
-    // --- Draw Hit Line ---
-    ctx.strokeStyle = 'rgba(240,215,140,0.3)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(hitLineX, height * 0.35);
-    ctx.lineTo(hitLineX, height * 0.75);
-    ctx.stroke();
-
     // --- Idle prompt ---
     if (state === State.IDLE) {
       const alpha = 0.5 + Math.sin(timestamp * 0.003) * 0.3;
       ctx.fillStyle = `rgba(240,215,140,${alpha})`;
-      ctx.font = '1.2rem var(--font-display)';
+      ctx.font = '1.1rem "Cinzel", serif';
       ctx.textAlign = 'center';
-      ctx.fillText('按 F/J 或点击屏幕开始', width * 0.5, height * 0.85);
+      ctx.fillText('按 F / J 或点击屏幕开始', width * 0.5, height * 0.85);
     }
   }
 
-  // Start the render loop immediately (idle animation)
+  // Start
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
-
-  // ===========================================
-  // Draw Drum (on canvas)
-  // ===========================================
-  function drawDrum(ctx) {
-    const cx = drumX + drumW * 0.55;
-    const cy = drumY + drumH * 0.5;
-
-    // Glow behind drum
-    const glowGrad = ctx.createRadialGradient(cx, cy, drumW * 0.2, cx, cy, drumW * 0.7);
-    glowGrad.addColorStop(0, 'rgba(240,215,140,0.08)');
-    glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = glowGrad;
-    ctx.beginPath();
-    ctx.arc(cx, cy, drumW * 0.7, 0, Math.PI * 2);
-    ctx.fill();
-
-    const bw = drumW * 0.75;
-    const bh = drumW * 0.55;
-
-    // Drum body
-    ctx.fillStyle = '#3a2510';
-    ctx.strokeStyle = '#d4a853';
-    ctx.lineWidth = 2.5;
-    const r = 6;
-    const rx = cx - bw, ry = cy - bh * 0.4, rw = bw * 2, rh = bh * 0.95;
-    ctx.beginPath();
-    ctx.moveTo(rx + r, ry);
-    ctx.lineTo(rx + rw - r, ry);
-    ctx.arcTo(rx + rw, ry, rx + rw, ry + r, r);
-    ctx.lineTo(rx + rw, ry + rh - r);
-    ctx.arcTo(rx + rw, ry + rh, rx + rw - r, ry + rh, r);
-    ctx.lineTo(rx + r, ry + rh);
-    ctx.arcTo(rx, ry + rh, rx, ry + rh - r, r);
-    ctx.lineTo(rx, ry + r);
-    ctx.arcTo(rx, ry, rx + r, ry, r);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Drum head (top ellipse)
-    ctx.fillStyle = '#f0e8d8';
-    ctx.strokeStyle = '#d4a853';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy - bh * 0.35, bw, bh * 0.28, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Inner rings
-    ctx.strokeStyle = '#d0c8b8';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy - bh * 0.35, bw * 0.85, bh * 0.22, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.ellipse(cx, cy - bh * 0.35, bw * 0.4, bh * 0.1, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Bottom rim
-    ctx.fillStyle = '#2a1a08';
-    ctx.strokeStyle = '#a67c30';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + bh * 0.5, bw * 0.92, bh * 0.18, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Left zone indicator (don)
-    ctx.fillStyle = 'rgba(240,74,58,0.12)';
-    ctx.beginPath();
-    ctx.arc(cx - bw * 0.4, cy - bh * 0.1, bw * 0.35, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Right zone indicator (ka)
-    ctx.fillStyle = 'rgba(58,122,240,0.12)';
-    ctx.beginPath();
-    ctx.arc(cx + bw * 0.4, cy - bh * 0.1, bw * 0.3, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Don label
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.font = `bold ${bw * 0.2}px var(--font-display)`;
-    ctx.textAlign = 'center';
-    ctx.fillText('咚', cx - bw * 0.4, cy - bh * 0.1 + 5);
-
-    // Ka label
-    ctx.fillText('咔', cx + bw * 0.4, cy - bh * 0.1 + 5);
-
-    // Stand legs
-    ctx.strokeStyle = '#6a5a3a';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    // Left leg
-    ctx.beginPath();
-    ctx.moveTo(cx - bw * 0.4, cy + bh * 0.5);
-    ctx.lineTo(cx - bw * 0.65, cy + bh * 1.5);
-    ctx.stroke();
-    // Right leg
-    ctx.beginPath();
-    ctx.moveTo(cx + bw * 0.2, cy + bh * 0.5);
-    ctx.lineTo(cx + bw * 0.5, cy + bh * 1.5);
-    ctx.stroke();
-  }
 
 })();
