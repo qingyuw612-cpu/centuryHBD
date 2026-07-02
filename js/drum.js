@@ -320,28 +320,23 @@
     if (bestDelta <= PERFECT_WINDOW)      { judgment = 'perfect'; baseScore = 300; perfects++; }
     else if (bestDelta <= GOOD_WINDOW)    { judgment = 'good';    baseScore = 200; goods++; }
     else if (bestDelta <= OK_WINDOW)      { judgment = 'ok';      baseScore = 100; oks++; }
-    else                                  { judgment = 'miss';    baseScore = 0;   misses++; }
+    else                                  { judgment = 'ok';      baseScore = 50;  oks++; }
 
     bestNote.hit = true;
     totalHits++;
 
-    if (judgment !== 'miss') {
-      combo++;
-      if (combo > maxCombo) maxCombo = combo;
-      let mult = 1.0;
-      if (combo >= 30) mult = 2.0;
-      else if (combo >= 15) mult = 1.5;
-      else if (combo >= 5) mult = 1.2;
-      score += Math.floor(baseScore * mult);
-
-      // Play the appropriate drum sound
-      SoundEngine.playDrumSound(bestNote.track.sound);
-    } else {
-      combo = 0;
-    }
+    // Always play sound and build combo
+    SoundEngine.playDrumSound(bestNote.track.sound);
+    combo++;
+    if (combo > maxCombo) maxCombo = combo;
+    let mult = 1.0;
+    if (combo >= 30) mult = 2.0;
+    else if (combo >= 15) mult = 1.5;
+    else if (combo >= 5) mult = 1.2;
+    score += Math.floor(baseScore * mult);
 
     updateHUD();
-    showJudgment(judgment, bestDelta);
+    showJudgment(judgment);
     effects.push(new HitEffect(trackXs[trackId], hitY, judgment, TRACKS[trackId].color));
   }
 
@@ -361,16 +356,11 @@
     }
   }
 
-  function showJudgment(judgment, delta) {
+  function showJudgment(judgment) {
     if (!judgmentPopup) return;
     const t = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
     const cl = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
-    let text = t[judgment];
-    // Add early/late hint
-    if (delta !== undefined && judgment !== 'perfect' && judgment !== 'miss') {
-      text += delta < 0 ? ' (早了)' : ' (晚了)';
-    }
-    judgmentPopup.textContent = text;
+    judgmentPopup.textContent = t[judgment];
     judgmentPopup.style.color = cl[judgment];
     judgmentPopup.style.fontSize = judgment === 'perfect' ? '3rem' : '2.2rem';
     judgmentPopup.style.opacity = '1';
@@ -609,9 +599,9 @@
           if (!note.hit && !note.missed && note.y > hitY + MISS_THRESHOLD * FALL_SPEED) {
             note.missed = true;
             misses++;
-            combo = 0;
             totalHits++;
             updateHUD();
+            // Passive miss doesn't break combo, just counts against accuracy
             showJudgment('miss');
             effects.push(new HitEffect(trackXs[note.trackId], hitY, 'miss', TRACKS[note.trackId].color));
           }
