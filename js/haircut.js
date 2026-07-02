@@ -139,20 +139,26 @@
     if (roundPopup) roundPopup.classList.add('hidden');
     if (speechBubble) speechBubble.classList.add('hidden');
 
-    // Vary target: rounds 3-4 move higher (but not above chin ≈ headY+43)
+    // Target per round: R1 lowest → R4 highest (never above chin)
     const chinY = headY + 45;
+    const hairRange = hairCurrentBottom - chinY;
     let tMin, tMax;
-    if (currentRound >= 2) {
-      // Rounds 3-4: higher, just below chin
-      tMin = chinY;
-      tMax = chinY + (hairCurrentBottom - chinY) * 0.4;
-    } else {
-      // Rounds 1-2: mid-lower hair
-      tMin = chinY + 20;
-      tMax = hairCurrentBottom - 30;
+    switch (currentRound) {
+      case 0: // R1: lower third
+        tMin = chinY + hairRange * 0.55;
+        tMax = hairCurrentBottom - 25;
+        break;
+      case 1: // R2: mid
+        tMin = chinY + hairRange * 0.3;
+        tMax = chinY + hairRange * 0.6;
+        break;
+      default: // R3-4: upper, just below chin
+        tMin = chinY + 5;
+        tMax = chinY + hairRange * 0.35;
+        break;
     }
     targetY = tMin + Math.random() * (tMax - tMin);
-    targetY = Math.max(chinY, Math.min(hairCurrentBottom - 10, targetY));
+    targetY = Math.max(chinY + 5, Math.min(hairCurrentBottom - 10, targetY));
 
     // Scissors start from above
     scissorY = hairTopY + 20;
@@ -367,39 +373,39 @@
     ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
 
-    // === 八字刘海 (center part, sweeps to sides, contained within head) ===
+    // === 八字刘海 (center part, covers forehead down to eye level) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang: from crown → sweep left and curl down
+    // Left bang: from hairline → sweep left and curl down
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 38);                          // center part, below crown
+    ctx.moveTo(cx, hy - 44);                          // center hairline at crown
     ctx.bezierCurveTo(
-      cx - 15, hy - 36,                                // gentle up-left
-      cx - 36, hy - 22,                                // sweep left
-      cx - 33, hy + 2                                  // curl down near cheek
+      cx - 12, hy - 44,                                // across top of forehead
+      cx - 34, hy - 28,                                // sweep left
+      cx - 32, hy + 2                                  // curl down near cheek
     );
     ctx.bezierCurveTo(
-      cx - 28, hy - 4,                                 // curl inward
-      cx - 16, hy - 10,                                // back toward face
-      cx - 4, hy - 6                                   // near eye
+      cx - 26, hy - 4,                                 // curl inward
+      cx - 14, hy - 8,                                 // back toward face
+      cx - 3, hy - 4                                   // near eye level
     );
-    ctx.quadraticCurveTo(cx - 2, hy - 16, cx, hy - 38); // return to center
+    ctx.quadraticCurveTo(cx - 1, hy - 18, cx, hy - 44); // return to hairline
     ctx.fill();
 
-    // Right bang: from crown → sweep right and curl down
+    // Right bang
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 38);
+    ctx.moveTo(cx, hy - 44);
     ctx.bezierCurveTo(
-      cx + 15, hy - 36,
-      cx + 36, hy - 22,
-      cx + 33, hy + 2
+      cx + 12, hy - 44,
+      cx + 34, hy - 28,
+      cx + 32, hy + 2
     );
     ctx.bezierCurveTo(
-      cx + 28, hy - 4,
-      cx + 16, hy - 10,
-      cx + 4, hy - 6
+      cx + 26, hy - 4,
+      cx + 14, hy - 8,
+      cx + 3, hy - 4
     );
-    ctx.quadraticCurveTo(cx + 2, hy - 16, cx, hy - 38);
+    ctx.quadraticCurveTo(cx + 1, hy - 18, cx, hy - 44);
     ctx.fill();
   }
 
