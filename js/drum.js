@@ -208,8 +208,9 @@
 
     update(et) {
       const dt = this.time - et;
-      // Notes always scroll from above: cap max y to just above screen top
-      this.y = Math.min(-NOTE_H, hitY - dt * FALL_SPEED);
+      const rawY = hitY - dt * FALL_SPEED;
+      // Cap only future notes: always enter from above the screen
+      this.y = (dt > 0) ? Math.min(-NOTE_H, rawY) : rawY;
     }
 
     draw(ctx) {
