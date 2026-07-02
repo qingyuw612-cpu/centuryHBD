@@ -23,10 +23,10 @@
   // ===========================================
   const BPM = 120;
   const BEAT_DURATION = 60 / BPM; // 0.5s per beat
-  const FALL_SPEED = 320; // px per second (top to bottom)
-  const LOOKAHEAD = 2.5; // seconds ahead to spawn
-  const HIT_Y_RATIO = 0.82; // hit zone at 82% from top
-  const MISS_THRESHOLD = 0.10;
+  const FALL_SPEED = 250; // px per second (slower)
+  const LOOKAHEAD = 3.0;  // spawn earlier so notes enter smoothly
+  const HIT_Y_RATIO = 0.80;
+  const MISS_THRESHOLD = 0.20; // notes linger longer after hit line
 
   // Judgment windows (seconds)
   const PERFECT_WINDOW = 0.050;
@@ -59,37 +59,28 @@
     n(0, 0); n(2, 0); n(4, 0); n(6, 0);
     // Snare on 2 & 4
     n(1, 1); n(3, 1); n(5, 1);
-    // Hi-hat eighth notes
-    for (let b = 0; b < 7; b += 0.5) n(b, 2);
+    // Hi-hat quarter notes
+    for (let b = 0; b <= 6; b++) n(b, 2);
     // Crash on phrase end
     n(5.5, 3);
 
     // === Phrase 2 (beats 8-15): "Happy birthday to you" ===
     n(8, 0); n(10, 0); n(12, 0); n(14, 0);
     n(9, 1); n(11, 1); n(13, 1);
-    for (let b = 8; b < 15; b += 0.5) n(b, 2);
+    for (let b = 8; b <= 14; b++) n(b, 2);
     n(13.5, 3);
 
     // === Phrase 3 (beats 16-23): "Happy birthday dear Century" ===
-    // Slightly different pattern - more emphasis
     n(16, 0); n(18, 0); n(20, 0); n(22, 0);
     n(17, 1); n(19, 1); n(21, 1);
-    // Hi-hat with some variation
-    for (let b = 16; b < 23; b += 0.5) {
-      if (b === 19.5 || b === 20.5) continue; // small rests
-      n(b, 2);
-    }
-    // Crash accents
-    n(18.5, 3);
-    n(21.5, 3);
+    for (let b = 16; b <= 22; b++) n(b, 2);
+    n(18.5, 3); n(21.5, 3);
 
     // === Phrase 4 (beats 24-31): "Happy birthday to you" (final) ===
     n(24, 0); n(26, 0); n(28, 0); n(30, 0);
     n(25, 1); n(27, 1); n(29, 1);
-    for (let b = 24; b < 31; b += 0.5) n(b, 2);
-    // Final crash
-    n(29, 3);
-    n(29.5, 3);
+    for (let b = 24; b <= 30; b++) n(b, 2);
+    n(29, 3); n(29.5, 3);
 
     return c;
   }
@@ -203,39 +194,39 @@
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_H = 18;
+  const NOTE_H = 24;
 
   class Note {
     constructor(beat, trackId) {
       this.time = (beat + 1) * BEAT_DURATION;
       this.trackId = trackId;
       this.track = TRACKS[trackId];
-      this.y = 0;
+      this.y = -100; // start above screen
       this.hit = false;
       this.missed = false;
     }
 
     update(et) {
       const dt = this.time - et;
-      this.y = hitY - dt * FALL_SPEED; // negative dt = above hit zone
+      this.y = hitY - dt * FALL_SPEED;
     }
 
     draw(ctx) {
       if (this.hit || this.missed) return;
-      if (this.y < -40 || this.y > height + 40) return;
+      if (this.y < -60 || this.y > height + 60) return;
 
       const cx = trackXs[this.trackId];
       const cy = this.y;
 
       ctx.save();
 
-      // Glow
-      const glowGrad = ctx.createRadialGradient(cx, cy, NOTE_H * 0.3, cx, cy, NOTE_H * 2);
+      // Glow (smaller to reduce overlap flicker)
+      const glowGrad = ctx.createRadialGradient(cx, cy, NOTE_H * 0.2, cx, cy, NOTE_H * 1.6);
       glowGrad.addColorStop(0, this.track.glowColor);
       glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, NOTE_H * 2, 0, Math.PI * 2);
+      ctx.arc(cx, cy, NOTE_H * 1.6, 0, Math.PI * 2);
       ctx.fill();
 
       // Note bar (rounded rect)
