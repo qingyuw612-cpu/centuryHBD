@@ -476,6 +476,15 @@
     else grade = 'D';
 
     document.getElementById('results-grade').textContent = grade;
+
+    const titles = {
+      S: '灵魂鼓手 🥁',
+      A: '节奏大师 🎵',
+      B: '合格伴奏 👍',
+      C: '新手鼓手 🥁',
+      D: '节拍迷失 😵',
+    };
+    document.getElementById('results-title-text').textContent = titles[grade] || '继续努力 💪';
     document.getElementById('res-score').textContent = score.toLocaleString();
     document.getElementById('res-maxcombo').textContent = maxCombo;
     document.getElementById('res-accuracy').textContent = accNum.toFixed(1) + '%';
