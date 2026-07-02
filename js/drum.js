@@ -86,6 +86,76 @@
   const TOTAL_DURATION = (lastBeat + 3) * BEAT_DURATION;
 
   // ===========================================
+  // Melody Player - Happy Birthday backing track
+  // ===========================================
+  // Frequencies (Hz): C4=262, D4=294, E4=330, F4=349, G4=392, A4=440, B4=494, C5=523, D5=587, E5=659, F5=698, G5=784
+  const MELODY_NOTES = [
+    // Phrase 1: Happy birthday to you
+    { beat: 0, freq: 392, dur: 0.45 },  // G4
+    { beat: 1, freq: 392, dur: 0.45 },  // G4
+    { beat: 2, freq: 440, dur: 0.45 },  // A4
+    { beat: 3, freq: 392, dur: 0.45 },  // G4
+    { beat: 4, freq: 523, dur: 0.45 },  // C5
+    { beat: 5, freq: 494, dur: 0.9 },   // B4 (longer)
+    // Phrase 2: Happy birthday to you
+    { beat: 8,  freq: 392, dur: 0.45 },
+    { beat: 9,  freq: 392, dur: 0.45 },
+    { beat: 10, freq: 440, dur: 0.45 },
+    { beat: 11, freq: 392, dur: 0.45 },
+    { beat: 12, freq: 587, dur: 0.45 },  // D5
+    { beat: 13, freq: 523, dur: 0.9 },   // C5
+    // Phrase 3: Happy birthday dear Century
+    { beat: 16, freq: 392, dur: 0.45 },
+    { beat: 17, freq: 392, dur: 0.45 },
+    { beat: 18, freq: 784, dur: 0.45 },  // G5 (high!)
+    { beat: 19, freq: 659, dur: 0.45 },  // E5
+    { beat: 20, freq: 523, dur: 0.45 },
+    { beat: 21, freq: 494, dur: 0.9 },
+    // Phrase 4: Happy birthday to you
+    { beat: 24, freq: 698, dur: 0.45 },  // F5
+    { beat: 25, freq: 698, dur: 0.45 },
+    { beat: 26, freq: 659, dur: 0.45 },  // E5
+    { beat: 27, freq: 523, dur: 0.45 },
+    { beat: 28, freq: 587, dur: 0.45 },  // D5
+    { beat: 29, freq: 523, dur: 1.2 },   // C5 (final, held)
+  ];
+
+  let melodyNodes = [];
+
+  function startMelody() {
+    stopMelody();
+    if (!SoundEngine._ensure()) return;
+    const ctx = SoundEngine.ctx;
+    const now = ctx.currentTime;
+
+    for (const mn of MELODY_NOTES) {
+      const t = now + (mn.beat + 1) * BEAT_DURATION;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(mn.freq, t);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.03);    // soft attack
+      gain.gain.setValueAtTime(0.08, t + mn.dur * 0.7);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + mn.dur); // decay
+
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + mn.dur + 0.1);
+
+      melodyNodes.push(osc, gain);
+    }
+  }
+
+  function stopMelody() {
+    for (const node of melodyNodes) {
+      try { node.stop(); } catch(e) { /* already stopped */ }
+    }
+    melodyNodes = [];
+  }
+
+  // ===========================================
   // Game State
   // ===========================================
   const State = { IDLE: 'idle', COUNTDOWN: 'countdown', PLAYING: 'playing', ENDED: 'ended' };
@@ -315,8 +385,7 @@
       else if (combo >= 8) mult = 1.2;
       score += Math.floor(baseScore * mult);
 
-      if (bestNote.type === 'don') SoundEngine.playDon();
-      else SoundEngine.playKa();
+      SoundEngine.playDrum();
 
       drumShake = 0.08;
     } else {
@@ -420,6 +489,9 @@
     }
 
     if (!animId) animId = requestAnimationFrame(gameLoop);
+
+    // Start melody backing track
+    startMelody();
   }
 
   function restartGame() {
@@ -428,6 +500,7 @@
     score = 0; combo = 0; maxCombo = 0;
     totalHits = 0; perfects = 0; goods = 0; oks = 0; misses = 0;
     drumShake = 0;
+    stopMelody();
     hudScore.textContent = '0';
     hudCombo.classList.remove('active');
     hudAccuracy.textContent = '--%';
@@ -438,6 +511,7 @@
 
   function endGame() {
     state = State.ENDED;
+    stopMelody();
     showResults();
   }
 

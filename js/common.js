@@ -141,20 +141,20 @@ const SoundEngine = {
     return true;
   },
 
-  /** Drum game: don sound (low thud) */
-  playDon() {
+  /** Unified drum hit sound */
+  playDrum() {
     if (!this._ensure()) return;
     const ctx = this.ctx;
     const now = ctx.currentTime;
 
-    // Oscillator - low thud
+    // Low thud oscillator
     const osc = ctx.createOscillator();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(200, now);
-    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.12);
 
-    // Noise burst
-    const bufferSize = ctx.sampleRate * 0.1;
+    // Noise burst for snare character
+    const bufferSize = Math.floor(ctx.sampleRate * 0.1);
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
@@ -163,64 +163,23 @@ const SoundEngine = {
 
     const noiseFilter = ctx.createBiquadFilter();
     noiseFilter.type = 'lowpass';
-    noiseFilter.frequency.setValueAtTime(800, now);
+    noiseFilter.frequency.setValueAtTime(600, now);
 
     const oscGain = ctx.createGain();
-    oscGain.gain.setValueAtTime(0.5, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    oscGain.gain.setValueAtTime(0.6, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
 
     const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.3, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    noiseGain.gain.setValueAtTime(0.35, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
 
     osc.connect(oscGain).connect(ctx.destination);
     noise.connect(noiseFilter).connect(noiseGain).connect(ctx.destination);
 
     osc.start(now);
-    osc.stop(now + 0.15);
+    osc.stop(now + 0.18);
     noise.start(now);
-    noise.stop(now + 0.15);
-  },
-
-  /** Drum game: ka sound (sharp rim click) */
-  playKa() {
-    if (!this._ensure()) return;
-    const ctx = this.ctx;
-    const now = ctx.currentTime;
-
-    const osc = ctx.createOscillator();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(1200, now);
-    osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
-
-    const oscGain = ctx.createGain();
-    oscGain.gain.setValueAtTime(0.25, now);
-    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-
-    // Bandpass noise for metallic character
-    const bufferSize = ctx.sampleRate * 0.05;
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-    const noise = ctx.createBufferSource();
-    noise.buffer = noiseBuffer;
-
-    const bpFilter = ctx.createBiquadFilter();
-    bpFilter.type = 'bandpass';
-    bpFilter.frequency.setValueAtTime(3000, now);
-    bpFilter.Q.setValueAtTime(2, now);
-
-    const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.2, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
-    osc.connect(oscGain).connect(ctx.destination);
-    noise.connect(bpFilter).connect(noiseGain).connect(ctx.destination);
-
-    osc.start(now);
-    osc.stop(now + 0.08);
-    noise.start(now);
-    noise.stop(now + 0.08);
+    noise.stop(now + 0.18);
   },
 
   /** Phone: snap click */
