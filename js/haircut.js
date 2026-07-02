@@ -193,18 +193,21 @@
     totalScore += points;
     hudScore.textContent = totalScore + ' 分';
 
-    // Spawn hair particles
-    for (let i = 0; i < 40; i++) {
+    // Spawn hair chunk particles
+    const hairLeft = charX - 52, hairRight = charX + 52;
+    for (let i = 0; i < 50; i++) {
       fallenParticles.push({
-        x: charX - 50 + Math.random() * 100,
-        y: cutY + Math.random() * 10,
-        vx: (Math.random() - 0.5) * 3,
-        vy: 1 + Math.random() * 4,
-        life: 0.6 + Math.random() * 0.8,
-        size: 2 + Math.random() * 4,
+        x: hairLeft + Math.random() * (hairRight - hairLeft),
+        y: cutY - 5 + Math.random() * 15,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -1 - Math.random() * 3,  // initial upward bounce
+        life: 0.7 + Math.random() * 1.0,
+        size: 3 + Math.random() * 8,
+        rot: Math.random() * Math.PI * 2,
+        rotSpd: (Math.random() - 0.5) * 0.1,
       });
     }
-    cutEffectTimer = 0.6;
+    cutEffectTimer = 0.7;
 
     // Show result
     showRoundResult(judgment, points);
@@ -381,30 +384,89 @@
 
   function drawHair(ctx, time) {
     const cx = charX;
-    const baseY = charScalpY;
+    const scalpY = charScalpY;
     const topY = hairCurrentTop;
-    const numStrands = 50;
-    const spread = 110;
+    const sway = Math.sin(time * 0.002) * 3;
 
-    for (let i = 0; i < numStrands; i++) {
-      const t = i / (numStrands - 1);
-      const bx = cx - spread / 2 + t * spread;
-      const length = baseY - topY;
-      const tipY = topY;
-      const sway = Math.sin(time * 0.002 + i * 0.3) * (3 + (length / 200) * 5);
+    // === Solid hair block ===
+    // Main hair mass - filled shape from scalp to current top
+    const hairLeft = cx - 52;
+    const hairRight = cx + 52;
+    const h = scalpY - topY;
 
-      ctx.strokeStyle = '#1a1028';
-      ctx.lineWidth = 0.8 + Math.random() * 0.1; // subtle variation
-      ctx.lineCap = 'round';
+    // Hair body gradient (dark, slight sheen)
+    const hairGrad = ctx.createLinearGradient(hairLeft, 0, hairRight, 0);
+    hairGrad.addColorStop(0, '#120a1e');
+    hairGrad.addColorStop(0.3, '#1e1230');
+    hairGrad.addColorStop(0.5, '#241838');
+    hairGrad.addColorStop(0.7, '#1e1230');
+    hairGrad.addColorStop(1, '#120a1e');
+
+    ctx.fillStyle = hairGrad;
+
+    // Draw hair as a solid rounded shape
+    ctx.beginPath();
+    // Start from left scalp
+    ctx.moveTo(hairLeft + 10, scalpY);
+    // Left side, slightly curved outward
+    ctx.bezierCurveTo(
+      hairLeft - 5 + sway, scalpY - h * 0.5,
+      hairLeft - 5 + sway, topY + h * 0.3,
+      hairLeft + 15, topY + 6
+    );
+    // Top edge (cut or natural top)
+    ctx.lineTo(hairRight - 15, topY + 6);
+    // Right side
+    ctx.bezierCurveTo(
+      hairRight + 5 - sway, topY + h * 0.3,
+      hairRight + 5 - sway, scalpY - h * 0.5,
+      hairRight - 10, scalpY
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    // Subtle outline
+    ctx.strokeStyle = 'rgba(60,40,80,0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Hair texture lines (subtle, inside the solid shape)
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(hairLeft + 10, topY, hairRight - hairLeft - 20, scalpY - topY);
+    ctx.clip();
+
+    for (let i = 0; i < 12; i++) {
+      const tx = hairLeft + 20 + i * (hairRight - hairLeft - 40) / 11;
+      const offset = Math.sin(time * 0.0015 + i * 0.5) * 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(bx, baseY);
-      const cp1x = bx + sway * 0.3;
-      const cp1y = baseY - length * 0.45;
-      const cp2x = bx + sway * 0.7;
-      const cp2y = baseY - length * 0.75;
-      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, bx + sway, tipY);
+      ctx.moveTo(tx + offset, topY);
+      ctx.quadraticCurveTo(tx + offset * 1.5, scalpY - h * 0.5, tx + offset, scalpY);
       ctx.stroke();
     }
+    ctx.restore();
+
+    // Cut edge highlight (if hair was cut)
+    if (scissorStopped && cutEffectTimer > 0) {
+      ctx.strokeStyle = `rgba(255,255,255,${cutEffectTimer / 0.6 * 0.4})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(hairLeft + 12, topY + 5);
+      ctx.lineTo(hairRight - 12, topY + 5);
+      ctx.stroke();
+    }
+
+    // Bangs (front hair over forehead)
+    ctx.fillStyle = '#1a1030';
+    ctx.beginPath();
+    ctx.moveTo(cx - 30, charHeadY - 115);
+    ctx.quadraticCurveTo(cx - 22, charHeadY - 95, cx - 15, charHeadY - 88);
+    ctx.lineTo(cx + 15, charHeadY - 88);
+    ctx.quadraticCurveTo(cx + 22, charHeadY - 95, cx + 30, charHeadY - 115);
+    ctx.quadraticCurveTo(cx, charHeadY - 128, cx - 30, charHeadY - 115);
+    ctx.fill();
   }
 
   function drawTargetLine(ctx, time) {
@@ -495,13 +557,26 @@
       const p = fallenParticles[i];
       p.y += p.vy;
       p.x += p.vx;
-      p.vy += 0.15;
+      p.vy += 0.2; // gravity
+      p.rot += p.rotSpd;
       p.life -= dt;
       if (p.life <= 0) { fallenParticles.splice(i, 1); continue; }
 
-      const alpha = Math.min(1, p.life / 0.3);
-      ctx.fillStyle = `rgba(26,16,40,${alpha})`;
-      ctx.fillRect(p.x, p.y, p.size, p.size * 0.4);
+      const alpha = Math.min(1, p.life / 0.4);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+
+      // Hair chunk - small dark rectangle
+      const hairGrad = ctx.createLinearGradient(0, -p.size / 2, 0, p.size / 2);
+      hairGrad.addColorStop(0, '#241838');
+      hairGrad.addColorStop(0.5, '#1e1230');
+      hairGrad.addColorStop(1, '#120a1e');
+      ctx.fillStyle = hairGrad;
+      ctx.fillRect(-p.size * 0.25, -p.size * 0.6, p.size * 0.5, p.size * 1.2);
+
+      ctx.restore();
     }
   }
 
