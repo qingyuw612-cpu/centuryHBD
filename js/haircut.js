@@ -355,6 +355,30 @@
     ctx.fillStyle = '#e0c8b0';
     ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
+
+    // === Bangs / 刘海 (both sides framing the face) ===
+    ctx.fillStyle = '#1a1032';
+    // Left bang
+    ctx.beginPath();
+    ctx.moveTo(cx - 35, hy - 30);
+    ctx.quadraticCurveTo(cx - 42, hy - 10, cx - 28, hy + 8);
+    ctx.quadraticCurveTo(cx - 18, hy + 5, cx - 12, hy - 5);
+    ctx.quadraticCurveTo(cx - 22, hy - 25, cx - 30, hy - 35);
+    ctx.fill();
+    // Right bang
+    ctx.beginPath();
+    ctx.moveTo(cx + 35, hy - 30);
+    ctx.quadraticCurveTo(cx + 42, hy - 10, cx + 28, hy + 8);
+    ctx.quadraticCurveTo(cx + 18, hy + 5, cx + 12, hy - 5);
+    ctx.quadraticCurveTo(cx + 22, hy - 25, cx + 30, hy - 35);
+    ctx.fill();
+    // Center bang (across forehead)
+    ctx.beginPath();
+    ctx.moveTo(cx - 15, hy - 38);
+    ctx.quadraticCurveTo(cx, hy - 48, cx + 15, hy - 38);
+    ctx.quadraticCurveTo(cx + 8, hy - 25, cx, hy - 20);
+    ctx.quadraticCurveTo(cx - 8, hy - 25, cx - 15, hy - 38);
+    ctx.fill();
   }
 
   function drawHair(ctx, time) {
@@ -412,16 +436,6 @@
       ctx.stroke();
     }
     ctx.restore();
-
-    // Bangs
-    ctx.fillStyle = '#1a1032';
-    ctx.beginPath();
-    ctx.moveTo(cx - 32, topY - 8);
-    ctx.quadraticCurveTo(cx - 20, topY + 5, cx - 10, topY + 15);
-    ctx.lineTo(cx + 10, topY + 15);
-    ctx.quadraticCurveTo(cx + 20, topY + 5, cx + 32, topY - 8);
-    ctx.quadraticCurveTo(cx, topY - 20, cx - 32, topY - 8);
-    ctx.fill();
 
     // Cut edge highlight
     if (scissorStopped && cutEffectTimer > 0) {
@@ -549,9 +563,10 @@
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
+    // Layer order: target → hair → character (head covers hair top)
     drawTargetLine(ctx, timestamp);
-    drawCharacter(ctx);
     drawHair(ctx, timestamp);
+    drawCharacter(ctx);
     drawScissors(ctx);
     drawParticles(ctx, dt);
 
