@@ -367,39 +367,39 @@
     ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
 
-    // === 八字刘海 (center part, sweeps to sides like quarter circles) ===
+    // === 八字刘海 (center part, sweeps to sides, contained within head) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang: from center part → sweep left and curl down
+    // Left bang: from crown → sweep left and curl down
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 42);                          // center parting point
+    ctx.moveTo(cx, hy - 38);                          // center part, below crown
     ctx.bezierCurveTo(
-      cx - 20, hy - 38,                                // control: up-left
-      cx - 40, hy - 25,                                // control: further left
-      cx - 35, hy + 2                                  // end: near left cheek
+      cx - 15, hy - 36,                                // gentle up-left
+      cx - 36, hy - 22,                                // sweep left
+      cx - 33, hy + 2                                  // curl down near cheek
     );
     ctx.bezierCurveTo(
-      cx - 30, hy - 5,                                 // control: curl back
-      cx - 18, hy - 12,                                // control: back toward face
-      cx - 5, hy - 8                                   // end: near eye level
+      cx - 28, hy - 4,                                 // curl inward
+      cx - 16, hy - 10,                                // back toward face
+      cx - 4, hy - 6                                   // near eye
     );
-    ctx.quadraticCurveTo(cx - 2, hy - 18, cx, hy - 42); // back to center part
+    ctx.quadraticCurveTo(cx - 2, hy - 16, cx, hy - 38); // return to center
     ctx.fill();
 
-    // Right bang: from center part → sweep right and curl down
+    // Right bang: from crown → sweep right and curl down
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 42);                          // center parting point
+    ctx.moveTo(cx, hy - 38);
     ctx.bezierCurveTo(
-      cx + 20, hy - 38,                                // control: up-right
-      cx + 40, hy - 25,                                // control: further right
-      cx + 35, hy + 2                                  // end: near right cheek
+      cx + 15, hy - 36,
+      cx + 36, hy - 22,
+      cx + 33, hy + 2
     );
     ctx.bezierCurveTo(
-      cx + 30, hy - 5,                                 // control: curl back
-      cx + 18, hy - 12,                                // control: back toward face
-      cx + 5, hy - 8                                   // end: near eye level
+      cx + 28, hy - 4,
+      cx + 16, hy - 10,
+      cx + 4, hy - 6
     );
-    ctx.quadraticCurveTo(cx + 2, hy - 18, cx, hy - 42); // back to center part
+    ctx.quadraticCurveTo(cx + 2, hy - 16, cx, hy - 38);
     ctx.fill();
   }
 
@@ -609,10 +609,10 @@
     ctx.closePath();
     ctx.fill();
 
-    // Layer order: hair → target line → character
+    // Layer order: hair → character → target line (gold line always on top)
     drawHair(ctx, timestamp);
-    drawTargetLine(ctx, timestamp);
     drawCharacter(ctx);
+    drawTargetLine(ctx, timestamp);
     drawScissors(ctx);
     drawParticles(ctx, dt);
 
