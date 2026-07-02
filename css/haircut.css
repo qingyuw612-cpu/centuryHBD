@@ -95,7 +95,7 @@
 /* --- Target Hint --- */
 #target-hint {
   position: absolute;
-  top: 16%;
+  top: 8%;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-body);
@@ -112,7 +112,7 @@
 /* --- Speech Bubble --- */
 #speech-bubble {
   position: absolute;
-  top: 30%;
+  top: 12%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(40, 20, 20, 0.92);

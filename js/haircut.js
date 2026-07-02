@@ -1,14 +1,12 @@
 /* ============================================
    Century Birthday - Haircut Game JS
-   Scissors oscillate, player stops to cut
+   Hair hangs down, scissors move, cut from below
    ============================================ */
 
 (function() {
   const { BGM, STORE, SoundEngine } = window.CenturyApp;
 
-  // ===========================================
   // DOM
-  // ===========================================
   const canvas = document.getElementById('haircut-canvas');
   const ctx = canvas.getContext('2d');
   const hudRound = document.getElementById('hud-round');
@@ -22,20 +20,18 @@
   const storyDialog = document.getElementById('story-dialog');
   const storyStart = document.getElementById('story-start');
 
-  // ===========================================
   // Constants
-  // ===========================================
   const TOTAL_ROUNDS = 4;
   const ROUND_CONFIG = [
-    { speed: 120, targetWidth: 50, label: '第一轮' },   // px/s scissors speed
-    { speed: 180, targetWidth: 35, label: '第二轮' },
-    { speed: 260, targetWidth: 22, label: '第三轮' },
-    { speed: 350, targetWidth: 14, label: '最后一轮' },
+    { speed: 100, targetHalfW: 40 },
+    { speed: 160, targetHalfW: 28 },
+    { speed: 240, targetHalfW: 18 },
+    { speed: 340, targetHalfW: 10 },
   ];
 
-  const PERFECT_RANGE = 10;
-  const GOOD_RANGE = 25;
-  const OK_RANGE = 45;
+  const PERFECT_RANGE = 12;
+  const GOOD_RANGE = 28;
+  const OK_RANGE = 50;
 
   const INSULTS = [
     '会不会剪啊！',
@@ -49,48 +45,35 @@
     '你这是在给我剃度吗？！',
   ];
 
-  // ===========================================
   // State
-  // ===========================================
   const State = { IDLE: 'idle', PLAYING: 'playing', RESULT: 'result', ENDED: 'ended' };
   let state = State.IDLE;
-
   let currentRound = 0;
-  let totalScore = 0;
-  let perfects = 0;
-  let insultCount = 0;
+  let totalScore = 0, perfects = 0, insultCount = 0;
 
-  // Hair & scissors
-  let hairHeight = 0;         // current hair top (y position, smaller = taller hair)
-  const HAIR_MAX = 0;         // top of head reference
-  let hairBaseY = 0;          // scalp y position
-  let hairCurrentTop = 0;     // current visible hair top
-  let targetY = 0;            // target line y
-  let targetHalfW = 25;       // half width of target zone
+  // Layout (computed in updateLayout)
+  let width, height;
+  let headX, headY;          // center of character's head
+  let hairTopY;              // where hair starts (scalp)
+  let hairBottomY;           // full length hair bottom (waist)
+  let hairCurrentBottom;     // current hair bottom (after cuts)
+  let targetY;               // target line position
+  let targetHalfW;           // half-width of target zone in px
 
-  // Scissors animation
-  let scissorY = 0;           // current scissors y
-  let scissorDir = 1;         // 1=down, -1=up
-  let scissorSpeed = 120;
-  let scissorMinY = 0;
-  let scissorMaxY = 0;
+  // Scissors
+  let scissorY;
+  let scissorDir = -1;
+  let scissorSpeed = 100;
+  let scissorMinY, scissorMaxY;
   let scissorStopped = false;
 
-  // Cut animation
+  // Effects
   let cutEffectTimer = 0;
   let fallenParticles = [];
-
-  // Timing
   let animId = null;
 
-  let width, height;
-  let charX, charHeadY, charScalpY;
-
-  // Round transition
-  let stateTimer = 0;
-
   // ===========================================
-  // Canvas Setup
+  // Canvas
   // ===========================================
   function resize() {
     width = window.innerWidth;
@@ -105,24 +88,31 @@
   }
 
   function updateLayout() {
-    charX = width / 2;
-    charHeadY = height * 0.72;
-    charScalpY = charHeadY - 35;
-    hairBaseY = charScalpY;
+    // Head near top of screen
+    headX = width / 2;
+    headY = height * 0.22;
 
-    // Scissors range: from just above head to the full hair height
-    scissorMinY = charScalpY - height * 0.48;  // top of hair range
-    scissorMaxY = charScalpY + 15;             // just below scalp
+    // Hair: from scalp down to waist area
+    hairTopY = headY + 25;
 
-    // Target in upper-middle of hair
-    targetY = charScalpY - height * 0.22;
-
-    // Initial hair is long
+    // Initial full hair length: down to ~80% of screen
+    hairBottomY = height * 0.78;
     if (state === State.IDLE) {
-      hairHeight = charScalpY - scissorMinY; // full length
-      hairCurrentTop = scissorMinY;
+      hairCurrentBottom = hairBottomY;
+    }
+
+    // Scissors range: from just below head to the full hair length
+    scissorMinY = hairTopY + 30;
+    scissorMaxY = hairBottomY - 15;
+
+    if (state === State.IDLE || scissorY < scissorMinY || scissorY > scissorMaxY) {
       scissorY = (scissorMinY + scissorMaxY) / 2;
     }
+
+    // Target: somewhere in the lower-middle of the hair
+    const cfg = ROUND_CONFIG[currentRound] || ROUND_CONFIG[0];
+    targetHalfW = cfg.targetHalfW;
+    targetY = hairTopY + (hairBottomY - hairTopY) * (0.55 + Math.random() * 0.2);
   }
 
   resize();
@@ -130,14 +120,14 @@
   window.addEventListener('resize', () => { resize(); updateLayout(); });
 
   // ===========================================
-  // Round Management
+  // Round
   // ===========================================
   function startRound() {
     if (currentRound >= TOTAL_ROUNDS) { endGame(); return; }
 
     const cfg = ROUND_CONFIG[currentRound];
     scissorSpeed = cfg.speed;
-    targetHalfW = cfg.targetWidth / 2;
+    targetHalfW = cfg.targetHalfW;
     scissorStopped = false;
     cutEffectTimer = 0;
     fallenParticles = [];
@@ -149,12 +139,13 @@
     if (roundPopup) roundPopup.classList.add('hidden');
     if (speechBubble) speechBubble.classList.add('hidden');
 
-    // Vary target position slightly each round
-    const jitter = (Math.random() - 0.5) * height * 0.06;
-    targetY = charScalpY - height * 0.22 + jitter;
+    // Vary target
+    targetY = hairTopY + (hairBottomY - hairTopY) * (0.5 + Math.random() * 0.35);
+    targetY = Math.max(hairTopY + 25, Math.min(hairCurrentBottom - 10, targetY));
 
-    // Clamp target within hair range
-    targetY = Math.max(scissorMinY + 40, Math.min(charScalpY - 15, targetY));
+    // Scissors start from above
+    scissorY = hairTopY + 20;
+    scissorDir = 1;
   }
 
   function doCut() {
@@ -165,15 +156,17 @@
     cutBtn.classList.add('disabled');
     targetHint.classList.remove('show');
 
-    // Hair above scissors gets cut
     const cutY = scissorY;
-    hairCurrentTop = Math.max(scissorMinY, cutY);
 
-    // Score based on distance from target
+    // Cut off hair BELOW the scissors
+    const trimmed = hairCurrentBottom - cutY;
+    hairCurrentBottom = Math.max(hairTopY + 5, cutY);
+
+    // Score: distance from target
     const distFromTarget = cutY - targetY;
     const absDist = Math.abs(distFromTarget);
     let judgment, points;
-    const tooShort = cutY < targetY - targetHalfW - OK_RANGE; // cut way below target
+    const tooShort = cutY < targetY - targetHalfW - OK_RANGE;
 
     if (absDist <= PERFECT_RANGE) {
       judgment = 'perfect'; points = 100; perfects++;
@@ -193,31 +186,25 @@
     totalScore += points;
     hudScore.textContent = totalScore + ' 分';
 
-    // Spawn hair chunk particles
-    const hairLeft = charX - 52, hairRight = charX + 52;
-    for (let i = 0; i < 50; i++) {
+    // Hair particles (falling from cut point)
+    const hairLeft = headX - 48, hairRight = headX + 48;
+    for (let i = 0; i < 40; i++) {
       fallenParticles.push({
         x: hairLeft + Math.random() * (hairRight - hairLeft),
-        y: cutY - 5 + Math.random() * 15,
-        vx: (Math.random() - 0.5) * 6,
-        vy: -1 - Math.random() * 3,  // initial upward bounce
-        life: 0.7 + Math.random() * 1.0,
-        size: 3 + Math.random() * 8,
+        y: cutY,
+        vx: (Math.random() - 0.5) * 4,
+        vy: 1 + Math.random() * 3,
+        life: 0.6 + Math.random() * 1.0,
+        size: 3 + Math.random() * 7,
         rot: Math.random() * Math.PI * 2,
-        rotSpd: (Math.random() - 0.5) * 0.1,
+        rotSpd: (Math.random() - 0.5) * 0.12,
       });
     }
-    cutEffectTimer = 0.7;
+    cutEffectTimer = 0.6;
 
-    // Show result
     showRoundResult(judgment, points);
+    if (tooShort || judgment === 'bad') showInsult();
 
-    // Show insult if too short
-    if (tooShort || judgment === 'bad') {
-      showInsult();
-    }
-
-    // Auto-advance
     setTimeout(() => {
       if (state === State.ENDED) return;
       if (roundPopup) roundPopup.classList.add('hidden');
@@ -239,15 +226,14 @@
 
   function showInsult() {
     if (!speechBubble) return;
-    const insult = INSULTS[Math.floor(Math.random() * INSULTS.length)];
-    speechBubble.textContent = insult;
+    speechBubble.textContent = INSULTS[Math.floor(Math.random() * INSULTS.length)];
     speechBubble.classList.remove('hidden');
     clearTimeout(speechBubble._timeout);
     speechBubble._timeout = setTimeout(() => speechBubble.classList.add('hidden'), 1800);
   }
 
   // ===========================================
-  // End Game
+  // End
   // ===========================================
   function endGame() {
     state = State.ENDED;
@@ -261,22 +247,13 @@
 
     const maxScore = TOTAL_ROUNDS * 100;
     const pct = maxScore > 0 ? totalScore / maxScore : 0;
-
     let grade, comment;
-    if (pct >= 0.9 && insultCount === 0) {
-      grade = 'S'; comment = 'Tony老师看了都想拜你为师！';
-    } else if (pct >= 0.8) {
-      grade = 'A'; comment = '顾客表示：下次还找你。';
-    } else if (pct >= 0.65) {
-      grade = 'B'; comment = '还行，起码没被当场开除。';
-    } else if (pct >= 0.45) {
-      grade = 'C'; comment = '店长：你明天不用来了……开玩笑的。';
-    } else if (pct >= 0.25) {
-      grade = 'D'; comment = '顾客已经去隔壁理发店了。';
-    } else {
-      grade = 'F'; comment = '你确定你拿的是剪刀不是除草机？';
-    }
-
+    if (pct >= 0.9 && insultCount === 0) { grade = 'S'; comment = 'Tony老师看了都想拜你为师！'; }
+    else if (pct >= 0.8) { grade = 'A'; comment = '顾客表示：下次还找你。'; }
+    else if (pct >= 0.65) { grade = 'B'; comment = '还行，起码没被当场开除。'; }
+    else if (pct >= 0.45) { grade = 'C'; comment = '店长：你明天不用来了……开玩笑的。'; }
+    else if (pct >= 0.25) { grade = 'D'; comment = '顾客已经去隔壁理发店了。'; }
+    else { grade = 'F'; comment = '你确定你拿的是剪刀不是除草机？'; }
     if (insultCount >= 3) comment += ' 顾客骂了你 ' + insultCount + ' 次。';
 
     document.getElementById('results-grade').textContent = grade;
@@ -287,7 +264,6 @@
 
     STORE.setBool('haircut_complete', true);
     STORE.set('haircut_score', totalScore.toString());
-    STORE.set('haircut_rounds', currentRound.toString());
     SoundEngine.playChime();
   }
 
@@ -298,10 +274,8 @@
     cutBtn.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       if (state === State.PLAYING) doCut();
-      else if (state === State.ENDED) { /* restart handled by reload button */ }
     });
   }
-
   document.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
@@ -309,7 +283,6 @@
     }
   });
 
-  // Story dialog
   if (storyStart) {
     storyStart.addEventListener('click', () => {
       if (storyDialog) storyDialog.classList.add('hidden');
@@ -331,157 +304,156 @@
   // Drawing
   // ===========================================
   function drawCharacter(ctx) {
-    const cx = charX, cy = charHeadY;
+    const cx = headX, hy = headY;
 
-    // Body
+    // === Body/shoulders ===
+    const shoulderY = hy + 50;
     ctx.fillStyle = '#1c1a28';
     ctx.beginPath();
-    ctx.moveTo(cx - 50, cy + 20);
-    ctx.quadraticCurveTo(cx - 35, cy - 55, cx - 25, cy - 95);
-    ctx.lineTo(cx - 25, cy + 85);
-    ctx.lineTo(cx + 25, cy + 85);
-    ctx.lineTo(cx + 25, cy - 95);
-    ctx.quadraticCurveTo(cx + 35, cy - 55, cx + 50, cy + 20);
+    ctx.moveTo(cx - 70, shoulderY + 30);
+    ctx.quadraticCurveTo(cx - 55, shoulderY - 5, cx - 22, shoulderY - 20);
+    ctx.lineTo(cx + 22, shoulderY - 20);
+    ctx.quadraticCurveTo(cx + 55, shoulderY - 5, cx + 70, shoulderY + 30);
     ctx.closePath();
     ctx.fill();
 
     // Collar
     ctx.strokeStyle = '#d4a853';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(cx - 24, cy - 85);
-    ctx.quadraticCurveTo(cx, cy - 72, cx + 24, cy - 85);
+    ctx.moveTo(cx - 20, shoulderY - 18);
+    ctx.quadraticCurveTo(cx, shoulderY - 5, cx + 20, shoulderY - 18);
     ctx.stroke();
 
     // Neck
     ctx.fillStyle = '#d8c0a8';
-    ctx.fillRect(cx - 9, cy - 110, 18, 22);
+    ctx.fillRect(cx - 9, hy + 6, 18, 20);
 
     // Head
-    const hY = cy - 125;
     ctx.fillStyle = '#e8d5c2';
     ctx.beginPath();
-    ctx.ellipse(cx, hY, 34, 42, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, hy, 35, 43, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eyes (closed, peaceful)
+    // Eyes
     ctx.strokeStyle = '#3a2a1a';
     ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.arc(cx - 13, hY - 6, 6, 0.15, Math.PI - 0.15);
+    ctx.arc(cx - 13, hy - 5, 6, 0.15, Math.PI - 0.15);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(cx + 13, hY - 6, 6, 0.15, Math.PI - 0.15);
+    ctx.arc(cx + 13, hy - 5, 6, 0.15, Math.PI - 0.15);
     ctx.stroke();
 
     // Mouth
     ctx.strokeStyle = '#c4956a';
-    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(cx, hY + 14, 7, 0.1, Math.PI - 0.1);
+    ctx.arc(cx, hy + 15, 7, 0.1, Math.PI - 0.1);
     ctx.stroke();
+
+    // Ears
+    ctx.fillStyle = '#e0c8b0';
+    ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
   }
 
   function drawHair(ctx, time) {
-    const cx = charX;
-    const scalpY = charScalpY;
-    const topY = hairCurrentTop;
-    const sway = Math.sin(time * 0.002) * 3;
+    const cx = headX;
+    const topY = hairTopY;
+    const bottomY = hairCurrentBottom;
+    const sway = Math.sin(time * 0.0015) * 2;
 
-    // === Solid hair block ===
-    // Main hair mass - filled shape from scalp to current top
-    const hairLeft = cx - 52;
-    const hairRight = cx + 52;
-    const h = scalpY - topY;
+    if (bottomY <= topY + 5) return;
 
-    // Hair body gradient (dark, slight sheen)
-    const hairGrad = ctx.createLinearGradient(hairLeft, 0, hairRight, 0);
+    const hw = 50; // hair half-width
+
+    // === Main hair block (from scalp down to current bottom) ===
+    const hairGrad = ctx.createLinearGradient(cx - hw, 0, cx + hw, 0);
     hairGrad.addColorStop(0, '#120a1e');
-    hairGrad.addColorStop(0.3, '#1e1230');
-    hairGrad.addColorStop(0.5, '#241838');
-    hairGrad.addColorStop(0.7, '#1e1230');
+    hairGrad.addColorStop(0.35, '#1e1232');
+    hairGrad.addColorStop(0.5, '#261840');
+    hairGrad.addColorStop(0.65, '#1e1232');
     hairGrad.addColorStop(1, '#120a1e');
 
     ctx.fillStyle = hairGrad;
 
-    // Draw hair as a solid rounded shape
+    // Hair shape: from scalp, flowing down, slight taper
     ctx.beginPath();
-    // Start from left scalp
-    ctx.moveTo(hairLeft + 10, scalpY);
-    // Left side, slightly curved outward
+    // Left side of scalp
+    ctx.moveTo(cx - 30, topY);
+    // Left flow
     ctx.bezierCurveTo(
-      hairLeft - 5 + sway, scalpY - h * 0.5,
-      hairLeft - 5 + sway, topY + h * 0.3,
-      hairLeft + 15, topY + 6
+      cx - hw - 10, topY + (bottomY - topY) * 0.3,
+      cx - hw - 5 + sway, topY + (bottomY - topY) * 0.7,
+      cx - hw + 5 + sway, bottomY
     );
-    // Top edge (cut or natural top)
-    ctx.lineTo(hairRight - 15, topY + 6);
-    // Right side
+    // Bottom edge (cut or natural)
+    ctx.lineTo(cx + hw - 5 - sway, bottomY);
+    // Right flow
     ctx.bezierCurveTo(
-      hairRight + 5 - sway, topY + h * 0.3,
-      hairRight + 5 - sway, scalpY - h * 0.5,
-      hairRight - 10, scalpY
+      cx + hw + 5 - sway, topY + (bottomY - topY) * 0.7,
+      cx + hw + 10, topY + (bottomY - topY) * 0.3,
+      cx + 30, topY
     );
     ctx.closePath();
     ctx.fill();
 
     // Subtle outline
-    ctx.strokeStyle = 'rgba(60,40,80,0.3)';
+    ctx.strokeStyle = 'rgba(60,40,90,0.25)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Hair texture lines (subtle, inside the solid shape)
+    // Hair texture lines
     ctx.save();
     ctx.beginPath();
-    ctx.rect(hairLeft + 10, topY, hairRight - hairLeft - 20, scalpY - topY);
+    ctx.rect(cx - hw, topY, hw * 2, bottomY - topY);
     ctx.clip();
-
-    for (let i = 0; i < 12; i++) {
-      const tx = hairLeft + 20 + i * (hairRight - hairLeft - 40) / 11;
-      const offset = Math.sin(time * 0.0015 + i * 0.5) * 2;
-      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    for (let i = 0; i < 10; i++) {
+      const tx = cx - hw + 15 + i * (hw * 2 - 30) / 9;
+      const off = Math.sin(time * 0.001 + i * 0.4) * 1.5;
+      ctx.strokeStyle = 'rgba(255,255,255,0.025)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(tx + offset, topY);
-      ctx.quadraticCurveTo(tx + offset * 1.5, scalpY - h * 0.5, tx + offset, scalpY);
+      ctx.moveTo(tx + off, topY);
+      ctx.quadraticCurveTo(tx + off * 2, topY + (bottomY - topY) * 0.5, tx + off, bottomY);
       ctx.stroke();
     }
     ctx.restore();
 
-    // Cut edge highlight (if hair was cut)
+    // Bangs
+    ctx.fillStyle = '#1a1032';
+    ctx.beginPath();
+    ctx.moveTo(cx - 32, topY - 8);
+    ctx.quadraticCurveTo(cx - 20, topY + 5, cx - 10, topY + 15);
+    ctx.lineTo(cx + 10, topY + 15);
+    ctx.quadraticCurveTo(cx + 20, topY + 5, cx + 32, topY - 8);
+    ctx.quadraticCurveTo(cx, topY - 20, cx - 32, topY - 8);
+    ctx.fill();
+
+    // Cut edge highlight
     if (scissorStopped && cutEffectTimer > 0) {
-      ctx.strokeStyle = `rgba(255,255,255,${cutEffectTimer / 0.6 * 0.4})`;
+      ctx.strokeStyle = `rgba(255,255,255,${cutEffectTimer / 0.6 * 0.3})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(hairLeft + 12, topY + 5);
-      ctx.lineTo(hairRight - 12, topY + 5);
+      ctx.moveTo(cx - hw + 8, bottomY);
+      ctx.lineTo(cx + hw - 8, bottomY);
       ctx.stroke();
     }
-
-    // Bangs (front hair over forehead)
-    ctx.fillStyle = '#1a1030';
-    ctx.beginPath();
-    ctx.moveTo(cx - 30, charHeadY - 115);
-    ctx.quadraticCurveTo(cx - 22, charHeadY - 95, cx - 15, charHeadY - 88);
-    ctx.lineTo(cx + 15, charHeadY - 88);
-    ctx.quadraticCurveTo(cx + 22, charHeadY - 95, cx + 30, charHeadY - 115);
-    ctx.quadraticCurveTo(cx, charHeadY - 128, cx - 30, charHeadY - 115);
-    ctx.fill();
   }
 
   function drawTargetLine(ctx, time) {
-    const cx = charX;
-    const pulse = Math.sin(time * 0.004) * 0.2 + 0.8;
+    const cx = headX;
     const bandW = 140;
+    const pulse = Math.sin(time * 0.004) * 0.15 + 0.85;
 
-    // Golden zone
-    ctx.fillStyle = `rgba(240,215,140,${0.3 * pulse})`;
+    // Target zone
+    ctx.fillStyle = `rgba(240,215,140,${0.25 * pulse})`;
     ctx.fillRect(cx - bandW / 2, targetY - targetHalfW, bandW, targetHalfW * 2);
 
-    // Center line
-    ctx.strokeStyle = `rgba(240,215,140,${0.5 * pulse})`;
+    // Line
+    ctx.strokeStyle = `rgba(240,215,140,${0.45 * pulse})`;
     ctx.lineWidth = 2;
-    ctx.setLineDash([6, 8]);
+    ctx.setLineDash([5, 7]);
     ctx.beginPath();
     ctx.moveTo(cx - bandW / 2 + 5, targetY);
     ctx.lineTo(cx + bandW / 2 - 5, targetY);
@@ -490,63 +462,46 @@
   }
 
   function drawScissors(ctx) {
-    const cx = charX;
+    const cx = headX + 60;
     const cy = scissorY;
 
     ctx.save();
     ctx.translate(cx, cy);
+    ctx.rotate(-0.15); // slight angle for visual interest
 
-    // Glow
     if (!scissorStopped) {
-      const glowGrad = ctx.createRadialGradient(0, 0, 8, 0, 0, 40);
-      glowGrad.addColorStop(0, 'rgba(240,215,140,0.3)');
+      const glowGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, 35);
+      glowGrad.addColorStop(0, 'rgba(240,215,140,0.25)');
       glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 40, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(0, 0, 35, 0, Math.PI * 2); ctx.fill();
     }
 
-    // Left blade
-    ctx.fillStyle = '#d0d5e0';
+    // Blades
+    ctx.fillStyle = '#d5d8e0';
     ctx.strokeStyle = '#999';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(-18, -35);
-    ctx.lineTo(8, -5);
-    ctx.lineTo(10, 2);
-    ctx.lineTo(-16, -28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.moveTo(-20, -38); ctx.lineTo(6, -6); ctx.lineTo(8, 1); ctx.lineTo(-18, -30);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
 
-    // Right blade
-    ctx.fillStyle = '#c0c5d0';
+    ctx.fillStyle = '#c5c8d0';
     ctx.beginPath();
-    ctx.moveTo(18, -35);
-    ctx.lineTo(-8, -5);
-    ctx.lineTo(-10, 2);
-    ctx.lineTo(16, -28);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.moveTo(20, -38); ctx.lineTo(-6, -6); ctx.lineTo(-8, 1); ctx.lineTo(18, -30);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
 
     // Pivot
     ctx.fillStyle = '#d4a853';
-    ctx.beginPath();
-    ctx.arc(0, -3, 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -4, 4, 0, Math.PI * 2); ctx.fill();
 
-    // Left handle
+    // Handles
     ctx.strokeStyle = '#d4a853';
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.ellipse(-20, 18, 14, 8, -0.3, Math.PI * 0.4, Math.PI * 1.8);
+    ctx.ellipse(-22, 20, 16, 9, -0.3, Math.PI * 0.35, Math.PI * 1.75);
     ctx.stroke();
-
-    // Right handle
     ctx.beginPath();
-    ctx.ellipse(20, 18, 14, 8, 0.3, Math.PI * 1.2, Math.PI * 2.6);
+    ctx.ellipse(22, 20, 16, 9, 0.3, Math.PI * 1.25, Math.PI * 2.65);
     ctx.stroke();
 
     ctx.restore();
@@ -557,25 +512,21 @@
       const p = fallenParticles[i];
       p.y += p.vy;
       p.x += p.vx;
-      p.vy += 0.2; // gravity
+      p.vy += 0.18;
       p.rot += p.rotSpd;
       p.life -= dt;
       if (p.life <= 0) { fallenParticles.splice(i, 1); continue; }
 
-      const alpha = Math.min(1, p.life / 0.4);
+      const alpha = Math.min(1, p.life / 0.35);
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
-
-      // Hair chunk - small dark rectangle
-      const hairGrad = ctx.createLinearGradient(0, -p.size / 2, 0, p.size / 2);
-      hairGrad.addColorStop(0, '#241838');
-      hairGrad.addColorStop(0.5, '#1e1230');
-      hairGrad.addColorStop(1, '#120a1e');
-      ctx.fillStyle = hairGrad;
-      ctx.fillRect(-p.size * 0.25, -p.size * 0.6, p.size * 0.5, p.size * 1.2);
-
+      const grad = ctx.createLinearGradient(0, -p.size / 2, 0, p.size / 2);
+      grad.addColorStop(0, '#241838');
+      grad.addColorStop(1, '#120a1e');
+      ctx.fillStyle = grad;
+      ctx.fillRect(-p.size * 0.2, -p.size * 0.55, p.size * 0.4, p.size * 1.1);
       ctx.restore();
     }
   }
@@ -594,28 +545,17 @@
       if (scissorY >= scissorMaxY) { scissorY = scissorMaxY; scissorDir = -1; }
       if (scissorY <= scissorMinY) { scissorY = scissorMinY; scissorDir = 1; }
     }
-
-    // Cut effect
     if (cutEffectTimer > 0) cutEffectTimer -= dt;
 
     // Draw
     ctx.clearRect(0, 0, width, height);
-
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-    bgGrad.addColorStop(0, '#1a1040');
+    bgGrad.addColorStop(0, '#1a1640');
     bgGrad.addColorStop(0.5, '#150d30');
-    bgGrad.addColorStop(1, '#0a0820');
+    bgGrad.addColorStop(1, '#0d0a20');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Mirror glow
-    const mirrorGrad = ctx.createRadialGradient(charX, charHeadY, 20, charX, charHeadY, height * 0.55);
-    mirrorGrad.addColorStop(0, 'rgba(179,157,218,0.05)');
-    mirrorGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = mirrorGrad;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw scene
     drawTargetLine(ctx, timestamp);
     drawCharacter(ctx);
     drawHair(ctx, timestamp);
@@ -628,22 +568,13 @@
       ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(charX - 80, scissorY);
-      ctx.lineTo(charX + 80, scissorY);
+      ctx.moveTo(headX - 60, scissorY);
+      ctx.lineTo(headX + 60, scissorY);
       ctx.stroke();
-    }
-
-    // Scissor stopped indicator
-    if (scissorStopped && state === State.RESULT) {
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = 'bold 13px "Microsoft YaHei", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('剪在这里！', charX, scissorY - 40);
     }
   }
 
   // Start
-  hairCurrentTop = scissorMinY;
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
 
