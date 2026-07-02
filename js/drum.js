@@ -198,7 +198,7 @@
 
   class Note {
     constructor(beat, trackId) {
-      this.time = (beat + 1) * BEAT_DURATION;
+      this.time = (beat + 7) * BEAT_DURATION;
       this.trackId = trackId;
       this.track = TRACKS[trackId];
       this.y = -100; // start above screen
@@ -208,8 +208,7 @@
 
     update(et) {
       const dt = this.time - et;
-      // Cap at screen top: notes queue above until their time to fall
-      this.y = Math.min(0, hitY - dt * FALL_SPEED);
+      this.y = hitY - dt * FALL_SPEED;
     }
 
     draw(ctx) {
