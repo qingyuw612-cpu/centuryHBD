@@ -25,8 +25,8 @@
   const ROUND_CONFIG = [
     { speed: 100, targetHalfW: 40 },
     { speed: 160, targetHalfW: 28 },
-    { speed: 240, targetHalfW: 18 },
-    { speed: 340, targetHalfW: 10 },
+    { speed: 220, targetHalfW: 18 },
+    { speed: 280, targetHalfW: 10 },
   ];
 
   const PERFECT_RANGE = 12;
@@ -176,8 +176,11 @@
     const cutY = scissorY;
 
     // Cut off hair BELOW the scissors
-    const trimmed = hairCurrentBottom - cutY;
-    hairCurrentBottom = Math.max(hairTopY + 5, cutY);
+    // Per-round minimum hair length to keep scissors range reasonable
+    const hairLen = hairBottomY - hairTopY;
+    const minKeep = [0.65, 0.40, 0.18, 0][currentRound]; // fraction of original length to keep
+    const minBottom = hairTopY + hairLen * minKeep;
+    hairCurrentBottom = Math.max(minBottom, cutY);
 
     // Shrink scissors range to match new hair length
     scissorMaxY = hairCurrentBottom - 10;
