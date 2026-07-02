@@ -179,6 +179,10 @@
     const trimmed = hairCurrentBottom - cutY;
     hairCurrentBottom = Math.max(hairTopY + 5, cutY);
 
+    // Shrink scissors range to match new hair length
+    scissorMaxY = hairCurrentBottom - 10;
+    if (scissorY > scissorMaxY) scissorY = scissorMaxY;
+
     // Score: distance from target
     const distFromTarget = cutY - targetY;
     const absDist = Math.abs(distFromTarget);
