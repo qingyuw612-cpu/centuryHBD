@@ -87,7 +87,7 @@
 
   const chart = generateChart().sort((a, b) => a.beat - b.beat); // MUST sort by beat!
   const lastBeat = Math.max(...chart.map(n => n.beat));
-  const TOTAL_DURATION = (lastBeat + 3) * BEAT_DURATION;
+  const TOTAL_DURATION = (lastBeat + 7 + 4) * BEAT_DURATION; // +7 offset + 4 beat buffer
 
   // ===========================================
   // Melody Player
