@@ -16,10 +16,10 @@
   const storyStart = document.getElementById('story-start');
 
   // State
-  const State = { IDLE: 'idle', ALIGN: 'align', PEEL: 'peel', BUBBLES: 'bubbles', DONE: 'done' };
+  const State = { IDLE: 'idle', ALIGN: 'align', BUBBLES: 'bubbles', DONE: 'done' };
   let state = State.IDLE;
   let totalScore = 0;
-  let alignScore = 0, peelScore = 0, bubbleScore = 0;
+  let alignScore = 0, bubbleScore = 0;
   let width, height;
   let animId;
 
@@ -150,7 +150,32 @@
       ctx.fillStyle = `rgba(240,215,140,${pulse})`;
       ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('拖拽对齐蓝色膜到手机边框', width/2, py + ph/2 + 50);
+      ctx.fillText('拖拽移动 · 滚轮或按钮旋转', width/2, py + ph/2 + 50);
+
+      // Rotation buttons
+      const rotBtns = [
+        { x: width/2 - 100, y: height * 0.78, label: '↺ 左转', dir: -1 },
+        { x: width/2 + 20, y: height * 0.78, label: '↻ 右转', dir: 1 },
+      ];
+      rotBtns.forEach(b => {
+        ctx.fillStyle = 'rgba(212,168,83,0.7)';
+        ctx.beginPath();
+        const rr = 8;
+        ctx.moveTo(b.x + rr, b.y); ctx.lineTo(b.x + 70 - rr, b.y);
+        ctx.arcTo(b.x + 70, b.y, b.x + 70, b.y + rr, rr);
+        ctx.lineTo(b.x + 70, b.y + 36 - rr);
+        ctx.arcTo(b.x + 70, b.y + 36, b.x + 70 - rr, b.y + 36, rr);
+        ctx.lineTo(b.x + rr, b.y + 36);
+        ctx.arcTo(b.x, b.y + 36, b.x, b.y + 36 - rr, rr);
+        ctx.lineTo(b.x, b.y + rr);
+        ctx.arcTo(b.x, b.y, b.x + rr, b.y, rr);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#1a1a2e';
+        ctx.font = 'bold 0.85rem "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(b.label, b.x + 35, b.y + 24);
+      });
     },
 
     onPointerDown(ex, ey) {
@@ -203,130 +228,7 @@
   };
 
   // ================================================================
-  // LEVEL 2: PEEL
-  // ================================================================
-  const peel = {
-    progress: 0,
-    speed: 0,
-    lastY: 0,
-    holding: false,
-    started: false,
-    done: false,
-    speedSamples: [],
-    idealMin: 80, idealMax: 180, // ideal drag speed px/s
-
-    init() {
-      this.progress = 0;
-      this.speed = 0;
-      this.lastY = 0;
-      this.holding = false;
-      this.started = false;
-      this.done = false;
-      this.speedSamples = [];
-    },
-
-    update(dt) {
-      // progress decays if not holding
-      if (!this.holding && this.progress > 0 && !this.done) {
-        this.progress -= 40 * dt;
-        if (this.progress < 0) this.progress = 0;
-      }
-    },
-
-    draw(ctx, time) {
-      const barX = width * 0.2, barW = width * 0.6;
-      const barY = height * 0.55, barH = 40;
-
-      // Instruction
-      ctx.fillStyle = '#e8e0f0';
-      ctx.font = '1rem "Microsoft YaHei", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('按住屏幕匀速向下拖动，撕开保护膜', width/2, height * 0.32);
-
-      // Speed indicator
-      ctx.fillText(`速度: ${Math.round(this.speed)} px/s`, width/2, height * 0.40);
-      const speedColor = this.holding
-        ? (this.speed >= this.idealMin && this.speed <= this.idealMax ? '#5adb7a' : '#db5a5a')
-        : '#9990b0';
-      ctx.fillStyle = speedColor;
-      const idealLabel = `${this.idealMin}-${this.idealMax} px/s 理想`;
-      ctx.font = '0.8rem "Microsoft YaHei", sans-serif';
-      ctx.fillText(idealLabel, width/2, height * 0.44);
-
-      // Progress bar bg
-      ctx.fillStyle = 'rgba(255,255,255,0.08)';
-      const r = 8;
-      ctx.beginPath();
-      ctx.moveTo(barX + r, barY);
-      ctx.lineTo(barX + barW - r, barY);
-      ctx.arcTo(barX + barW, barY, barX + barW, barY + r, r);
-      ctx.lineTo(barX + barW, barY + barH - r);
-      ctx.arcTo(barX + barW, barY + barH, barX + barW - r, barY + barH, r);
-      ctx.lineTo(barX + r, barY + barH);
-      ctx.arcTo(barX, barY + barH, barX, barY + barH - r, r);
-      ctx.lineTo(barX, barY + r);
-      ctx.arcTo(barX, barY, barX + r, barY, r);
-      ctx.closePath();
-      ctx.fill();
-
-      // Progress fill
-      const fillW = barW * (this.progress / 100);
-      if (fillW > 0) {
-        const fillGrad = ctx.createLinearGradient(barX, 0, barX + fillW, 0);
-        fillGrad.addColorStop(0, '#7eb8da');
-        fillGrad.addColorStop(1, '#b39dda');
-        ctx.fillStyle = fillGrad;
-        ctx.beginPath();
-        ctx.moveTo(barX + r, barY);
-        ctx.lineTo(barX + fillW, barY);
-        ctx.lineTo(barX + fillW, barY + barH);
-        ctx.lineTo(barX + r, barY + barH);
-        ctx.arcTo(barX, barY + barH, barX, barY + barH - r, r);
-        ctx.lineTo(barX, barY + r);
-        ctx.arcTo(barX, barY, barX + r, barY, r);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // Progress text
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 1.2rem "Cinzel", serif';
-      ctx.fillText(`${Math.round(this.progress)}%`, width/2, barY + barH/2 + 5);
-
-      if (this.progress >= 100 && !this.done) this.done = true;
-    },
-
-    onPointerDown(ey) {
-      this.holding = true;
-      this.started = true;
-      this.lastY = ey;
-    },
-    onPointerMove(ey) {
-      if (!this.holding) return;
-      const dy = this.lastY - ey; // negative when moving down
-      this.speed = Math.abs(dy) * 60; // approximate px/s
-      this.lastY = ey;
-
-      // Check if speed is in ideal range
-      if (this.speed >= this.idealMin * 0.5 && this.speed <= this.idealMax * 2) {
-        const quality = this.speed >= this.idealMin && this.speed <= this.idealMax ? 1.2 : 0.6;
-        this.progress += quality * 1.5;
-        if (this.progress > 100) this.progress = 100;
-      }
-    },
-    onPointerUp() {
-      this.holding = false;
-    },
-
-    getScore() {
-      if (this.progress < 100) return Math.round(this.progress * 0.6);
-      // Based on average speed quality
-      return 85;
-    },
-  };
-
-  // ================================================================
-  // LEVEL 3: BUBBLES
+  // LEVEL 2: BUBBLES
   // ================================================================
   const bubbles = {
     list: [],
@@ -433,11 +335,11 @@
         if (!b.alive) continue;
         const dx = ex - b.x, dy = ey - b.y;
         const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < b.r + 30) {
-          // Push bubble away from finger
+        if (dist < b.r + 25) {
+          // Push bubble away from finger (higher resistance)
           const nx = dx / dist, ny = dy / dist;
-          b.vx += nx * 400;
-          b.vy += ny * 400;
+          b.vx += nx * 180;
+          b.vy += ny * 180;
         }
       }
     },
@@ -457,14 +359,12 @@
   function startLevel(levelName) {
     state = levelName;
     hudLevel.textContent = {
-      align: '① 对齐贴膜', peel: '② 撕开保护膜', bubbles: '③ 排除气泡'
+      align: '① 对齐贴膜', bubbles: '② 排除气泡'
     }[levelName] || '';
 
-    // Show level intro
     const titles = {
-      align: '① 对齐贴膜\n拖拽蓝色膜对齐手机边框',
-      peel: '② 撕开保护膜\n按住匀速下拖',
-      bubbles: '③ 排除气泡\n滑动推开所有气泡',
+      align: '① 对齐贴膜\n拖拽+旋转对齐手机边框',
+      bubbles: '② 排除气泡\n滑动推开所有气泡',
     };
     if (levelPopup) {
       levelPopup.innerHTML = titles[levelName].replace(/\n/g, '<br>');
@@ -473,15 +373,13 @@
     }
 
     if (levelName === State.ALIGN) align.init();
-    else if (levelName === State.PEEL) peel.init();
     else if (levelName === State.BUBBLES) bubbles.init();
   }
 
   function finishLevel(score) {
     totalScore += score;
 
-    if (state === State.ALIGN) { alignScore = score; startLevel(State.PEEL); }
-    else if (state === State.PEEL) { peelScore = score; startLevel(State.BUBBLES); }
+    if (state === State.ALIGN) { alignScore = score; startLevel(State.BUBBLES); }
     else if (state === State.BUBBLES) { bubbleScore = score; finishGame(); }
 
     hudScore.textContent = totalScore + ' 分';
@@ -496,7 +394,7 @@
     if (!resultsEl) return;
     resultsEl.classList.remove('hidden');
 
-    const maxScore = 285;
+    const maxScore = 200;
     const pct = totalScore / maxScore;
     let grade, title;
     if (pct >= 0.9) { grade = 'S'; title = '完美无痕 · 贴膜仙人 ✨'; }
@@ -508,7 +406,7 @@
     document.getElementById('results-grade').textContent = grade;
     document.getElementById('results-title-text').textContent = title;
     document.getElementById('res-align').textContent = alignScore + ' 分';
-    document.getElementById('res-peel').textContent = peelScore + ' 分';
+    document.getElementById('res-peel').textContent = '--';
     document.getElementById('res-bubble').textContent = bubbleScore + ' 分';
     document.getElementById('res-total').textContent = totalScore + ' 分';
 
@@ -525,7 +423,7 @@
     const rect = canvas.getBoundingClientRect();
     const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
 
-    // Check confirm button for align level
+    // Check confirm button
     if (state === State.ALIGN && confirmBtn.visible &&
         ex >= confirmBtn.x && ex <= confirmBtn.x + confirmBtn.w &&
         ey >= confirmBtn.y && ey <= confirmBtn.y + confirmBtn.h) {
@@ -533,9 +431,18 @@
       return;
     }
 
+    // Check rotation buttons
+    if (state === State.ALIGN) {
+      const rbx1 = width/2 - 100, rbx2 = width/2 + 20, rby = height * 0.78;
+      if (ex >= rbx1 && ex <= rbx1 + 70 && ey >= rby && ey <= rby + 36) {
+        align.rotateSpeed = -2.5; return;
+      }
+      if (ex >= rbx2 && ex <= rbx2 + 70 && ey >= rby && ey <= rby + 36) {
+        align.rotateSpeed = 2.5; return;
+      }
+    }
+
     if (state === State.ALIGN) align.onPointerDown(ex, ey);
-    else if (state === State.PEEL) peel.onPointerDown(ey);
-    else if (state === State.BUBBLES) { /* handled in move */ }
   });
 
   canvas.addEventListener('pointermove', (e) => {
@@ -544,14 +451,12 @@
     const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
 
     if (state === State.ALIGN) align.onPointerMove(ex, ey);
-    else if (state === State.PEEL) peel.onPointerMove(ey);
     else if (state === State.BUBBLES) bubbles.onPointerMove(ex, ey);
   });
 
   canvas.addEventListener('pointerup', (e) => {
     e.preventDefault();
-    if (state === State.ALIGN) align.onPointerUp();
-    else if (state === State.PEEL) peel.onPointerUp();
+    if (state === State.ALIGN) { align.onPointerUp(); align.rotateSpeed = 0; }
   });
 
   // Rotate: mouse wheel or two-finger
@@ -619,11 +524,6 @@
         ctx.font = 'bold 1rem "Cinzel", serif';
         ctx.textAlign = 'center';
         ctx.fillText('确认对齐 ✔', width/2, by + bh/2 + 5);
-        break;
-      case State.PEEL:
-        peel.update(dt);
-        peel.draw(ctx, timestamp);
-        if (peel.done) finishLevel(peel.getScore());
         break;
       case State.BUBBLES:
         bubbles.update(dt);
