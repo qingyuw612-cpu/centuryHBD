@@ -25,15 +25,15 @@
   // ===========================================
   const BPM = 120;
   const BEAT_DURATION = 60 / BPM; // 0.5s per beat
-  const FALL_SPEED = 250;
-  const LOOKAHEAD = 4.5;  // spawn 4.5s ahead (covers screens up to 1125px)
+  const FALL_SPEED = 200;  // slower, easier to react
+  const LOOKAHEAD = 5.0;   // more lead time
   const HIT_Y_RATIO = 0.80;
-  const MISS_THRESHOLD = 0.20;
+  const MISS_THRESHOLD = 0.25;
 
-  // Judgment windows (seconds)
-  const PERFECT_WINDOW = 0.050;
-  const GOOD_WINDOW = 0.100;
-  const OK_WINDOW = 0.150;
+  // Judgment windows (seconds) — wider for better feel
+  const PERFECT_WINDOW = 0.060;
+  const GOOD_WINDOW = 0.120;
+  const OK_WINDOW = 0.180;
 
   // Track config: { key, label, color, sound }
   const TRACKS = [
@@ -196,7 +196,7 @@
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_H = 24;
+  const NOTE_H = 28;
 
   class Note {
     constructor(beat, trackId) {
@@ -329,9 +329,9 @@
       combo++;
       if (combo > maxCombo) maxCombo = combo;
       let mult = 1.0;
-      if (combo >= 40) mult = 2.0;
-      else if (combo >= 20) mult = 1.5;
-      else if (combo >= 8) mult = 1.2;
+      if (combo >= 30) mult = 2.0;
+      else if (combo >= 15) mult = 1.5;
+      else if (combo >= 5) mult = 1.2;
       score += Math.floor(baseScore * mult);
 
       // Play the appropriate drum sound
@@ -341,7 +341,7 @@
     }
 
     updateHUD();
-    showJudgment(judgment);
+    showJudgment(judgment, bestDelta);
     effects.push(new HitEffect(trackXs[trackId], hitY, judgment, TRACKS[trackId].color));
   }
 
@@ -361,11 +361,16 @@
     }
   }
 
-  function showJudgment(judgment) {
+  function showJudgment(judgment, delta) {
     if (!judgmentPopup) return;
     const t = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
     const cl = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
-    judgmentPopup.textContent = t[judgment];
+    let text = t[judgment];
+    // Add early/late hint
+    if (delta !== undefined && judgment !== 'perfect' && judgment !== 'miss') {
+      text += delta < 0 ? ' (早了)' : ' (晚了)';
+    }
+    judgmentPopup.textContent = text;
     judgmentPopup.style.color = cl[judgment];
     judgmentPopup.style.fontSize = judgment === 'perfect' ? '3rem' : '2.2rem';
     judgmentPopup.style.opacity = '1';
