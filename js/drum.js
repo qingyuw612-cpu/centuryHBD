@@ -17,6 +17,8 @@
   const countdownEl = document.getElementById('countdown');
   const judgmentPopup = document.getElementById('judgment-popup');
   const resultsEl = document.getElementById('results');
+  const storyDialog = document.getElementById('story-dialog');
+  const storyStart = document.getElementById('story-start');
 
   // ===========================================
   // Constants
@@ -633,5 +635,24 @@
 
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
+
+  // ===========================================
+  // Story Dialog
+  // ===========================================
+  if (storyStart) {
+    storyStart.addEventListener('click', () => {
+      if (storyDialog) storyDialog.classList.add('hidden');
+      SoundEngine._ensure(); // init audio context on user gesture
+    });
+    // Also allow clicking anywhere on the dialog
+    if (storyDialog) {
+      storyDialog.addEventListener('click', (e) => {
+        if (e.target === storyDialog) {
+          storyDialog.classList.add('hidden');
+          SoundEngine._ensure();
+        }
+      });
+    }
+  }
 
 })();

@@ -11,6 +11,15 @@
 <body>
   <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
 
+  <!-- Story Dialog -->
+  <div id="story-dialog">
+    <div class="story-card">
+      <div class="story-icon">🎂</div>
+      <p class="story-text">Century 的生日到了，<br>请你为他的生日歌伴奏吧！</p>
+      <button class="btn" id="story-start">开始演奏 🥁</button>
+    </div>
+  </div>
+
   <div id="game-container">
     <canvas id="drum-canvas"></canvas>
 
