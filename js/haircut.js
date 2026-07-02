@@ -54,9 +54,9 @@
   // Layout (computed in updateLayout)
   let width, height;
   let headX, headY;          // center of character's head
-  let hairTopY;              // where hair starts (scalp)
-  let hairBottomY;           // full length hair bottom (waist)
-  let hairCurrentBottom;     // current hair bottom (after cuts)
+  let hairTopY = 200;              // where hair starts (scalp)
+  let hairBottomY = 500;           // full length hair bottom (waist)
+  let hairCurrentBottom = 500;     // current hair bottom (after cuts)
   let targetY;               // target line position
   let targetHalfW;           // half-width of target zone in px
 
@@ -92,8 +92,8 @@
     headX = width / 2;
     headY = height * 0.22;
 
-    // Hair: from scalp down to waist area
-    hairTopY = headY + 25;
+    // Hair: from TOP of head (crown), flowing down to waist
+    hairTopY = headY - 30;
 
     // Initial full hair length: down to ~80% of screen
     hairBottomY = height * 0.78;
@@ -101,18 +101,18 @@
       hairCurrentBottom = hairBottomY;
     }
 
-    // Scissors range: from just below head to the full hair length
-    scissorMinY = hairTopY + 30;
+    // Scissors range: lower portion of hair (not cutting near scalp)
+    scissorMinY = headY + 30;
     scissorMaxY = hairBottomY - 15;
 
     if (state === State.IDLE || scissorY < scissorMinY || scissorY > scissorMaxY) {
       scissorY = (scissorMinY + scissorMaxY) / 2;
     }
 
-    // Target: somewhere in the lower-middle of the hair
+    // Target: lower portion of hair (where scissors move)
     const cfg = ROUND_CONFIG[currentRound] || ROUND_CONFIG[0];
     targetHalfW = cfg.targetHalfW;
-    targetY = hairTopY + (hairBottomY - hairTopY) * (0.55 + Math.random() * 0.2);
+    targetY = headY + 30 + (hairBottomY - headY - 30) * (0.5 + Math.random() * 0.3);
   }
 
   resize();
@@ -358,48 +358,41 @@
   }
 
   function drawHair(ctx, time) {
-    const cx = headX;
+    const bottomY = hairCurrentBottom || hairBottomY; // safety fallback
     const topY = hairTopY;
-    const bottomY = hairCurrentBottom;
-    const sway = Math.sin(time * 0.0015) * 2;
+    const cx = headX;
 
     if (bottomY <= topY + 5) return;
 
-    const hw = 50; // hair half-width
+    const hw = 50;
+    const sway = Math.sin(time * 0.0015) * 2;
 
-    // === Main hair block (from scalp down to current bottom) ===
+    // Main hair block
     const hairGrad = ctx.createLinearGradient(cx - hw, 0, cx + hw, 0);
     hairGrad.addColorStop(0, '#120a1e');
     hairGrad.addColorStop(0.35, '#1e1232');
     hairGrad.addColorStop(0.5, '#261840');
     hairGrad.addColorStop(0.65, '#1e1232');
     hairGrad.addColorStop(1, '#120a1e');
-
     ctx.fillStyle = hairGrad;
 
-    // Hair shape: from scalp, flowing down, slight taper
     ctx.beginPath();
-    // Left side of scalp
-    ctx.moveTo(cx - 30, topY);
-    // Left flow
+    ctx.moveTo(cx - 28, topY);
     ctx.bezierCurveTo(
-      cx - hw - 10, topY + (bottomY - topY) * 0.3,
-      cx - hw - 5 + sway, topY + (bottomY - topY) * 0.7,
-      cx - hw + 5 + sway, bottomY
+      cx - hw - 8, topY + (bottomY - topY) * 0.3,
+      cx - hw - 3 + sway, topY + (bottomY - topY) * 0.7,
+      cx - hw + 8 + sway, bottomY
     );
-    // Bottom edge (cut or natural)
-    ctx.lineTo(cx + hw - 5 - sway, bottomY);
-    // Right flow
+    ctx.lineTo(cx + hw - 8 - sway, bottomY);
     ctx.bezierCurveTo(
-      cx + hw + 5 - sway, topY + (bottomY - topY) * 0.7,
-      cx + hw + 10, topY + (bottomY - topY) * 0.3,
-      cx + 30, topY
+      cx + hw + 3 - sway, topY + (bottomY - topY) * 0.7,
+      cx + hw + 8, topY + (bottomY - topY) * 0.3,
+      cx + 28, topY
     );
     ctx.closePath();
     ctx.fill();
 
-    // Subtle outline
-    ctx.strokeStyle = 'rgba(60,40,90,0.25)';
+    ctx.strokeStyle = 'rgba(80,50,120,0.2)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
