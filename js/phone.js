@@ -150,32 +150,7 @@
       ctx.fillStyle = `rgba(240,215,140,${pulse})`;
       ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('拖拽移动 · 滚轮或按钮旋转', width/2, py + ph/2 + 50);
-
-      // Rotation buttons
-      const rotBtns = [
-        { x: width/2 - 100, y: height * 0.78, label: '↺ 左转', dir: -1 },
-        { x: width/2 + 20, y: height * 0.78, label: '↻ 右转', dir: 1 },
-      ];
-      rotBtns.forEach(b => {
-        ctx.fillStyle = 'rgba(212,168,83,0.7)';
-        ctx.beginPath();
-        const rr = 8;
-        ctx.moveTo(b.x + rr, b.y); ctx.lineTo(b.x + 70 - rr, b.y);
-        ctx.arcTo(b.x + 70, b.y, b.x + 70, b.y + rr, rr);
-        ctx.lineTo(b.x + 70, b.y + 36 - rr);
-        ctx.arcTo(b.x + 70, b.y + 36, b.x + 70 - rr, b.y + 36, rr);
-        ctx.lineTo(b.x + rr, b.y + 36);
-        ctx.arcTo(b.x, b.y + 36, b.x, b.y + 36 - rr, rr);
-        ctx.lineTo(b.x, b.y + rr);
-        ctx.arcTo(b.x, b.y, b.x + rr, b.y, rr);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#1a1a2e';
-        ctx.font = 'bold 0.85rem "Microsoft YaHei", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(b.label, b.x + 35, b.y + 24);
-      });
+      ctx.fillText('拖拽移动 · 滚轮或 Q/E 旋转', width/2, py + ph/2 + 50);
     },
 
     onPointerDown(ex, ey) {
@@ -234,7 +209,7 @@
     list: [],
     screenX: 0, screenY: 0, screenW: 0, screenH: 0,
     dragging: false,
-    totalGenerated: 8,
+    totalGenerated: 5,
     cleared: 0,
     startTime: 0,
 
@@ -338,8 +313,8 @@
         if (dist < b.r + 25) {
           // Push bubble away from finger (higher resistance)
           const nx = dx / dist, ny = dy / dist;
-          b.vx += nx * 180;
-          b.vy += ny * 180;
+          b.vx += nx * 100;
+          b.vy += ny * 100;
         }
       }
     },
@@ -431,17 +406,6 @@
       return;
     }
 
-    // Check rotation buttons
-    if (state === State.ALIGN) {
-      const rbx1 = width/2 - 100, rbx2 = width/2 + 20, rby = height * 0.78;
-      if (ex >= rbx1 && ex <= rbx1 + 70 && ey >= rby && ey <= rby + 36) {
-        align.rotateSpeed = -2.5; return;
-      }
-      if (ex >= rbx2 && ex <= rbx2 + 70 && ey >= rby && ey <= rby + 36) {
-        align.rotateSpeed = 2.5; return;
-      }
-    }
-
     if (state === State.ALIGN) align.onPointerDown(ex, ey);
   });
 
@@ -456,7 +420,7 @@
 
   canvas.addEventListener('pointerup', (e) => {
     e.preventDefault();
-    if (state === State.ALIGN) { align.onPointerUp(); align.rotateSpeed = 0; }
+    if (state === State.ALIGN) align.onPointerUp();
   });
 
   // Rotate: mouse wheel or two-finger
