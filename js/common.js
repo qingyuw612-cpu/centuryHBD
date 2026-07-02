@@ -182,6 +182,77 @@ const SoundEngine = {
     noise.stop(now + 0.18);
   },
 
+  /** Rhythm Master: 4 drum sounds */
+  playDrumSound(type) {
+    if (!this._ensure()) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+
+    switch (type) {
+      case 'kick': {
+        // Deep low thud
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.25);
+        break;
+      }
+      case 'snare': {
+        // Sharp crack with noise
+        const osc = ctx.createOscillator();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
+        const nBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+        const nd = nBuf.getChannelData(0);
+        for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource(); noise.buffer = nBuf;
+        const nf = ctx.createBiquadFilter(); nf.type = 'highpass'; nf.frequency.setValueAtTime(1000, now);
+        const og = ctx.createGain(); og.gain.setValueAtTime(0.4, now); og.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        const ng = ctx.createGain(); ng.gain.setValueAtTime(0.5, now); ng.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(og).connect(ctx.destination);
+        noise.connect(nf).connect(ng).connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.12);
+        noise.start(now); noise.stop(now + 0.12);
+        break;
+      }
+      case 'hihat': {
+        // Short high-frequency tsss
+        const nBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.06), ctx.sampleRate);
+        const nd = nBuf.getChannelData(0);
+        for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource(); noise.buffer = nBuf;
+        const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.setValueAtTime(5000, now);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        noise.connect(hp).connect(gain).connect(ctx.destination);
+        noise.start(now); noise.stop(now + 0.08);
+        break;
+      }
+      case 'crash': {
+        // Loud metallic crash
+        const nBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.3), ctx.sampleRate);
+        const nd = nBuf.getChannelData(0);
+        for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource(); noise.buffer = nBuf;
+        const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.setValueAtTime(3000, now); bp.Q.setValueAtTime(1, now);
+        const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.setValueAtTime(2000, now);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        noise.connect(bp).connect(hp).connect(gain).connect(ctx.destination);
+        noise.start(now); noise.stop(now + 0.35);
+        break;
+      }
+    }
+  },
+
   /** Phone: snap click */
   playSnap() {
     if (!this._ensure()) return;

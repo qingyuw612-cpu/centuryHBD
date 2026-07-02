@@ -1,6 +1,6 @@
 /* ============================================
    Century Birthday - Drum Game JS
-   Single Track, Red/Blue Notes
+   Rhythm Master Style - 4 Tracks
    ============================================ */
 
 (function() {
@@ -11,8 +11,6 @@
   // ===========================================
   const canvas = document.getElementById('drum-canvas');
   const ctx = canvas.getContext('2d');
-  const touchDon = document.getElementById('touch-don');
-  const touchKa = document.getElementById('touch-ka');
   const hudScore = document.getElementById('hud-score');
   const hudCombo = document.getElementById('hud-combo');
   const hudAccuracy = document.getElementById('hud-accuracy');
@@ -24,59 +22,74 @@
   // Constants
   // ===========================================
   const BPM = 120;
-  const BEAT_DURATION = 60 / BPM;
-  const SCROLL_SPEED = 280; // slower for easier play
-  const LOOKAHEAD = 2.5;
-  const HIT_X = 0.2;
+  const BEAT_DURATION = 60 / BPM; // 0.5s per beat
+  const FALL_SPEED = 320; // px per second (top to bottom)
+  const LOOKAHEAD = 2.5; // seconds ahead to spawn
+  const HIT_Y_RATIO = 0.82; // hit zone at 82% from top
   const MISS_THRESHOLD = 0.10;
 
-  // Wider judgment windows (seconds)
+  // Judgment windows (seconds)
   const PERFECT_WINDOW = 0.050;
   const GOOD_WINDOW = 0.100;
   const OK_WINDOW = 0.150;
 
+  // Track config: { key, label, color, sound }
+  const TRACKS = [
+    { id: 0, key: 'd', label: '底鼓', color: '#ff6b5b', glowColor: 'rgba(255,100,80,0.6)', sound: 'kick' },
+    { id: 1, key: 'f', label: '军鼓', color: '#f0d78c', glowColor: 'rgba(240,215,140,0.6)', sound: 'snare' },
+    { id: 2, key: 'j', label: '踩镲', color: '#7eb8da', glowColor: 'rgba(126,184,218,0.6)', sound: 'hihat' },
+    { id: 3, key: 'k', label: '吊镲', color: '#b39dda', glowColor: 'rgba(179,157,218,0.6)', sound: 'crash' },
+  ];
+
   // ===========================================
-  // Beatmap - Happy Birthday (simplified, single track)
-  // type: 'don'(red→F/left touch) | 'ka'(blue→J/right touch)
+  // Drum Beatmap - Happy Birthday accompaniment
+  // beat 0-31, 4/4 time, 120 BPM
+  // A proper drum pattern:
+  //   Kick on beats 1, 3 | Snare on beats 2, 4
+  //   Hi-hat eighth notes | Crash on phrase endings
   // ===========================================
   function generateChart() {
     const c = [];
 
-    // Phrase 1: Happy birthday to you (beats 0-7)
-    c.push({ beat: 0, type: 'don' });  // Hap-
-    c.push({ beat: 1, type: 'don' });  // -py
-    c.push({ beat: 2, type: 'ka'  });  // Birth-
-    c.push({ beat: 3, type: 'don' });  // -day
-    c.push({ beat: 4, type: 'ka'  });  // to
-    c.push({ beat: 5, type: 'don' });  // you
-    // beat 6-7 rest
+    // Helper: add note at beat for a track
+    function n(beat, trackId) { c.push({ beat, track: trackId }); }
 
-    // Phrase 2: Happy birthday to you (beats 8-15)
-    c.push({ beat: 8,  type: 'don' });
-    c.push({ beat: 9,  type: 'don' });
-    c.push({ beat: 10, type: 'ka'  });
-    c.push({ beat: 11, type: 'don' });
-    c.push({ beat: 12, type: 'ka'  });
-    c.push({ beat: 13, type: 'don' });
-    // beat 14-15 rest
+    // === Phrase 1 (beats 0-7): "Happy birthday to you" ===
+    // Kick on 1 & 3
+    n(0, 0); n(2, 0); n(4, 0); n(6, 0);
+    // Snare on 2 & 4
+    n(1, 1); n(3, 1); n(5, 1);
+    // Hi-hat eighth notes
+    for (let b = 0; b < 7; b += 0.5) n(b, 2);
+    // Crash on phrase end
+    n(5.5, 3);
 
-    // Phrase 3: Happy birthday dear Century (beats 16-23)
-    c.push({ beat: 16, type: 'don' });
-    c.push({ beat: 17, type: 'don' });
-    c.push({ beat: 18, type: 'ka'  });  // high note
-    c.push({ beat: 19, type: 'ka'  });
-    c.push({ beat: 20, type: 'don' });
-    c.push({ beat: 21, type: 'don' });
-    // beat 22-23 rest
+    // === Phrase 2 (beats 8-15): "Happy birthday to you" ===
+    n(8, 0); n(10, 0); n(12, 0); n(14, 0);
+    n(9, 1); n(11, 1); n(13, 1);
+    for (let b = 8; b < 15; b += 0.5) n(b, 2);
+    n(13.5, 3);
 
-    // Phrase 4: Happy birthday to you (beats 24-31)
-    c.push({ beat: 24, type: 'ka'  });
-    c.push({ beat: 25, type: 'ka'  });
-    c.push({ beat: 26, type: 'don' });
-    c.push({ beat: 27, type: 'don' });
-    c.push({ beat: 28, type: 'ka'  });
-    c.push({ beat: 29, type: 'don' });  // final note
-    // beat 30-31 rest (hold)
+    // === Phrase 3 (beats 16-23): "Happy birthday dear Century" ===
+    // Slightly different pattern - more emphasis
+    n(16, 0); n(18, 0); n(20, 0); n(22, 0);
+    n(17, 1); n(19, 1); n(21, 1);
+    // Hi-hat with some variation
+    for (let b = 16; b < 23; b += 0.5) {
+      if (b === 19.5 || b === 20.5) continue; // small rests
+      n(b, 2);
+    }
+    // Crash accents
+    n(18.5, 3);
+    n(21.5, 3);
+
+    // === Phrase 4 (beats 24-31): "Happy birthday to you" (final) ===
+    n(24, 0); n(26, 0); n(28, 0); n(30, 0);
+    n(25, 1); n(27, 1); n(29, 1);
+    for (let b = 24; b < 31; b += 0.5) n(b, 2);
+    // Final crash
+    n(29, 3);
+    n(29.5, 3);
 
     return c;
   }
@@ -86,38 +99,21 @@
   const TOTAL_DURATION = (lastBeat + 3) * BEAT_DURATION;
 
   // ===========================================
-  // Melody Player - Happy Birthday backing track
+  // Melody Player
   // ===========================================
-  // Frequencies (Hz): C4=262, D4=294, E4=330, F4=349, G4=392, A4=440, B4=494, C5=523, D5=587, E5=659, F5=698, G5=784
   const MELODY_NOTES = [
-    // Phrase 1: Happy birthday to you
-    { beat: 0, freq: 392, dur: 0.45 },  // G4
-    { beat: 1, freq: 392, dur: 0.45 },  // G4
-    { beat: 2, freq: 440, dur: 0.45 },  // A4
-    { beat: 3, freq: 392, dur: 0.45 },  // G4
-    { beat: 4, freq: 523, dur: 0.45 },  // C5
-    { beat: 5, freq: 494, dur: 0.9 },   // B4 (longer)
-    // Phrase 2: Happy birthday to you
-    { beat: 8,  freq: 392, dur: 0.45 },
-    { beat: 9,  freq: 392, dur: 0.45 },
-    { beat: 10, freq: 440, dur: 0.45 },
-    { beat: 11, freq: 392, dur: 0.45 },
-    { beat: 12, freq: 587, dur: 0.45 },  // D5
-    { beat: 13, freq: 523, dur: 0.9 },   // C5
-    // Phrase 3: Happy birthday dear Century
-    { beat: 16, freq: 392, dur: 0.45 },
-    { beat: 17, freq: 392, dur: 0.45 },
-    { beat: 18, freq: 784, dur: 0.45 },  // G5 (high!)
-    { beat: 19, freq: 659, dur: 0.45 },  // E5
-    { beat: 20, freq: 523, dur: 0.45 },
-    { beat: 21, freq: 494, dur: 0.9 },
-    // Phrase 4: Happy birthday to you
-    { beat: 24, freq: 698, dur: 0.45 },  // F5
-    { beat: 25, freq: 698, dur: 0.45 },
-    { beat: 26, freq: 659, dur: 0.45 },  // E5
-    { beat: 27, freq: 523, dur: 0.45 },
-    { beat: 28, freq: 587, dur: 0.45 },  // D5
-    { beat: 29, freq: 523, dur: 1.2 },   // C5 (final, held)
+    { beat: 0, freq: 392, dur: 0.45 }, { beat: 1, freq: 392, dur: 0.45 },
+    { beat: 2, freq: 440, dur: 0.45 }, { beat: 3, freq: 392, dur: 0.45 },
+    { beat: 4, freq: 523, dur: 0.45 }, { beat: 5, freq: 494, dur: 0.9 },
+    { beat: 8, freq: 392, dur: 0.45 }, { beat: 9, freq: 392, dur: 0.45 },
+    { beat: 10, freq: 440, dur: 0.45 }, { beat: 11, freq: 392, dur: 0.45 },
+    { beat: 12, freq: 587, dur: 0.45 }, { beat: 13, freq: 523, dur: 0.9 },
+    { beat: 16, freq: 392, dur: 0.45 }, { beat: 17, freq: 392, dur: 0.45 },
+    { beat: 18, freq: 784, dur: 0.45 }, { beat: 19, freq: 659, dur: 0.45 },
+    { beat: 20, freq: 523, dur: 0.45 }, { beat: 21, freq: 494, dur: 0.9 },
+    { beat: 24, freq: 698, dur: 0.45 }, { beat: 25, freq: 698, dur: 0.45 },
+    { beat: 26, freq: 659, dur: 0.45 }, { beat: 27, freq: 523, dur: 0.45 },
+    { beat: 28, freq: 587, dur: 0.45 }, { beat: 29, freq: 523, dur: 1.2 },
   ];
 
   let melodyNodes = [];
@@ -133,24 +129,21 @@
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(mn.freq, t);
-
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.08, t + 0.03);    // soft attack
-      gain.gain.setValueAtTime(0.08, t + mn.dur * 0.7);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + mn.dur); // decay
-
+      gain.gain.linearRampToValueAtTime(0.07, t + 0.03);
+      gain.gain.setValueAtTime(0.07, t + mn.dur * 0.6);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + mn.dur);
       osc.connect(gain).connect(ctx.destination);
       osc.start(t);
       osc.stop(t + mn.dur + 0.1);
-
       melodyNodes.push(osc, gain);
     }
   }
 
   function stopMelody() {
     for (const node of melodyNodes) {
-      try { node.stop(); } catch(e) { /* already stopped */ }
+      try { node.stop(); } catch(e) {}
     }
     melodyNodes = [];
   }
@@ -164,23 +157,16 @@
   let effects = [];
   let nextNoteIdx = 0;
 
-  let score = 0;
-  let combo = 0;
-  let maxCombo = 0;
-  let totalHits = 0;
-  let perfects = 0, goods = 0, oks = 0, misses = 0;
+  let score = 0, combo = 0, maxCombo = 0;
+  let totalHits = 0, perfects = 0, goods = 0, oks = 0, misses = 0;
 
-  let startTime = 0;
-  let elapsedTime = 0;
+  let startTime = 0, elapsedTime = 0;
   let animId = null;
-
   let width, height;
-  let trackY, hitLineX;
-  let drumShake = 0; // screen shake on hit
+  let hitY, trackXs = [];
+  let trackW = 0;
 
-  // Countdown
-  let countdownValue = 0;
-  let countdownTimer = 0;
+  let countdownValue = 0, countdownTimer = 0;
 
   // ===========================================
   // Canvas Setup
@@ -198,76 +184,80 @@
   }
 
   function updateLayout() {
-    hitLineX = width * HIT_X;
-    trackY = height * 0.52;
+    hitY = height * HIT_Y_RATIO;
+    trackW = Math.min(80, width * 0.16);
+    const totalW = trackW * 4;
+    const startX = (width - totalW) / 2;
+    trackXs = [
+      startX + trackW * 0.5,
+      startX + trackW * 1.5,
+      startX + trackW * 2.5,
+      startX + trackW * 3.5,
+    ];
   }
 
   resize();
   updateLayout();
-
-  window.addEventListener('resize', () => {
-    resize();
-    updateLayout();
-  });
+  window.addEventListener('resize', () => { resize(); updateLayout(); });
 
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_RADIUS = 32;
+  const NOTE_H = 18;
 
   class Note {
-    constructor(beat, type) {
+    constructor(beat, trackId) {
       this.time = (beat + 1) * BEAT_DURATION;
-      this.type = type; // 'don' (red) or 'ka' (blue)
-      this.x = 0;
-      this.y = trackY;
+      this.trackId = trackId;
+      this.track = TRACKS[trackId];
+      this.y = 0;
       this.hit = false;
       this.missed = false;
     }
 
     update(et) {
       const dt = this.time - et;
-      this.x = hitLineX + dt * SCROLL_SPEED;
+      this.y = hitY - dt * FALL_SPEED; // negative dt = above hit zone
     }
 
     draw(ctx) {
       if (this.hit || this.missed) return;
-      if (this.x < -60 || this.x > width + 60) return;
+      if (this.y < -40 || this.y > height + 40) return;
 
-      const isRed = this.type === 'don';
+      const cx = trackXs[this.trackId];
+      const cy = this.y;
 
       ctx.save();
 
       // Glow
-      const glowGrad = ctx.createRadialGradient(this.x, this.y, NOTE_RADIUS * 0.5, this.x, this.y, NOTE_RADIUS * 1.4);
-      glowGrad.addColorStop(0, isRed ? 'rgba(255,100,70,0.5)' : 'rgba(70,140,255,0.5)');
+      const glowGrad = ctx.createRadialGradient(cx, cy, NOTE_H * 0.3, cx, cy, NOTE_H * 2);
+      glowGrad.addColorStop(0, this.track.glowColor);
       glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, NOTE_RADIUS * 1.4, 0, Math.PI * 2);
+      ctx.arc(cx, cy, NOTE_H * 2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Main circle
-      const bodyGrad = ctx.createRadialGradient(this.x - 6, this.y - 6, NOTE_RADIUS * 0.1, this.x, this.y, NOTE_RADIUS);
-      bodyGrad.addColorStop(0, isRed ? '#ff6b5b' : '#6ba0ff');
-      bodyGrad.addColorStop(0.6, isRed ? '#d04030' : '#3060d0');
-      bodyGrad.addColorStop(1, isRed ? '#902020' : '#204090');
-      ctx.fillStyle = bodyGrad;
+      // Note bar (rounded rect)
+      const barW = trackW * 0.75;
+      const bx = cx - barW / 2, by = cy - NOTE_H / 2;
+      const br = 6;
+      ctx.fillStyle = this.track.color;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, NOTE_RADIUS, 0, Math.PI * 2);
+      ctx.moveTo(bx + br, by);
+      ctx.lineTo(bx + barW - br, by);
+      ctx.arcTo(bx + barW, by, bx + barW, by + br, br);
+      ctx.lineTo(bx + barW, by + NOTE_H - br);
+      ctx.arcTo(bx + barW, by + NOTE_H, bx + barW - br, by + NOTE_H, br);
+      ctx.lineTo(bx + br, by + NOTE_H);
+      ctx.arcTo(bx, by + NOTE_H, bx, by + NOTE_H - br, br);
+      ctx.lineTo(bx, by + br);
+      ctx.arcTo(bx, by, bx + br, by, br);
+      ctx.closePath();
       ctx.fill();
-
-      // Border
-      ctx.strokeStyle = isRed ? '#ffaaa0' : '#a0c0ff';
-      ctx.lineWidth = 3;
       ctx.stroke();
-
-      // Label
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(isRed ? '咚' : '咔', this.x, this.y);
 
       ctx.restore();
     }
@@ -277,12 +267,12 @@
   // Hit Effect
   // ===========================================
   class HitEffect {
-    constructor(x, y, judgment) {
-      this.x = x;
-      this.y = y;
+    constructor(x, y, judgment, color) {
+      this.x = x; this.y = y;
       this.judgment = judgment;
+      this.color = color;
       this.age = 0;
-      this.maxAge = 0.6;
+      this.maxAge = 0.55;
       this.done = false;
     }
 
@@ -292,86 +282,52 @@
     }
 
     draw(ctx) {
-      const progress = this.age / this.maxAge;
-      const alpha = 1 - progress;
-
+      const p = this.age / this.maxAge;
+      const alpha = 1 - p;
       ctx.save();
       ctx.globalAlpha = alpha;
-
-      // Expanding ring
-      const ringColors = {
-        perfect: '#f0d78c',
-        good: '#7eb8da',
-        ok: '#b39dda',
-        miss: '#db5a5a'
-      };
-
-      ctx.strokeStyle = ringColors[this.judgment];
-      ctx.lineWidth = 4 + (1 - progress) * 4;
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = 3 + (1 - p) * 3;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, NOTE_RADIUS + progress * 50, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, NOTE_H + p * 45, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Judgment text (big!)
       const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
-      const fontSize = 28 + (1 - progress) * 20;
-      ctx.font = `bold ${fontSize}px "Cinzel", serif`;
-      ctx.fillStyle = ringColors[this.judgment];
+      const fz = 24 + (1 - p) * 16;
+      ctx.font = `bold ${fz}px "Cinzel", serif`;
+      ctx.fillStyle = this.color;
       ctx.textAlign = 'center';
-      ctx.fillText(texts[this.judgment], this.x, this.y - NOTE_RADIUS - 20 - progress * 30);
-
+      ctx.fillText(texts[this.judgment], this.x, this.y - NOTE_H - 16 - p * 25);
       ctx.restore();
     }
   }
 
   // ===========================================
-  // Input Handling
+  // Input
   // ===========================================
-  function hitDon() {
+  function hitTrack(trackId) {
     if (state !== State.PLAYING) return;
-    judgeHit('don');
-    flashZone(touchDon);
+    judgeHit(trackId);
   }
 
-  function hitKa() {
-    if (state !== State.PLAYING) return;
-    judgeHit('ka');
-    flashZone(touchKa);
-  }
-
-  function flashZone(el) {
-    if (!el) return;
-    el.classList.add('flash');
-    setTimeout(() => el.classList.remove('flash'), 100);
-  }
-
-  function judgeHit(type) {
+  function judgeHit(trackId) {
     let bestNote = null;
     let bestDelta = Infinity;
 
     for (const note of notes) {
       if (note.hit || note.missed) continue;
-      if (note.type !== type) continue;
-
+      if (note.trackId !== trackId) continue;
       const delta = Math.abs(note.time - elapsedTime);
-      if (delta < bestDelta) {
-        bestDelta = delta;
-        bestNote = note;
-      }
+      if (delta < bestDelta) { bestDelta = delta; bestNote = note; }
     }
 
     if (!bestNote) return;
 
     let judgment, baseScore;
-    if (bestDelta <= PERFECT_WINDOW) {
-      judgment = 'perfect'; baseScore = 300; perfects++;
-    } else if (bestDelta <= GOOD_WINDOW) {
-      judgment = 'good'; baseScore = 200; goods++;
-    } else if (bestDelta <= OK_WINDOW) {
-      judgment = 'ok'; baseScore = 100; oks++;
-    } else {
-      judgment = 'miss'; baseScore = 0; misses++;
-    }
+    if (bestDelta <= PERFECT_WINDOW)      { judgment = 'perfect'; baseScore = 300; perfects++; }
+    else if (bestDelta <= GOOD_WINDOW)    { judgment = 'good';    baseScore = 200; goods++; }
+    else if (bestDelta <= OK_WINDOW)      { judgment = 'ok';      baseScore = 100; oks++; }
+    else                                  { judgment = 'miss';    baseScore = 0;   misses++; }
 
     bestNote.hit = true;
     totalHits++;
@@ -385,16 +341,15 @@
       else if (combo >= 8) mult = 1.2;
       score += Math.floor(baseScore * mult);
 
-      SoundEngine.playDrum();
-
-      drumShake = 0.08;
+      // Play the appropriate drum sound
+      SoundEngine.playDrumSound(bestNote.track.sound);
     } else {
       combo = 0;
     }
 
     updateHUD();
     showJudgment(judgment);
-    effects.push(new HitEffect(hitLineX, trackY, judgment));
+    effects.push(new HitEffect(trackXs[trackId], hitY, judgment, TRACKS[trackId].color));
   }
 
   // ===========================================
@@ -402,40 +357,32 @@
   // ===========================================
   function updateHUD() {
     hudScore.textContent = score.toLocaleString();
-
     if (combo >= 4) {
       hudCombo.textContent = combo + ' 连击';
       hudCombo.classList.add('active');
     } else {
       hudCombo.classList.remove('active');
     }
-
     if (totalHits > 0) {
-      const acc = ((perfects * 100 + goods * 80 + oks * 50) / (totalHits * 100) * 100).toFixed(0);
-      hudAccuracy.textContent = acc + '%';
+      hudAccuracy.textContent = ((perfects * 100 + goods * 80 + oks * 50) / (totalHits * 100) * 100).toFixed(0) + '%';
     }
   }
 
   function showJudgment(judgment) {
     if (!judgmentPopup) return;
-    const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
-    const colors = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
-    judgmentPopup.textContent = texts[judgment];
-    judgmentPopup.style.color = colors[judgment];
+    const t = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
+    const cl = { perfect: '#f0d78c', good: '#7eb8da', ok: '#b39dda', miss: '#db5a5a' };
+    judgmentPopup.textContent = t[judgment];
+    judgmentPopup.style.color = cl[judgment];
     judgmentPopup.style.fontSize = judgment === 'perfect' ? '3rem' : '2.2rem';
     judgmentPopup.style.opacity = '1';
     judgmentPopup.style.transform = 'translate(-50%, -50%) scale(1.3)';
-
     setTimeout(() => {
       judgmentPopup.style.transition = 'all 0.5s ease-out';
       judgmentPopup.style.opacity = '0';
       judgmentPopup.style.transform = 'translate(-50%, -50%) scale(0.6)';
     }, 80);
-
-    setTimeout(() => {
-      judgmentPopup.style.transition = 'none';
-      judgmentPopup.style.fontSize = '2rem';
-    }, 600);
+    setTimeout(() => { judgmentPopup.style.transition = 'none'; }, 600);
   }
 
   // ===========================================
@@ -443,26 +390,38 @@
   // ===========================================
   document.addEventListener('keydown', (e) => {
     if (state === State.IDLE) { startGame(); return; }
-    if (e.key === 'f' || e.key === 'F' || e.key === 'd' || e.key === 'D') { hitDon(); e.preventDefault(); }
-    if (e.key === 'j' || e.key === 'J' || e.key === 'k' || e.key === 'K') { hitKa(); e.preventDefault(); }
+    const key = e.key.toLowerCase();
+    for (const tr of TRACKS) {
+      if (key === tr.key) { hitTrack(tr.id); e.preventDefault(); return; }
+    }
     if (e.key === ' ' && state === State.ENDED) { restartGame(); e.preventDefault(); }
   });
 
   // ===========================================
-  // Touch
+  // Touch Zones
   // ===========================================
-  if (touchDon) {
-    touchDon.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      if (state === State.IDLE) startGame(); else hitDon();
-    });
-  }
-  if (touchKa) {
-    touchKa.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      if (state === State.IDLE) startGame(); else hitKa();
-    });
-  }
+  const touchZones = [
+    document.getElementById('touch-don'),
+    document.getElementById('touch-ka'),
+  ];
+
+  // Reuse touch divs - map to 4 tracks on mobile
+  // touch-don covers left half (tracks 0,1), touch-ka covers right half (tracks 2,3)
+  // But we need 4 touch zones. Let's use the canvas for 4-zone touch.
+  canvas.addEventListener('pointerdown', (e) => {
+    if (state === State.IDLE) { startGame(); return; }
+    if (state !== State.PLAYING) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    // Find which track was tapped
+    let bestDist = Infinity, bestTrack = 0;
+    for (let i = 0; i < 4; i++) {
+      const dist = Math.abs(x - trackXs[i]);
+      if (dist < bestDist) { bestDist = dist; bestTrack = i; }
+    }
+    if (bestDist < trackW) hitTrack(bestTrack);
+    e.preventDefault();
+  });
 
   // ===========================================
   // Game Flow
@@ -473,15 +432,14 @@
     countdownValue = 3;
     countdownTimer = 0;
     nextNoteIdx = 0;
-    notes = [];
-    effects = [];
+    notes = []; effects = [];
     score = 0; combo = 0; maxCombo = 0;
     totalHits = 0; perfects = 0; goods = 0; oks = 0; misses = 0;
-    drumShake = 0;
     hudScore.textContent = '0';
     hudCombo.classList.remove('active');
     hudAccuracy.textContent = '--%';
     if (resultsEl) resultsEl.classList.add('hidden');
+    stopMelody();
 
     if (countdownEl) {
       countdownEl.classList.add('show');
@@ -489,9 +447,6 @@
     }
 
     if (!animId) animId = requestAnimationFrame(gameLoop);
-
-    // Start melody backing track
-    startMelody();
   }
 
   function restartGame() {
@@ -499,7 +454,6 @@
     notes = []; effects = []; nextNoteIdx = 0;
     score = 0; combo = 0; maxCombo = 0;
     totalHits = 0; perfects = 0; goods = 0; oks = 0; misses = 0;
-    drumShake = 0;
     stopMelody();
     hudScore.textContent = '0';
     hudCombo.classList.remove('active');
@@ -518,14 +472,11 @@
   function showResults() {
     if (!resultsEl) return;
     resultsEl.classList.remove('hidden');
-
     const totalNotes = chart.length;
     const accNum = totalHits > 0
-      ? (perfects * 100 + goods * 80 + oks * 50) / (totalNotes * 100) * 100
-      : 0;
-
+      ? (perfects * 100 + goods * 80 + oks * 50) / (totalNotes * 100) * 100 : 0;
     let grade;
-    if (accNum >= 95 && misses <= 1) grade = 'S';
+    if (accNum >= 95 && misses <= 2) grade = 'S';
     else if (accNum >= 85) grade = 'A';
     else if (accNum >= 70) grade = 'B';
     else if (accNum >= 50) grade = 'C';
@@ -543,69 +494,7 @@
     STORE.setBool('drum_complete', true);
     STORE.set('drum_score', score.toString());
     STORE.set('drum_grade', grade);
-
     SoundEngine.playChime();
-  }
-
-  // ===========================================
-  // Draw Drum
-  // ===========================================
-  function drawDrum(ctx) {
-    const cx = hitLineX;
-    const cy = trackY;
-    const r = NOTE_RADIUS + 8;
-
-    // Apply drum shake
-    let shakeX = 0, shakeY = 0;
-    if (drumShake > 0) {
-      shakeX = (Math.random() - 0.5) * drumShake * 30;
-      shakeY = (Math.random() - 0.5) * drumShake * 30;
-    }
-    const dx = cx + shakeX;
-    const dy = cy + shakeY;
-
-    // Combo glow
-    if (combo >= 8) {
-      const glowAlpha = Math.min(0.6, combo * 0.02);
-      const glowGrad = ctx.createRadialGradient(dx, dy, r * 0.6, dx, dy, r * 2.5);
-      glowGrad.addColorStop(0, `rgba(240,215,140,${glowAlpha})`);
-      glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = glowGrad;
-      ctx.beginPath();
-      ctx.arc(dx, dy, r * 2.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Outer ring
-    ctx.strokeStyle = '#d4a853';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(dx, dy, r, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Inner drum face
-    const faceGrad = ctx.createRadialGradient(dx - 3, dy - 3, r * 0.1, dx, dy, r * 0.9);
-    faceGrad.addColorStop(0, '#f5f0e8');
-    faceGrad.addColorStop(1, '#d8d0c0');
-    ctx.fillStyle = faceGrad;
-    ctx.beginPath();
-    ctx.arc(dx, dy, r - 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Cross pattern (snare)
-    ctx.strokeStyle = 'rgba(200,190,170,0.4)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(dx - r + 12, dy); ctx.lineTo(dx + r - 12, dy);
-    ctx.moveTo(dx, dy - r + 12); ctx.lineTo(dx, dy + r - 12);
-    ctx.stroke();
-
-    // Labels
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.font = 'bold 12px "Microsoft YaHei", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('F 咚', dx, dy - r - 22);
-    ctx.fillText('J 咔', dx, dy - r - 6);
   }
 
   // ===========================================
@@ -613,33 +502,64 @@
   // ===========================================
   function gameLoop(timestamp) {
     animId = requestAnimationFrame(gameLoop);
-
     const dt = Math.min(0.05, (timestamp - (gameLoop._lastTs || timestamp)) / 1000);
     gameLoop._lastTs = timestamp;
 
-    // Update shake
-    if (drumShake > 0) drumShake = Math.max(0, drumShake - dt);
-
-    // --- Clear & Background ---
+    // --- Draw ---
     ctx.clearRect(0, 0, width, height);
 
+    // Background
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-    bgGrad.addColorStop(0, '#0c0a20');
-    bgGrad.addColorStop(0.5, '#100d28');
-    bgGrad.addColorStop(1, '#0a0818');
+    bgGrad.addColorStop(0, '#080818');
+    bgGrad.addColorStop(0.5, '#0e0c24');
+    bgGrad.addColorStop(1, '#0c0a1e');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Subtle track lane
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, trackY);
-    ctx.lineTo(width, trackY);
-    ctx.stroke();
+    // Track lanes
+    for (let i = 0; i < 4; i++) {
+      const tx = trackXs[i];
+      const tr = TRACKS[i];
+      // Lane background
+      ctx.fillStyle = 'rgba(255,255,255,0.015)';
+      ctx.fillRect(tx - trackW / 2, 0, trackW, height);
 
-    // --- Draw Drum ---
-    drawDrum(ctx);
+      // Lane borders
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 20]);
+      ctx.beginPath();
+      ctx.moveTo(tx - trackW / 2, 0);
+      ctx.lineTo(tx - trackW / 2, height);
+      ctx.moveTo(tx + trackW / 2, 0);
+      ctx.lineTo(tx + trackW / 2, height);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Track label at top
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.font = `bold ${Math.min(13, trackW * 0.18)}px "Microsoft YaHei", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText(tr.label, tx, 30);
+
+      // Key hint
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.font = `${Math.min(11, trackW * 0.15)}px "Cinzel", serif`;
+      ctx.fillText(tr.key.toUpperCase(), tx, 48);
+
+      // Hit zone indicator
+      const hzAlpha = 0.15 + Math.sin(timestamp * 0.003) * 0.05;
+      ctx.fillStyle = tr.glowColor.replace('0.6', hzAlpha.toString());
+      ctx.fillRect(tx - trackW / 2 + 2, hitY - NOTE_H, trackW - 4, NOTE_H * 2);
+
+      // Hit line
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tx - trackW / 2 + 4, hitY);
+      ctx.lineTo(tx + trackW / 2 - 4, hitY);
+      ctx.stroke();
+    }
 
     // --- State Machine ---
     switch (state) {
@@ -651,6 +571,7 @@
           if (countdownValue <= 0) {
             state = State.PLAYING;
             startTime = performance.now();
+            startMelody(); // <-- melody starts HERE, when playing begins
             if (countdownEl) countdownEl.classList.remove('show');
           } else {
             if (countdownEl) {
@@ -665,62 +586,57 @@
       case State.PLAYING:
         elapsedTime = (performance.now() - startTime) / 1000;
 
-        // Spawn notes
+        // Spawn
         while (nextNoteIdx < chart.length &&
                (chart[nextNoteIdx].beat + 1) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
-          notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].type));
+          notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].track));
           nextNoteIdx++;
         }
 
-        // Update notes & miss check
+        // Update & miss check
         for (const note of notes) {
           note.update(elapsedTime);
-          if (!note.hit && !note.missed && note.x < hitLineX - MISS_THRESHOLD * SCROLL_SPEED) {
+          if (!note.hit && !note.missed && note.y > hitY + MISS_THRESHOLD * FALL_SPEED) {
             note.missed = true;
             misses++;
             combo = 0;
             totalHits++;
             updateHUD();
             showJudgment('miss');
-            effects.push(new HitEffect(hitLineX, trackY, 'miss'));
+            effects.push(new HitEffect(trackXs[note.trackId], hitY, 'miss', TRACKS[note.trackId].color));
           }
         }
 
         // Draw notes
         for (const note of notes) note.draw(ctx);
 
-        // Check end
         if (elapsedTime >= TOTAL_DURATION) endGame();
         break;
 
       case State.ENDED:
         for (const note of notes) {
-          if (!note.hit && !note.missed) {
-            note.update(elapsedTime || TOTAL_DURATION);
-            note.draw(ctx);
-          }
+          if (!note.hit && !note.missed) { note.update(elapsedTime || TOTAL_DURATION); note.draw(ctx); }
         }
         break;
     }
 
-    // --- Effects ---
+    // Effects
     for (let i = effects.length - 1; i >= 0; i--) {
       effects[i].update(dt);
       effects[i].draw(ctx);
       if (effects[i].done) effects.splice(i, 1);
     }
 
-    // --- Idle prompt ---
+    // Idle prompt
     if (state === State.IDLE) {
       const alpha = 0.5 + Math.sin(timestamp * 0.003) * 0.3;
       ctx.fillStyle = `rgba(240,215,140,${alpha})`;
       ctx.font = '1.1rem "Cinzel", serif';
       ctx.textAlign = 'center';
-      ctx.fillText('按 F / J 或点击屏幕开始', width * 0.5, height * 0.85);
+      ctx.fillText('按 D F J K 或点击轨道开始', width * 0.5, height * 0.92);
     }
   }
 
-  // Start
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
 
