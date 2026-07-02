@@ -3,87 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>📱 修手机 - Century</title>
+  <title>📱 贴膜游戏 - Century</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/phone.css">
 </head>
 <body>
-  <!-- Back button -->
   <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
 
+  <!-- Story Dialog -->
+  <div id="story-dialog">
+    <div class="story-card">
+      <div class="story-icon">📱</div>
+      <p class="story-text">Century 的手机膜摔碎了，<br>贴心的你决定帮他贴一张新膜！</p>
+      <button class="btn" id="story-start">开始贴膜 ✨</button>
+    </div>
+  </div>
+
   <div id="game-container">
-    <!-- Phone outline area -->
-    <div id="phone-outline">
-      <div class="phone-frame">
-        <!-- Slots for each part -->
-        <div class="part-slot" id="slot-screen" data-part="screen"></div>
-        <div class="part-slot" id="slot-battery" data-part="battery"></div>
-        <div class="part-slot" id="slot-camera" data-part="camera"></div>
-        <div class="part-slot" id="slot-backcover" data-part="backcover"></div>
-        <div class="part-slot" id="slot-volbtn" data-part="volbtn"></div>
-        <div class="part-slot" id="slot-powerbtn" data-part="powerbtn"></div>
-        <div class="part-slot" id="slot-charge" data-part="charge"></div>
-      </div>
+    <canvas id="phone-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="hud-level"></div>
+      <div id="hud-score">0 分</div>
     </div>
 
-    <!-- Parts tray -->
-    <div id="parts-tray">
-      <div class="part" id="part-screen" data-part="screen">
-        <span class="part-icon">📱</span>
-        <span class="part-label">屏幕</span>
-      </div>
-      <div class="part" id="part-battery" data-part="battery">
-        <span class="part-icon">🔋</span>
-        <span class="part-label">电池</span>
-      </div>
-      <div class="part" id="part-camera" data-part="camera">
-        <span class="part-icon">📷</span>
-        <span class="part-label">摄像头</span>
-      </div>
-      <div class="part" id="part-backcover" data-part="backcover">
-        <span class="part-icon">📦</span>
-        <span class="part-label">后盖</span>
-      </div>
-      <div class="part" id="part-volbtn" data-part="volbtn">
-        <span class="part-icon">🎚️</span>
-        <span class="part-label">音量键</span>
-      </div>
-      <div class="part" id="part-powerbtn" data-part="powerbtn">
-        <span class="part-icon">⏻</span>
-        <span class="part-label">电源键</span>
-      </div>
-      <div class="part" id="part-charge" data-part="charge">
-        <span class="part-icon">🔌</span>
-        <span class="part-label">充电口</span>
-      </div>
-    </div>
+    <!-- Level indicator -->
+    <div id="level-popup" class="hidden"></div>
 
-    <!-- Progress bar -->
-    <div id="progress-container">
-      <div id="progress-bar"></div>
-      <span id="progress-text">0/7</span>
-    </div>
-
-    <!-- Completion overlay -->
-    <div id="completion" class="hidden">
-      <div class="completion-card">
-        <div class="completion-phone">
-          <div class="phone-screen-on">📱</div>
+    <!-- Results -->
+    <div id="results" class="hidden">
+      <div class="results-card">
+        <h2 class="results-title">贴膜完成！</h2>
+        <div class="results-grade" id="results-grade">S</div>
+        <div class="results-title-text" id="results-title-text"></div>
+        <div class="results-stats">
+          <div class="stat-row"><span class="stat-label">对齐</span><span class="stat-value" id="res-align">--</span></div>
+          <div class="stat-row"><span class="stat-label">撕膜</span><span class="stat-value" id="res-peel">--</span></div>
+          <div class="stat-row"><span class="stat-label">排气泡</span><span class="stat-value" id="res-bubble">--</span></div>
+          <div class="stat-row"><span class="stat-label">总分</span><span class="stat-value" id="res-total">0</span></div>
         </div>
-        <h2>修好了！</h2>
-        <p id="completion-time"></p>
-        <div class="completion-buttons">
-          <button class="btn" onclick="location.reload()">再修一次</button>
+        <div class="results-buttons">
+          <button class="btn" onclick="location.reload()">再贴一次</button>
           <a href="index.html" class="btn btn-small" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
         </div>
       </div>
     </div>
   </div>
 
-  <noscript>
-    <div>请启用 JavaScript 以运行此游戏。</div>
-  </noscript>
+  <noscript><div>请启用 JavaScript 以运行此游戏。</div></noscript>
 
   <script src="js/common.js"></script>
   <script src="js/phone.js"></script>
