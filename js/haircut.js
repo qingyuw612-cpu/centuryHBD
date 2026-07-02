@@ -380,39 +380,39 @@
     ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
 
-    // === 八字刘海 (larger, covers forehead, frames face) ===
+    // === 八字刘海 (natural length, flush with head top, frames face) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang
+    // Left bang — starts at crown (hy-43), sweeps to cheek
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 45);
+    ctx.moveTo(cx, hy - 43);
     ctx.bezierCurveTo(
-      cx - 14, hy - 45,
-      cx - 40, hy - 30,
-      cx - 38, hy + 6
+      cx - 12, hy - 42,
+      cx - 36, hy - 28,
+      cx - 34, hy + 4
     );
     ctx.bezierCurveTo(
-      cx - 32, hy + 2,
-      cx - 18, hy - 6,
-      cx - 5, hy - 2
+      cx - 28, hy,
+      cx - 16, hy - 8,
+      cx - 4, hy - 2
     );
-    ctx.quadraticCurveTo(cx - 2, hy - 18, cx, hy - 45);
+    ctx.quadraticCurveTo(cx - 1, hy - 16, cx, hy - 43);
     ctx.fill();
 
     // Right bang
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 45);
+    ctx.moveTo(cx, hy - 43);
     ctx.bezierCurveTo(
-      cx + 14, hy - 45,
-      cx + 40, hy - 30,
-      cx + 38, hy + 6
+      cx + 12, hy - 42,
+      cx + 36, hy - 28,
+      cx + 34, hy + 4
     );
     ctx.bezierCurveTo(
-      cx + 32, hy + 2,
-      cx + 18, hy - 6,
-      cx + 5, hy - 2
+      cx + 28, hy,
+      cx + 16, hy - 8,
+      cx + 4, hy - 2
     );
-    ctx.quadraticCurveTo(cx + 2, hy - 18, cx, hy - 45);
+    ctx.quadraticCurveTo(cx + 1, hy - 16, cx, hy - 43);
     ctx.fill();
   }
 
