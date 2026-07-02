@@ -118,7 +118,7 @@
     const now = ctx.currentTime;
 
     for (const mn of MELODY_NOTES) {
-      const t = now + (mn.beat + 1) * BEAT_DURATION;
+      const t = now + (mn.beat + 7) * BEAT_DURATION;
       const osc = ctx.createOscillator();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(mn.freq, t);
@@ -585,7 +585,7 @@
 
         // Spawn notes (chart sorted by beat, stop at first not-ready)
         while (nextNoteIdx < chart.length) {
-          if ((chart[nextNoteIdx].beat + 1) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
+          if ((chart[nextNoteIdx].beat + 7) * BEAT_DURATION - elapsedTime <= LOOKAHEAD) {
             notes.push(new Note(chart[nextNoteIdx].beat, chart[nextNoteIdx].track));
             nextNoteIdx++;
           } else {
