@@ -23,10 +23,10 @@
   // ===========================================
   const BPM = 120;
   const BEAT_DURATION = 60 / BPM; // 0.5s per beat
-  const FALL_SPEED = 250; // px per second (slower)
-  const LOOKAHEAD = 3.0;  // spawn earlier so notes enter smoothly
+  const FALL_SPEED = 250;
+  const LOOKAHEAD = 4.5;  // spawn 4.5s ahead (covers screens up to 1125px)
   const HIT_Y_RATIO = 0.80;
-  const MISS_THRESHOLD = 0.20; // notes linger longer after hit line
+  const MISS_THRESHOLD = 0.20;
 
   // Judgment windows (seconds)
   const PERFECT_WINDOW = 0.050;
@@ -208,9 +208,8 @@
 
     update(et) {
       const dt = this.time - et;
-      const rawY = hitY - dt * FALL_SPEED;
-      // Cap only future notes: always enter from above the screen
-      this.y = (dt > 0) ? Math.min(-NOTE_H, rawY) : rawY;
+      // Cap at screen top: notes queue above until their time to fall
+      this.y = Math.min(0, hitY - dt * FALL_SPEED);
     }
 
     draw(ctx) {
