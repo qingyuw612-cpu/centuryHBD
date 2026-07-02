@@ -178,7 +178,7 @@
     // Cut off hair BELOW the scissors
     // Per-round minimum hair length to keep scissors range reasonable
     const hairLen = hairBottomY - hairTopY;
-    const minKeep = [0.65, 0.40, 0.18, 0][currentRound]; // fraction of original length to keep
+    const minKeep = [0.65, 0.45, 0.30, 0][currentRound]; // fraction of original length to keep
     const minBottom = hairTopY + hairLen * minKeep;
     hairCurrentBottom = Math.max(minBottom, cutY);
 
