@@ -585,7 +585,31 @@
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
-    // Layer order: hair → target line → character (target line on top of hair)
+    // Light backdrop panel behind character + hair (for contrast)
+    const panelW = Math.min(280, width * 0.6);
+    const panelH = hairBottomY - headY + 100;
+    const panelX = headX - panelW / 2;
+    const panelY = headY - 50;
+    const panelGrad = ctx.createLinearGradient(0, panelY, 0, panelY + panelH);
+    panelGrad.addColorStop(0, 'rgba(180,170,210,0.12)');
+    panelGrad.addColorStop(0.5, 'rgba(200,190,220,0.08)');
+    panelGrad.addColorStop(1, 'rgba(160,150,190,0.04)');
+    ctx.fillStyle = panelGrad;
+    ctx.beginPath();
+    const pr = 20;
+    ctx.moveTo(panelX + pr, panelY);
+    ctx.lineTo(panelX + panelW - pr, panelY);
+    ctx.arcTo(panelX + panelW, panelY, panelX + panelW, panelY + pr, pr);
+    ctx.lineTo(panelX + panelW, panelY + panelH - pr);
+    ctx.arcTo(panelX + panelW, panelY + panelH, panelX + panelW - pr, panelY + panelH, pr);
+    ctx.lineTo(panelX + pr, panelY + panelH);
+    ctx.arcTo(panelX, panelY + panelH, panelX, panelY + panelH - pr, pr);
+    ctx.lineTo(panelX, panelY + pr);
+    ctx.arcTo(panelX, panelY, panelX + pr, panelY, pr);
+    ctx.closePath();
+    ctx.fill();
+
+    // Layer order: hair → target line → character
     drawHair(ctx, timestamp);
     drawTargetLine(ctx, timestamp);
     drawCharacter(ctx);
