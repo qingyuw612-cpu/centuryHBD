@@ -377,39 +377,39 @@
     ctx.beginPath(); ctx.ellipse(cx - 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.ellipse(cx + 34, hy, 6, 11, 0, 0, Math.PI * 2); ctx.fill();
 
-    // === 八字刘海 (center part, covers forehead down to eye level) ===
+    // === 八字刘海 (larger, covers forehead, frames face) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang: from hairline → sweep left and curl down
+    // Left bang
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 44);                          // center hairline at crown
+    ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx - 12, hy - 44,                                // across top of forehead
-      cx - 34, hy - 28,                                // sweep left
-      cx - 32, hy + 2                                  // curl down near cheek
+      cx - 14, hy - 45,
+      cx - 40, hy - 30,
+      cx - 38, hy + 6
     );
     ctx.bezierCurveTo(
-      cx - 26, hy - 4,                                 // curl inward
-      cx - 14, hy - 8,                                 // back toward face
-      cx - 3, hy - 4                                   // near eye level
+      cx - 32, hy + 2,
+      cx - 18, hy - 6,
+      cx - 5, hy - 2
     );
-    ctx.quadraticCurveTo(cx - 1, hy - 18, cx, hy - 44); // return to hairline
+    ctx.quadraticCurveTo(cx - 2, hy - 18, cx, hy - 45);
     ctx.fill();
 
     // Right bang
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 44);
+    ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx + 12, hy - 44,
-      cx + 34, hy - 28,
-      cx + 32, hy + 2
+      cx + 14, hy - 45,
+      cx + 40, hy - 30,
+      cx + 38, hy + 6
     );
     ctx.bezierCurveTo(
-      cx + 26, hy - 4,
-      cx + 14, hy - 8,
-      cx + 3, hy - 4
+      cx + 32, hy + 2,
+      cx + 18, hy - 6,
+      cx + 5, hy - 2
     );
-    ctx.quadraticCurveTo(cx + 1, hy - 18, cx, hy - 44);
+    ctx.quadraticCurveTo(cx + 2, hy - 18, cx, hy - 45);
     ctx.fill();
   }
 
