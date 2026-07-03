@@ -251,6 +251,47 @@
         rosePortal.classList.remove('visible');
       }
     }
+
+    // Homepage fireworks + text when story done
+    var fwCanvas = document.getElementById('home-fireworks');
+    var bdayText = document.getElementById('home-birthday-text');
+    if (story) {
+      if (fwCanvas) fwCanvas.style.display = '';
+      if (bdayText) bdayText.style.display = '';
+      if (!window._homeFWStarted) startHomeFireworks();
+    }
+  }
+
+  function startHomeFireworks() {
+    window._homeFWStarted = true;
+    var c = document.getElementById('home-fireworks');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    var fw = [];
+    var COL = ['#f0d78c','#e8c060','#b39dda','#ffb3ba'];
+    function rz() { c.width = window.innerWidth; c.height = window.innerHeight; }
+    rz(); window.addEventListener('resize', rz);
+    function spawn() {
+      var x = Math.random()*c.width, y = Math.random()*c.height*0.35;
+      var col = COL[Math.floor(Math.random()*COL.length)];
+      for (var i=0;i<35;i++) {
+        var a=Math.random()*Math.PI*2, s=1+Math.random()*3.5;
+        fw.push({x:x,y:y,c:col,vx:Math.cos(a)*s,vy:Math.sin(a)*s,age:0,life:0.7+Math.random()*1,sz:1+Math.random()*2});
+      }
+    }
+    function loop() {
+      if (Math.random()<0.025) spawn();
+      ctx.clearRect(0,0,c.width,c.height);
+      for (var i=fw.length-1;i>=0;i--) {
+        var p=fw[i]; p.age+=0.016; p.x+=p.vx; p.y+=p.vy; p.vy+=0.025;
+        var alpha=Math.max(0,1-p.age/p.life);
+        ctx.fillStyle=p.c; ctx.globalAlpha=alpha;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.sz,0,Math.PI*2); ctx.fill();
+        if (p.age>=p.life) fw.splice(i,1);
+      }
+      ctx.globalAlpha=1; requestAnimationFrame(loop);
+    }
+    loop();
   }
 
   checkProgress();
