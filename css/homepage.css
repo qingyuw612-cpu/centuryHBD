@@ -32,7 +32,7 @@
   max-width: 400px;
   animation: charFloat 4s ease-in-out infinite,
              charTilt 6s ease-in-out infinite;
-  z-index: 2;
+  z-index: 10;
   filter: drop-shadow(0 0 30px rgba(179, 157, 218, 0.3))
           drop-shadow(0 0 60px rgba(126, 184, 218, 0.15));
   transition: filter 0.5s;

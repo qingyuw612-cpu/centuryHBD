@@ -279,13 +279,14 @@
   setInterval(checkProgress, 2000);
 
   // ===========================================
-  // Century click: always bound, checks condition on click
+  // Century click: bound immediately, checks condition on click
   // ===========================================
-  document.addEventListener('DOMContentLoaded', function() {
+  function bindCentury() {
     var c = document.getElementById('character-container');
     if (c) {
       c.addEventListener('click', function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var d = STORE.getBool('drum_complete');
         var p = STORE.getBool('phone_complete');
         var h = STORE.getBool('haircut_complete');
@@ -294,7 +295,12 @@
         }
       });
     }
-  });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindCentury);
+  } else {
+    bindCentury();
+  }
 
   // ===========================================
   // Floating object hover sound hint
