@@ -56,6 +56,22 @@ const BGM = {
         this.audio.currentTime = savedTime;
       }
 
+      // Auto-resume if was playing before navigation
+      if (STORE.getBool('bgm_playing')) {
+        this.audio.play().catch(() => {
+          // Browser blocked — resume on first user gesture
+          const resume = () => {
+            this.audio.play().catch(() => {});
+            document.removeEventListener('click', resume);
+            document.removeEventListener('touchstart', resume);
+            document.removeEventListener('keydown', resume);
+          };
+          document.addEventListener('click', resume, { once: true });
+          document.addEventListener('touchstart', resume, { once: true });
+          document.addEventListener('keydown', resume, { once: true });
+        });
+      }
+
       // Save position periodically
       setInterval(() => {
         if (this.audio && !this.audio.paused) {
