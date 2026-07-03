@@ -298,6 +298,7 @@
       ctx.fillStyle = '#e8e0f0';
       ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
+      ctx.fillText('在屏幕上滑动，把气泡推向边缘', width/2, sy - 38);
       ctx.fillText(`剩余气泡: ${remaining}  ·  用时: ${elapsed}s`, width/2, sy - 20);
     },
 
