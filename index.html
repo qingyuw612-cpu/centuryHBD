@@ -111,13 +111,22 @@
   <!-- ==================== SUMMARY SECTION ==================== -->
   <div id="section-summary" class="page-section hidden">
     <div id="summary-container">
-      <div id="summary-scroll">
-        <div id="panel-left" class="side-panel"><h3>🎮 冒险记录</h3><div id="achievements"></div></div>
-        <div id="panel-center"><div id="final-comment"></div><a href="#" class="btn" onclick="CenturyApp.showSection('ending')">🎂 生日祝福</a></div>
-        <div id="panel-right" class="side-panel"><h3>📊 趣味统计</h3><div id="fun-stats"></div></div>
+      <a href="#" class="back-btn" onclick="CenturyApp.showSection('home')">◂</a>
+      <div id="summary-inner">
+        <div id="summary-header">
+          <div id="summary-title">Adventure Log</div>
+          <div id="summary-subtitle">冒险记录</div>
+        </div>
+        <div id="summary-cards">
+          <div id="panel-achievements" class="sum-card"><div id="achievements"></div></div>
+          <div id="panel-stats" class="sum-card"><div id="fun-stats"></div></div>
+        </div>
+        <div id="summary-verdict">
+          <div id="final-comment"></div>
+          <a href="#" class="btn" onclick="CenturyApp.showSection('ending')">生日祝福</a>
+        </div>
       </div>
     </div>
-    <a href="#" class="back-btn" style="position:fixed;top:16px;left:16px;z-index:1000" onclick="CenturyApp.showSection('home')">◂</a>
   </div>
 
   <script src="js/common.js"></script>

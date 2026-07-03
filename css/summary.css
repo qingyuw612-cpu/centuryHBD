@@ -1,69 +1,94 @@
 /* ============================================
-   Century Birthday - Summary Page
+   Century Birthday - Summary (Elegant)
    ============================================ */
 
-body { background: #0a0818; }
-#summary-container { width: 100vw; height: 100vh; height: 100dvh; overflow-y: auto; }
-#summary-scroll {
-  display: flex; align-items: flex-start; justify-content: center;
-  gap: 30px; padding: 80px 20px 40px; min-height: 100vh;
-  max-width: 1000px; margin: 0 auto;
+#section-summary {
+  position: fixed; inset: 0; z-index: 200;
+  background: #0a0818;
 }
 
-.side-panel {
-  width: 280px; flex-shrink: 0;
-  background: rgba(15,13,40,0.85); border: 1px solid rgba(212,168,83,0.25);
-  border-radius: 16px; padding: 24px;
-  backdrop-filter: blur(8px);
+#summary-container {
+  width: 100%; height: 100%;
+  overflow-y: auto;
+  display: flex; justify-content: center;
+  padding: 80px 24px 40px;
 }
 
-.side-panel h3 {
-  font-family: var(--font-display); font-size: 0.85rem;
-  color: var(--color-gold-light); margin-bottom: 14px;
-  text-align: center; letter-spacing: 0.06em;
+#summary-inner {
+  max-width: 680px; width: 100%;
 }
 
-#panel-center {
-  flex: 1; text-align: center; padding-top: 40px;
+/* --- Header --- */
+#summary-header {
+  text-align: center; margin-bottom: 40px;
+}
+#summary-title {
+  font-family: var(--font-display); font-size: 1.6rem;
+  color: var(--color-gold-light); letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+#summary-subtitle {
+  font-family: var(--font-body); font-size: 0.85rem;
+  color: rgba(200,180,150,0.4); letter-spacing: 0.15em;
 }
 
-/* Achievement rows */
+/* --- Cards --- */
+#summary-cards {
+  display: flex; gap: 24px; margin-bottom: 36px;
+}
+.sum-card {
+  flex: 1; min-width: 0;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px; padding: 28px 24px;
+}
+
+/* --- Achievements --- */
 .ach-row {
-  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-.ach-icon { font-size: 1.3rem; margin-right: 6px; }
+.ach-row:last-child { border-bottom: none; }
+.ach-header {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px;
+}
+.ach-icon { font-size: 0.9rem; opacity: 0.6; }
 .ach-title {
   font-family: var(--font-display); font-size: 0.9rem;
-  color: var(--color-gold); letter-spacing: 0.03em;
-}
-.ach-sub {
-  font-family: var(--font-body); font-size: 0.78rem;
-  color: var(--color-text-dim); margin-top: 4px; line-height: 1.5;
+  color: var(--color-gold); letter-spacing: 0.04em;
 }
 .ach-grade {
-  display: inline-block; padding: 2px 10px; border-radius: 4px;
-  font-family: var(--font-display); font-size: 0.9rem; font-weight: 700;
-  background: rgba(240,215,140,0.12); color: var(--color-gold-light);
-  margin-top: 5px;
+  margin-left: auto; font-family: var(--font-display);
+  font-size: 0.8rem; font-weight: 700; color: var(--color-gold-light);
+  background: rgba(240,215,140,0.08); padding: 2px 8px; border-radius: 4px;
+}
+.ach-detail {
+  font-family: var(--font-body); font-size: 0.78rem;
+  color: rgba(200,190,210,0.5); line-height: 1.6;
 }
 
-/* Fun stats */
+/* --- Fun Stats --- */
 .stat-item {
-  padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-  font-family: var(--font-body); font-size: 0.82rem;
-  color: var(--color-lavender); line-height: 1.5;
+  padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-family: var(--font-body); font-size: 0.8rem;
+  color: rgba(190,180,210,0.6); line-height: 1.6;
 }
+.stat-item:last-child { border-bottom: none; }
 .stat-item span { color: var(--color-gold-light); font-weight: 600; }
 
-/* Center comment */
-#final-comment {
-  font-family: var(--font-body); font-size: 1.05rem;
-  color: var(--color-lavender); font-style: italic;
-  line-height: 1.9; margin-bottom: 28px; max-width: 360px;
+/* --- Verdict --- */
+#summary-verdict {
+  text-align: center;
 }
+#final-comment {
+  font-family: var(--font-body); font-size: 1rem;
+  color: rgba(200,190,210,0.7); font-style: italic;
+  line-height: 1.9; margin-bottom: 24px; max-width: 500px;
+  margin-left: auto; margin-right: auto;
+}
+#final-comment b { color: var(--color-gold-light); font-weight: 600; }
 
-@media (max-width: 900px) {
-  #summary-scroll { flex-direction: column; align-items: center; gap: 16px; padding-top: 60px; }
-  .side-panel { width: 90%; }
-  #panel-center { padding-top: 10px; }
+/* --- Responsive --- */
+@media (max-width: 640px) {
+  #summary-cards { flex-direction: column; }
+  #summary-container { padding: 60px 16px 30px; }
 }
