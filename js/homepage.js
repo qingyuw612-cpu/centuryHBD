@@ -272,6 +272,14 @@
     const haircut = STORE.getBool('haircut_complete');
     const story = STORE.getBool('story_complete');
 
+    // Individual game objects glow when completed
+    const objDrum = document.getElementById('obj-drum');
+    const objPhone = document.getElementById('obj-phone');
+    const objScissors = document.getElementById('obj-scissors');
+    if (objDrum) objDrum.classList.toggle('completed', drum);
+    if (objPhone) objPhone.classList.toggle('completed', phone);
+    if (objScissors) objScissors.classList.toggle('completed', haircut);
+
     // Century lights up when all 3 games done
     const allDone = drum && phone && haircut;
     if (charContainer) {
