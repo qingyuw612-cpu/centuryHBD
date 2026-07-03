@@ -92,41 +92,44 @@
   }
 
   // ===== Story Scenes =====
+  let remainingChoices = [];
+
   function scene1_room() {
     setScene('room');
+    remainingChoices = ['choice1', 'choice2', 'choice3'];
     say('旁白', '空旷的小房间。一个女孩坐在地上哭。');
     say('我', '你为什么在哭？');
-    say('女孩', '我的猫变成蘑菇了。', () => {
-      showChoices([
-        { label: '猫怎么会变成蘑菇呢？', action: () => scene1_choice1() },
-        { label: '这是谁干的？', action: () => scene1_choice2() },
-        { label: '是毒蘑菇还是普通的蘑菇？', action: () => scene1_choice3() },
-      ]);
-    });
+    say('女孩', '我的猫变成蘑菇了。', () => showNextChoice());
+  }
+
+  function showNextChoice() {
+    if (remainingChoices.length === 0) {
+      scene2_forest();
+      return;
+    }
+    const opts = [];
+    if (remainingChoices.includes('choice1')) opts.push({ label: '猫怎么会变成蘑菇呢？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice1'); scene1_choice1(); } });
+    if (remainingChoices.includes('choice2')) opts.push({ label: '这是谁干的？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice2'); scene1_choice2(); } });
+    if (remainingChoices.includes('choice3')) opts.push({ label: '是毒蘑菇还是普通的蘑菇？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice3'); scene1_choice3(); } });
+    showChoices(opts);
   }
 
   function scene1_choice1() {
     say('我', '猫怎么会变成蘑菇呢？');
-    say('女孩', '（忧郁地抬起头瞪了你一眼）我不想提起这件事。');
-    scene1_choice2(); // proceed to same follow-up
+    say('女孩', '（忧郁地抬起头瞪了你一眼）我不想提起这件事。', () => showNextChoice());
   }
 
   function scene1_choice2() {
-    if (!storyFlags.askedWho) {
-      storyFlags.askedWho = true;
-      say('我', '这是谁干的？');
-      say('女孩', '一个魔术师。他的嘴脸十分狡猾丑陋，他的魔杖十分冷峻锋利。他是魔鬼的母亲，他是赌徒的儿子。');
-      say('我', '我会帮助你找到魔术师，让他把猫变回来。');
-      say('女孩', '感谢你的帮助，但是当你找到他的时候，请直接干掉他，我不再需要他。');
-    }
-    scene2_forest();
+    say('我', '这是谁干的？');
+    say('女孩', '一个魔术师。他的嘴脸十分狡猾丑陋，他的魔杖十分冷峻锋利。他是魔鬼的母亲，他是赌徒的儿子。');
+    say('我', '我会帮助你找到魔术师，让他把猫变回来。');
+    say('女孩', '感谢你的帮助，但是当你找到他的时候，请直接干掉他，我不再需要他。', () => showNextChoice());
   }
 
   function scene1_choice3() {
     say('我', '是毒蘑菇还是普通的蘑菇？这或许可以提供一些有用的参考。');
     say('女孩', '我的猫毛发光泽柔顺，性格温顺柔和。当它变成蘑菇时，它的色彩斑斓鲜艳，让人垂涎欲滴。');
-    say('我', '我知道了，我会帮助你把你的猫变回来的。');
-    scene2_forest();
+    say('我', '我知道了，我会帮助你把你的猫变回来的。', () => showNextChoice());
   }
 
   function scene2_forest() {
@@ -247,13 +250,14 @@
     say('忧郁的蘑菇', '我原本是猫，魔术师把我变成毒蘑菇，让我吸满大自然的雨露。成为猫的时候，我只是静止地存在就可以被解读为诱惑。但成为一个蘑菇，让我的生命中充满了欢笑。');
     say('忧郁的蘑菇', '夜深人静之时，天地都在为我落泪。吹着风的夜晚，黑夜的思绪逐渐飘离。呐，今后该如何是好呢！');
     say('我', '那便不必再骗自己了。蘑菇的欢笑，是你说给自己听的谎言；猫的沉默，才是你唯一诚实的时刻。魔术师已死，他的咒语随他埋进了土里，可我还记得你原本的模样——');
-    say('旁白', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……');
-    charSprite.textContent = '🐱';
+    say('旁白', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……', () => {
+      charSprite.textContent = '🐱';
+    });
     say('猫', '（吟唱）だから僕はきのこを辞めた。');
-    say('我', '和我一起走吧！');
-
-    showEnding('重归猫女', '🐱',
-      '女孩高兴地发现猫又回来了，一切都像平常一样照常进行。<br><br>但是在一个没有人注意的角落，有一块土地里彻底失去了一个蘑菇……');
+    say('我', '和我一起走吧！', () => {
+      showEnding('重归猫女', '🐱',
+        '女孩高兴地发现猫又回来了，一切都像平常一样照常进行。<br><br>但是在一个没有人注意的角落，有一块土地里彻底失去了一个蘑菇……');
+    });
   }
 
   function ending_happy() {
@@ -266,10 +270,10 @@
     say('我', '看来，你已经完全接纳了自己的蘑菇身份。');
     say('乐观的蘑菇', '我生来就是蘑菇，蘑菇是蘑菇，天经地义。真相啊，爱啊，世界啊，痛苦啊，人生啊，怎么样都好啦。');
     say('我', '那我便不再多言了——去打扰一场无欲无求的宁静，本身就是一种冒犯。愿你继续做你的蘑菇，快乐地生活一辈子吧。');
-    say('旁白', '你转身离开了。蘑菇在身后安静地发光。');
-
-    showEnding('音乐小子', '🍄',
-      '蘑菇带来了一阵短暂的蘑菇风潮，但很快归于平静。<br><br>他不需要被拯救，因为他本来就是完整的。');
+    say('旁白', '你转身离开了。蘑菇在身后安静地发光。', () => {
+      showEnding('音乐小子', '🍄',
+        '蘑菇带来了一阵短暂的蘑菇风潮，但很快归于平静。<br><br>他不需要被拯救，因为他本来就是完整的。');
+    });
   }
 
   function showEnding(title, icon, subtitle) {
