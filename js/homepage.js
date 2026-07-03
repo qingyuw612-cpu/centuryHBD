@@ -283,18 +283,16 @@
     // Century lights up + clickable when all 3 games done
     const allDone = drum && phone && haircut;
     if (charContainer) {
-      if (allDone && !charContainer._clickSet) {
-        charContainer.classList.add('lit');
-        charContainer.style.cursor = 'pointer';
-        charContainer._clickSet = true;
-        charContainer.addEventListener('click', (e) => {
+      if (allDone) {
+        if (!charContainer.classList.contains('lit')) {
+          charContainer.classList.add('lit');
+          charContainer.style.cursor = 'pointer';
+        }
+        // Always ensure click works
+        charContainer.onclick = function(e) {
           e.preventDefault();
           CenturyApp.navigateTo('story.html');
-        });
-      } else if (!allDone) {
-        charContainer.classList.remove('lit');
-        charContainer.style.cursor = '';
-        charContainer._clickSet = false;
+        };
       }
     }
 
