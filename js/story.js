@@ -361,7 +361,7 @@
   // ===== Start =====
   SoundEngine._ensure();
   BGM.init();
-  BGM._volume = 0.05;
+  BGM._volume = 0.01;
   if (BGM.audio) BGM.audio.volume = 0.05;
   scene1_room();
 

@@ -66,6 +66,7 @@ const BGM = {
       if (!this._unlocked) {
         const unlock = () => {
           this._unlocked = true;
+          if (this._volume) this.audio.volume = this._volume;
           this.audio.play().catch(() => {});
           document.removeEventListener('click', unlock);
           document.removeEventListener('touchstart', unlock);
