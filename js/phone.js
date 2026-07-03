@@ -10,7 +10,6 @@
   const ctx = canvas.getContext('2d');
   const hudLevel = document.getElementById('hud-level');
   const hudScore = document.getElementById('hud-score');
-  const levelPopup = document.getElementById('level-popup');
   const resultsEl = document.getElementById('results');
   const storyDialog = document.getElementById('story-dialog');
   const storyStart = document.getElementById('story-start');
@@ -174,6 +173,12 @@
         ctx.font = 'bold 1.3rem "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(r, width/2, tableY + 50);
+      } else if (!this.dropping) {
+        const pulse = 0.5 + Math.sin(time * 0.004) * 0.3;
+        ctx.fillStyle = `rgba(240,215,140,${pulse})`;
+        ctx.font = '1rem "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('看准时机，点击放下贴膜！', width/2, height * 0.32);
       }
     },
 
@@ -287,6 +292,13 @@
         ctx.fill();
       }
 
+      // Timer display
+      const elapsed = ((Date.now() - this.startTime) / 1000).toFixed(1);
+      const remaining = this.list.filter(b => b.alive).length;
+      ctx.fillStyle = '#e8e0f0';
+      ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`剩余气泡: ${remaining}  ·  用时: ${elapsed}s`, width/2, sy - 20);
     },
 
     onPointerMove(ex, ey) {
@@ -322,16 +334,6 @@
     hudLevel.textContent = {
       align: '① 对齐贴膜', bubbles: '② 排除气泡'
     }[levelName] || '';
-
-    const titles = {
-      align: '① 对齐贴膜\n拖拽+旋转对齐手机边框',
-      bubbles: '② 排除气泡\n滑动推开所有气泡',
-    };
-    if (levelPopup) {
-      levelPopup.innerHTML = titles[levelName].replace(/\n/g, '<br>');
-      levelPopup.classList.remove('hidden');
-      setTimeout(() => levelPopup.classList.add('hidden'), 2000);
-    }
 
     if (levelName === State.ALIGN) align.init();
     else if (levelName === State.BUBBLES) bubbles.init();
