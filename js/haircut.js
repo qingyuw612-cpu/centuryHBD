@@ -23,10 +23,10 @@
   // Constants
   const TOTAL_ROUNDS = 4;
   const ROUND_CONFIG = [
-    { speed: 100, targetHalfW: 40 },
-    { speed: 160, targetHalfW: 28 },
-    { speed: 220, targetHalfW: 18 },
-    { speed: 280, targetHalfW: 10 },
+    { speed: 150, targetHalfW: 40 },
+    { speed: 220, targetHalfW: 28 },
+    { speed: 300, targetHalfW: 18 },
+    { speed: 380, targetHalfW: 10 },
   ];
 
   const PERFECT_RANGE = 12;
@@ -148,13 +148,13 @@
         tMin = chinY + hairRange * 0.55;
         tMax = hairCurrentBottom - 25;
         break;
-      case 1: // R2: mid
-        tMin = chinY + hairRange * 0.3;
-        tMax = chinY + hairRange * 0.6;
+      case 1: // R2: lower-mid
+        tMin = chinY + hairRange * 0.4;
+        tMax = chinY + hairRange * 0.7;
         break;
-      default: // R3-4: upper, just below chin
-        tMin = chinY + 5;
-        tMax = chinY + hairRange * 0.35;
+      default: // R3-4: mid, not too high
+        tMin = chinY + hairRange * 0.15;
+        tMax = chinY + hairRange * 0.45;
         break;
     }
     targetY = tMin + Math.random() * (tMax - tMin);
@@ -383,36 +383,36 @@
     // === 八字刘海 (natural length, flush with head top, frames face) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang — starts at crown (hy-43), sweeps to cheek
+    // Left bang — higher, closer to crown
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 43);
+    ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx - 12, hy - 42,
-      cx - 36, hy - 28,
-      cx - 34, hy + 4
+      cx - 10, hy - 44,
+      cx - 32, hy - 30,
+      cx - 30, hy
     );
     ctx.bezierCurveTo(
-      cx - 28, hy,
-      cx - 16, hy - 8,
-      cx - 4, hy - 2
+      cx - 24, hy - 4,
+      cx - 12, hy - 10,
+      cx - 2, hy - 6
     );
-    ctx.quadraticCurveTo(cx - 1, hy - 16, cx, hy - 43);
+    ctx.quadraticCurveTo(cx - 1, hy - 20, cx, hy - 45);
     ctx.fill();
 
     // Right bang
     ctx.beginPath();
-    ctx.moveTo(cx, hy - 43);
+    ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx + 12, hy - 42,
-      cx + 36, hy - 28,
-      cx + 34, hy + 4
+      cx + 10, hy - 44,
+      cx + 32, hy - 30,
+      cx + 30, hy
     );
     ctx.bezierCurveTo(
-      cx + 28, hy,
-      cx + 16, hy - 8,
-      cx + 4, hy - 2
+      cx + 24, hy - 4,
+      cx + 12, hy - 10,
+      cx + 2, hy - 6
     );
-    ctx.quadraticCurveTo(cx + 1, hy - 16, cx, hy - 43);
+    ctx.quadraticCurveTo(cx + 1, hy - 20, cx, hy - 45);
     ctx.fill();
   }
 

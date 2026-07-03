@@ -66,16 +66,17 @@
 
 /* --- Rose Portal --- */
 #rose-portal {
-  position: fixed; bottom: 24px; right: 24px; z-index: 50;
-  font-size: 2.5rem; opacity: 0; pointer-events: none;
-  transition: opacity 0.8s; text-decoration: none;
-  animation: roseFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 12px rgba(255,100,100,0.4));
+  position: fixed; bottom: 30%; right: 6%; z-index: 50;
+  width: min(100px, 18vw); opacity: 0; pointer-events: none;
+  transition: opacity 0.8s;
+  animation: selfRotate 12s linear infinite;
+  filter: drop-shadow(0 0 20px rgba(255,80,100,0.5));
 }
 #rose-portal.visible { opacity: 1; pointer-events: auto; }
-@keyframes roseFloat {
-  0%,100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+#rose-portal:hover {
+  filter: drop-shadow(0 0 30px rgba(255,80,100,0.8))
+          drop-shadow(0 0 60px rgba(255,80,100,0.3));
+  transform: scale(1.15);
 }
 
 @keyframes charFloat {

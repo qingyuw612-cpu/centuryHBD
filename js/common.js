@@ -53,8 +53,9 @@ const BGM = {
   init() {
     if (this.audio) return;
     try {
-      // Check for page-specific BGM override (data-bgm on body)
+      // Check for page-specific BGM override (data-bgm on body). "off" = no BGM
       const override = document.body.getAttribute('data-bgm');
+      if (override === 'off') return; // this page doesn't want BGM
       const trackPath = override ? 'assets/bgm/' + override : this._defaultPath;
       this.audio = new Audio(trackPath);
       this.audio.loop = true;

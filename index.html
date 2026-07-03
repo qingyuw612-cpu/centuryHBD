@@ -115,9 +115,37 @@
     <span id="bgm-icon">♪</span>
   </button>
 
-  <!-- Rose portal (appears after story complete) -->
-  <a href="ending.html" id="rose-portal" aria-label="生日祝福"
-     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">🌹</a>
+  <!-- Rose portal (appears after story complete, matches floating objects style) -->
+  <a href="ending.html" id="rose-portal" class="floating-object" aria-label="生日祝福"
+     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">
+    <svg viewBox="0 0 120 120" class="obj-svg">
+      <defs>
+        <radialGradient id="rose-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff4060"/>
+          <stop offset="60%" stop-color="#c02040"/>
+          <stop offset="100%" stop-color="#801030"/>
+        </radialGradient>
+      </defs>
+      <!-- Outer petals -->
+      <ellipse cx="45" cy="45" rx="22" ry="30" fill="url(#rose-grad)" transform="rotate(-30,45,45)"/>
+      <ellipse cx="75" cy="45" rx="22" ry="30" fill="url(#rose-grad)" transform="rotate(30,75,45)"/>
+      <ellipse cx="60" cy="35" rx="18" ry="28" fill="url(#rose-grad)" transform="rotate(0,60,35)"/>
+      <!-- Inner petals -->
+      <ellipse cx="55" cy="52" rx="14" ry="20" fill="#ff6080" transform="rotate(-20,55,52)"/>
+      <ellipse cx="65" cy="52" rx="14" ry="20" fill="#ff6080" transform="rotate(20,65,52)"/>
+      <!-- Center -->
+      <circle cx="60" cy="55" r="10" fill="#ffe0c0"/>
+      <circle cx="58" cy="53" r="4" fill="#ffd0a0"/>
+      <!-- Stem -->
+      <path d="M 60 65 Q 58 85 55 105" stroke="#3a6a3a" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <!-- Leaf -->
+      <path d="M 57 80 Q 70 75 72 85 Q 65 88 57 85" fill="#4a8a4a"/>
+      <!-- Glow -->
+      <circle cx="60" cy="50" r="45" fill="none" stroke="rgba(255,100,120,0.2)" stroke-width="3">
+        <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </a>
 
   <noscript>
     <div>请启用 JavaScript 以查看此页面。</div>
