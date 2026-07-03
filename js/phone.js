@@ -52,18 +52,18 @@
     landTimer: 0,
 
     init() {
+      this.phoneW = Math.min(180, width * 0.55);
+      this.phoneH = 12; // phone is flat, viewed from side = thin bar
       this.phoneX = width / 2;
-      this.phoneY = height * 0.68;
-      this.phoneW = Math.min(150, width * 0.38);
-      this.phoneH = this.phoneW * 1.94;
+      this.phoneY = height * 0.78; // phone sits on table
 
-      this.filmW = this.phoneW + 4;
-      this.filmH = this.phoneH + 4;
+      this.filmW = this.phoneW + 6;
+      this.filmH = 10;
 
-      // Film high above, narrow oscillation over phone
-      this.filmY = height * 0.08;
-      this.filmX = this.phoneX + (Math.random() - 0.5) * this.phoneW * 1.2;
-      this.filmSpeed = 180 + Math.random() * 100; // px/s, faster
+      // Film high above
+      this.filmY = height * 0.15;
+      this.filmX = this.phoneX + (Math.random() - 0.5) * this.phoneW * 1.0;
+      this.filmSpeed = 200 + Math.random() * 120;
       this.filmDir = Math.random() > 0.5 ? 1 : -1;
       this.dropping = false;
       this.dropVy = 0;
@@ -73,11 +73,9 @@
 
     update(dt) {
       if (this.dropping) {
-        this.dropVy += 900 * dt;
+        this.dropVy += 800 * dt;
         this.filmY += this.dropVy * dt;
-
-        // Film lands centered on phone
-        const landY = this.phoneY;
+        const landY = this.phoneY - 6; // film sits ON phone
         if (this.filmY >= landY) {
           this.filmY = landY;
           this.dropping = false;
@@ -86,101 +84,88 @@
           SoundEngine.playSnap();
         }
       } else if (!this.landed) {
-        // Narrow oscillation: ±phoneW * 0.8 from center
         this.filmX += this.filmSpeed * this.filmDir * dt;
-        const range = this.phoneW * 0.8;
-        const left = this.phoneX - range;
-        const right = this.phoneX + range;
-        if (this.filmX > right) { this.filmX = right; this.filmDir = -1; }
-        if (this.filmX < left) { this.filmX = left; this.filmDir = 1; }
+        const range = this.phoneW * 0.6;
+        if (this.filmX > this.phoneX + range) { this.filmX = this.phoneX + range; this.filmDir = -1; }
+        if (this.filmX < this.phoneX - range) { this.filmX = this.phoneX - range; this.filmDir = 1; }
       }
-
       if (this.landed) this.landTimer += dt;
     },
 
     draw(ctx, time) {
       const px = this.phoneX, py = this.phoneY;
-      const pw = this.phoneW, ph = this.phoneH;
-      const skew = 0.15; // perspective angle
+      const pw = this.phoneW;
 
-      // === Table surface ===
-      ctx.fillStyle = 'rgba(50,40,35,0.25)';
-      ctx.fillRect(0, py + ph/2 + 10, width, height);
+      // === Table ===
+      const tableY = py + 8;
+      ctx.fillStyle = '#3a2a1a';
+      ctx.fillRect(0, tableY, width, height - tableY);
+      // Table edge highlight
+      ctx.strokeStyle = '#5a4a3a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, tableY);
+      ctx.lineTo(width, tableY);
+      ctx.stroke();
+      // Table surface top
+      const tableGrad = ctx.createLinearGradient(0, tableY, 0, tableY + 20);
+      tableGrad.addColorStop(0, '#5a4530');
+      tableGrad.addColorStop(1, '#3a2a1a');
+      ctx.fillStyle = tableGrad;
+      ctx.fillRect(0, tableY, width, 20);
 
-      // === Phone (skewed for perspective) ===
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.transform(1, skew, 0, 1, 0, 0);
-
+      // === Phone (flat on table, seen from side/low angle) ===
+      // Phone body - thin rectangle on table
+      const phoneBodyH = 14;
+      const phoneTopY = py - phoneBodyH;
       ctx.fillStyle = '#1c1c2e';
       ctx.strokeStyle = '#555';
       ctx.lineWidth = 2;
-      const pr = 12;
       ctx.beginPath();
-      ctx.moveTo(-pw/2 + pr, -ph/2);
-      ctx.lineTo(pw/2 - pr, -ph/2);
-      ctx.arcTo(pw/2, -ph/2, pw/2, -ph/2 + pr, pr);
-      ctx.lineTo(pw/2, ph/2 - pr);
-      ctx.arcTo(pw/2, ph/2, pw/2 - pr, ph/2, pr);
-      ctx.lineTo(-pw/2 + pr, ph/2);
-      ctx.arcTo(-pw/2, ph/2, -pw/2, ph/2 - pr, pr);
-      ctx.lineTo(-pw/2, -ph/2 + pr);
-      ctx.arcTo(-pw/2, -ph/2, -pw/2 + pr, -ph/2, pr);
-      ctx.closePath();
+      ctx.roundRect(px - pw/2, phoneTopY, pw, phoneBodyH, 4);
       ctx.fill();
       ctx.stroke();
 
-      // Screen
+      // Screen (top surface, slightly lighter)
       ctx.fillStyle = '#0a0a1e';
-      ctx.fillRect(-pw/2 + 10, -ph/2 + 16, pw - 20, ph - 48);
-      ctx.restore();
+      ctx.fillRect(px - pw/2 + 6, phoneTopY + 3, pw - 12, 5);
 
-      // === Film (also skewed, above phone) ===
+      // Home button indicator on the side edge
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(px, phoneTopY + phoneBodyH/2, 3, 0, Math.PI*2);
+      ctx.fill();
+
+      // === Film (thin bar above, oscillating) ===
       const fx = this.filmX, fy = this.filmY;
       const fw = this.filmW, fh = this.filmH;
 
-      ctx.save();
-      ctx.translate(fx, fy);
-      ctx.transform(1, skew, 0, 1, 0, 0);
-      ctx.globalAlpha = 0.6;
-      ctx.fillStyle = '#7eb8da';
-      ctx.strokeStyle = '#fff';
+      ctx.fillStyle = 'rgba(126,184,218,0.7)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
       ctx.lineWidth = 2;
-      ctx.setLineDash([4, 3]);
-      const fr2 = 12;
+      ctx.setLineDash([3, 2]);
       ctx.beginPath();
-      ctx.moveTo(-fw/2 + fr2, -fh/2);
-      ctx.lineTo(fw/2 - fr2, -fh/2);
-      ctx.arcTo(fw/2, -fh/2, fw/2, -fh/2 + fr2, fr2);
-      ctx.lineTo(fw/2, fh/2 - fr2);
-      ctx.arcTo(fw/2, fh/2, fw/2 - fr2, fh/2, fr2);
-      ctx.lineTo(-fw/2 + fr2, fh/2);
-      ctx.arcTo(-fw/2, fh/2, -fw/2, fh/2 - fr2, fr2);
-      ctx.lineTo(-fw/2, -fh/2 + fr2);
-      ctx.arcTo(-fw/2, -fh/2, -fw/2 + fr2, -fh/2, fr2);
-      ctx.closePath();
+      ctx.roundRect(fx - fw/2, fy - fh/2, fw, fh, 4);
       ctx.fill();
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
-      ctx.restore();
 
-      // Trajectory hint
+      // Drop line hint
       if (!this.dropping && !this.landed) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-        ctx.setLineDash([2, 10]);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.setLineDash([2, 8]);
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(fx, fy + fh/2);
-        ctx.lineTo(fx + fx * skew, py);
+        ctx.lineTo(fx, phoneTopY);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // Result / hint
+      // Hint / result
       if (this.landed) {
         const offset = Math.abs(this.filmX - this.phoneX);
-        let r = ''; let rc = '#db5a5a';
+        let r = '', rc = '#db5a5a';
         if (offset < 5) { r = '完美对齐！✨'; rc = '#f0d78c'; }
         else if (offset < 15) { r = '还不错！👍'; rc = '#7eb8da'; }
         else if (offset < 35) { r = '有点歪...😅'; rc = '#b39dda'; }
@@ -188,13 +173,13 @@
         ctx.fillStyle = rc;
         ctx.font = 'bold 1.3rem "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(r, width/2, py + ph/2 + 55);
+        ctx.fillText(r, width/2, tableY + 50);
       } else if (!this.dropping) {
         const pulse = 0.5 + Math.sin(time * 0.004) * 0.3;
         ctx.fillStyle = `rgba(240,215,140,${pulse})`;
         ctx.font = '1rem "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('点击屏幕放下贴膜！', width/2, height * 0.28);
+        ctx.fillText('看准时机，点击放下贴膜！', width/2, height * 0.32);
       }
     },
 
