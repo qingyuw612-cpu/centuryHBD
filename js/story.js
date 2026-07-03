@@ -52,14 +52,10 @@
   }
 
   function showSprite(pos, emoji) {
-    const el = pos === 'left' ? spriteLeft : pos === 'right' ? spriteRight : spriteCenter;
+    const el = spriteCenter; // all sprites centered
+    [spriteLeft, spriteRight, spriteCenter].forEach(s => s.classList.remove('show'));
     el.textContent = emoji;
     el.className = 'vn-sprite show';
-    if (pos === 'center') el.classList.add('show');
-    // Position
-    if (pos === 'left') el.style.left = '8%';
-    else if (pos === 'right') { el.style.left = 'auto'; el.style.right = '8%'; }
-    else el.style.left = '50%';
   }
 
   function clearSprites() {
@@ -361,7 +357,7 @@
   // ===== Start =====
   SoundEngine._ensure();
   BGM.init();
-  BGM._volume = 0.01;
+  BGM._volume = 0.05;
   if (BGM.audio) BGM.audio.volume = 0.05;
   scene1_room();
 
