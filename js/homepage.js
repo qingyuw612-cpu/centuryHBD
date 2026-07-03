@@ -294,6 +294,7 @@
       } else if (!allDone) {
         charContainer.classList.remove('lit');
         charContainer.style.cursor = '';
+        charContainer._clickSet = false;
       }
     }
 
