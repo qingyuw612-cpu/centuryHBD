@@ -52,10 +52,13 @@ window.CenturyApp.loadSummary = function() {
     icon:'📱', name:'贴膜', title: phoneTitles[getPhoneGrade()]||'贴膜工', grade: getPhoneGrade(),
     sub: `${phoneScore}分${phoneBestTime?' · 最快'+phoneBestTime+'秒':''}${phonePlays>1?' · 贴了'+phonePlays+'次':''}`,
   });
-  if (storyComplete) games.push({
-    icon:'🍄', name:'故事', title:'探索者', grade:'✓',
-    sub:'达成了猫与蘑菇的结局',
-  });
+  if (storyComplete) {
+    var endingType = STORE.get('story_ending') || '未知';
+    games.push({
+      icon:'🍄', name:'故事', title:'探索者', grade:'✓',
+      sub:'结局：《' + endingType + '》',
+    });
+  }
 
   if (games.length === 0) {
     ach.innerHTML = '<p style="color:#9990b0;font-size:0.8rem;">还没有冒险记录…<br>去首页玩玩小游戏吧！</p>';
@@ -79,7 +82,7 @@ window.CenturyApp.loadSummary = function() {
   if (drumPlays > 1) funs.push(`打了 <span>${drumPlays}</span> 次鼓（鼓手の执着）`);
   if (haircutPlays > 1) funs.push(`上了 <span>${haircutPlays}</span> 次理发班（敬业精神可嘉）`);
   if (phonePlays > 1) funs.push(`贴了 <span>${phonePlays}</span> 次膜（贴膜熟练工）`);
-  if (storyComplete) funs.push('探索了猫与蘑菇的秘密 🍄');
+  if (storyComplete) funs.push('达成结局：《' + (STORE.get('story_ending')||'未知') + '》🍄');
   if (funs.length === 0) funs.push('还没有数据…去玩点游戏吧！');
   funEl.innerHTML = funs.map(f => `<div class="stat-item">${f}</div>`).join('');
 
