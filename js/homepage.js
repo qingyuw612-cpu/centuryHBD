@@ -257,21 +257,37 @@
   });
 
   function checkProgress() {
-    const drum = STORE.getBool('drum_complete');
-    const phone = STORE.getBool('phone_complete');
-    const haircut = STORE.getBool('haircut_complete');
-    const story = STORE.getBool('story_complete');
+    var drum = STORE.getBool('drum_complete');
+    var phone = STORE.getBool('phone_complete');
+    var haircut = STORE.getBool('haircut_complete');
+    var story = STORE.getBool('story_complete');
 
-    // Visual: light up Century when all 3 games done
-    const allDone = drum && phone && haircut;
-    if (charContainer) {
-      if (allDone) { charContainer.classList.add('lit'); charContainer.style.cursor = 'pointer'; }
-      else { charContainer.classList.remove('lit'); charContainer.style.cursor = ''; }
+    // Debug: show status in console
+    console.log('[checkProgress] drum='+drum+' phone='+phone+' haircut='+haircut+' story='+story);
+
+    var allDone = drum && phone && haircut;
+    var c = document.getElementById('character-container');
+    if (c) {
+      if (allDone) {
+        c.classList.add('lit');
+        c.style.cursor = 'pointer';
+        c.style.outline = '3px solid gold'; // visible debug
+      } else {
+        c.classList.remove('lit');
+        c.style.cursor = '';
+        c.style.outline = '';
+      }
     }
 
-    // Rose only after story complete
-    if (rosePortal) {
-      if (story) rosePortal.classList.add('visible');
+    var r = document.getElementById('rose-portal');
+    if (r && story) r.classList.add('visible');
+
+    // Hint
+    var hg = document.getElementById('hint-game');
+    if (hg && !window._hintGameShown && !drum && !phone && !haircut) {
+      hg.classList.add('show');
+      window._hintGameShown = true;
+      setTimeout(function() { if (hg.classList.contains('show')) hg.classList.add('gone'); }, 8000);
     }
   }
 
