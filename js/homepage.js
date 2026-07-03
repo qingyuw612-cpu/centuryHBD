@@ -270,16 +270,6 @@
     const haircut = STORE.getBool('haircut_complete');
     const story = STORE.getBool('story_complete');
 
-    // Always clickable — no conditions
-    if (charContainer && !charContainer._clickReady) {
-      charContainer._clickReady = true;
-      charContainer.classList.add('lit');
-      charContainer.style.cursor = 'pointer';
-      charContainer.onclick = function(e) {
-        e.preventDefault();
-        CenturyApp.navigateTo('story.html');
-      };
-    }
 
     // Rose only after story complete
     if (rosePortal) {
@@ -289,6 +279,21 @@
 
   checkProgress();
   setInterval(checkProgress, 2000);
+
+  // ===========================================
+  // Century always clickable — bulletproof
+  // ===========================================
+  document.addEventListener('DOMContentLoaded', function() {
+    var c = document.getElementById('character-container');
+    if (c) {
+      c.style.cursor = 'pointer';
+      c.classList.add('lit');
+      c.addEventListener('click', function(e) {
+        e.preventDefault();
+        CenturyApp.navigateTo('story.html');
+      });
+    }
+  });
 
   // ===========================================
   // Floating object hover sound hint
