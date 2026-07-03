@@ -191,6 +191,15 @@
   if (alreadyVisited) {
     hideOverlay();
     BGM.play();
+    // Show game hint if no games completed yet
+    const noGamesDone = !STORE.getBool('drum_complete') && !STORE.getBool('phone_complete') && !STORE.getBool('haircut_complete');
+    if (hintGame && !hintGameShown && noGamesDone) {
+      setTimeout(() => {
+        hintGame.classList.add('show');
+        hintGameShown = true;
+        setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
+      }, 500);
+    }
   }
 
   function onFirstInteraction(e) {
@@ -198,6 +207,14 @@
     STORE.setBool('first_visit', true);
     BGM.play();
     SoundEngine._ensure();
+    // Show game hint after overlay dismissed
+    setTimeout(() => {
+      if (hintGame && !hintGameShown) {
+        hintGame.classList.add('show');
+        hintGameShown = true;
+        setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
+      }
+    }, 500);
     document.removeEventListener('click', onFirstInteraction);
     document.removeEventListener('touchstart', onFirstInteraction);
     document.removeEventListener('keydown', onFirstInteraction);
@@ -266,13 +283,6 @@
     if (rosePortal) {
       if (story) rosePortal.classList.add('visible');
       else rosePortal.classList.remove('visible');
-    }
-
-    // Hint: game (first visit, no games done yet)
-    if (hintGame && !hintGameShown && !drum && !phone && !haircut) {
-      hintGame.classList.add('show');
-      hintGameShown = true;
-      setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
     }
 
     // Hint: century lit
