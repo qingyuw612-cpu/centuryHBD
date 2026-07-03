@@ -40,7 +40,7 @@ window.CenturyApp.STORE = STORE;
 // =============================================
 const BGM = {
   audio: null,
-  _defaultPath: 'assets/bgm/' + encodeURI('世纪末尺度 The Temporal Scale - The 1999.mp3'),
+  _defaultPath: 'assets/bgm/bgm.mp3',
   _unlocked: false,
 
   setTrack(path) {

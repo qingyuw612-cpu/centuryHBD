@@ -320,7 +320,7 @@
       const elapsed = (Date.now() - this.startTime) / 1000;
       const ratio = this.cleared / this.totalGenerated;
       if (ratio < 1) return Math.round(ratio * 50);
-      if (elapsed < 7) return 100;
+      if (elapsed < 2) return 100;
       if (elapsed < 14) return 80;
       if (elapsed < 22) return 55;
       return 35;

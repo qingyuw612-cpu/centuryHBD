@@ -21,9 +21,9 @@ if (!fs.existsSync(VOICE_DIR)) fs.mkdirSync(VOICE_DIR, { recursive: true });
 const CHAR_CONFIG = {
   narrator:  { speaker: 'en_female_dacey_uranus_bigtts',       speed: 5 },
   me:        { speaker: 'en_female_stokie_uranus_bigtts',      speed: 5 },
-  girl:      { speaker: 'en_female_dacey_uranus_bigtts',       speed: -5 },
+  girl:      { speaker: 'en_female_dacey_uranus_bigtts',       speed: 5 },
   magician:  { speaker: 'zh_male_aojiaobazong_uranus_bigtts',  speed: 5 },
-  sadMush:   { speaker: 'zh_male_shaonianzixin_uranus_bigtts', speed: -5 },
+  sadMush:   { speaker: 'ICL_uranus_en_male_xavier_tob', speed: 10 },
   happyMush: { speaker: 'zh_male_shaonianzixin_uranus_bigtts', speed: 10 },
   cat:       { speaker: 'ja_male_bv524_uranus_bigtts',         speed: 0 },
 };
