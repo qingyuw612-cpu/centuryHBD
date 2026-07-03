@@ -19,13 +19,13 @@ if (!fs.existsSync(VOICE_DIR)) fs.mkdirSync(VOICE_DIR, { recursive: true });
 
 // Character voice & speed config
 const CHAR_CONFIG = {
-  narrator:  { speaker: 'zh_female_zhixingnv_uranus_bigtts',    speed: -5 },
-  me:        { speaker: 'zh_female_qingxinnvsheng_uranus_bigtts', speed: 0 },
-  girl:      { speaker: 'zh_female_wenroushunv_uranus_bigtts',  speed: -5 },
-  magician:  { speaker: 'zh_male_aojiaobazong_uranus_bigtts',   speed: 5 },
-  sadMush:   { speaker: 'zh_male_shaonianzixin_uranus_bigtts',  speed: -20 },
-  happyMush: { speaker: 'zh_male_shaonianzixin_uranus_bigtts',  speed: 10 },
-  cat:       { speaker: 'zh_female_sajiaoxuemei_uranus_bigtts', speed: 0 },
+  narrator:  { speaker: 'en_female_dacey_uranus_bigtts',       speed: 5 },
+  me:        { speaker: 'en_female_stokie_uranus_bigtts',      speed: 5 },
+  girl:      { speaker: 'en_female_dacey_uranus_bigtts',       speed: -5 },
+  magician:  { speaker: 'zh_male_aojiaobazong_uranus_bigtts',  speed: 5 },
+  sadMush:   { speaker: 'zh_male_shaonianzixin_uranus_bigtts', speed: -5 },
+  happyMush: { speaker: 'zh_male_shaonianzixin_uranus_bigtts', speed: 10 },
+  cat:       { speaker: 'ja_male_bv524_uranus_bigtts',         speed: 0 },
 };
 
 const JP_SPEAKER = 'ja_male_bv524_uranus_bigtts';
@@ -34,10 +34,12 @@ async function generateTTS(text, filename, charKey, isJapanese) {
   const cfg = CHAR_CONFIG[charKey] || CHAR_CONFIG.narrator;
   const reqid = crypto.randomUUID();
 
+  const speaker = isJapanese ? JP_SPEAKER : cfg.speaker;
+
   const body = JSON.stringify({
     req_params: {
       text: text,
-      speaker: isJapanese ? JP_SPEAKER : cfg.speaker,
+      speaker: speaker,
       model: 'seed-tts-2.0-standard',
       audio_params: {
         format: 'mp3',
