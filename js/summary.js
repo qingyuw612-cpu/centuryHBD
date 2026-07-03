@@ -85,30 +85,44 @@ window.CenturyApp.loadSummary = function() {
   if (funs.length === 0) funs.push('暂无数据');
   funEl.innerHTML = funs.map(f => `<div class="stat-item">${f}</div>`).join('');
 
-  // Weighted comment
-  const wDrum = drumPlays > 0 ? (drumGrade==='S'?100:drumGrade==='A'?85:drumGrade==='B'?65:drumGrade==='C'?40:15) : 0;
-  const wHair = haircutPlays > 0 ? (getHaircutGrade()==='S'?100:getHaircutGrade()==='A'?85:getHaircutGrade()==='B'?65:getHaircutGrade()==='C'?40:15) : 0;
-  const wPhone = phonePlays > 0 ? (getPhoneGrade()==='S'?100:getPhoneGrade()==='A'?85:getPhoneGrade()==='B'?65:getPhoneGrade()==='C'?40:15) : 0;
-  const wStory = storyComplete ? 100 : 0;
-  const weighted = (wDrum*0.3 + wHair*0.3 + wPhone*0.2 + wStory*0.2).toFixed(0);
-  const totalPlays = drumPlays + haircutPlays + phonePlays;
-  const dg = drumGrade, hg = getHaircutGrade(), pg = getPhoneGrade();
+  // Generate comprehensive humorous evaluation
+  var parts = [], dg = drumGrade, hg = getHaircutGrade(), pg = getPhoneGrade();
+  var totalPlays = drumPlays + haircutPlays + phonePlays;
 
-  let comment;
-  if (weighted >= 90) comment = 'Century 看了这份成绩单，连夜定制了奖杯。';
-  else if (dg==='S' && (hg==='D'||pg==='D')) comment = '鼓打得震天响，理发剪得顾客哭爹喊娘——但你是个好鼓手。';
-  else if (hg==='S' && dg==='D') comment = 'Tony 老师想收你为徒，但邻居已经在投诉你打鼓扰民了。';
-  else if (weighted >= 70) comment = '相当不错的成绩。Century 满意地点了点头。';
-  else if (weighted >= 50) comment = '有高有低，有笑有泪——这才是人生啊。';
-  else if (weighted >= 30) comment = 'Century 看完沉默了。然后笑了。然后笑哭了。';
-  else comment = '你确定你玩的不是「如何激怒 Century」模拟器？';
+  if (drumPlays > 0) {
+    var dt = drumTitles[dg]||'鼓手';
+    if (dg==='S') parts.push('鼓技已入化境，荣膺「'+dt+'」');
+    else if (dg==='A') parts.push('节奏感出众，拿下「'+dt+'」称号');
+    else if (dg==='D') parts.push('打鼓的路还很长，但勇气可嘉');
+    else parts.push('以「'+dt+'」之姿完成了伴奏');
+  }
+  if (haircutPlays > 0) {
+    var ht = haircutTitles[hg]||'理发师';
+    if (hg==='S') parts.push('剪刀功夫炉火纯青，无愧「'+ht+'」之名');
+    else if (hg==='D') parts.push('理发店差点被顾客砸了——「'+ht+'」名副其实');
+    else if (haircutInsults>=3) parts.push('虽被骂 '+haircutInsults+' 次，但「'+ht+'」的头衔保住了');
+    else parts.push('「'+ht+'」——顾客情绪基本稳定');
+  }
+  if (phonePlays > 0) {
+    var pt = phoneTitles[pg]||'贴膜工';
+    if (pg==='S') parts.push('贴膜技艺堪称完美，「'+pt+'」当之无愧');
+    else if (phoneBestTime&&phoneBestTime<10) parts.push('手速惊人，'+phoneBestTime+'秒清空气泡');
+    else parts.push('「'+pt+'」——贴膜之路仍在继续');
+  }
+  if (storyComplete) {
+    parts.push('在猫与蘑菇的故事中抵达了「'+(STORE.get('story_ending')||'未知')+'」');
+  }
 
-  if (totalPlays > 8) comment += ` 前前后后折腾了 <b>${totalPlays}</b> 次，这份执着感动了所有人。`;
-  else if (totalPlays > 4) comment += ` 尝试了 <b>${totalPlays}</b> 次，越战越勇。`;
-  if (haircutInsults >= 5) comment += ` 被骂了 <b>${haircutInsults}</b> 次——顾客已经在写投诉信了。`;
-  if (drumMaxCombo >= 30) comment += ` 最高连击 <b>${drumMaxCombo}</b>，鼓都为你颤抖。`;
-
-  document.getElementById('final-comment').innerHTML = comment;
+  var comment = parts.length>0 ? parts.join('。\n')+'。' : '还没有冒险记录。';
+  if (totalPlays>0) {
+    comment += '\n\n';
+    if (totalPlays>=12) comment += '来来回回折腾了 '+totalPlays+' 次——这份执着，日月可鉴。';
+    else if (totalPlays>6) comment += '前前后后尝试了 '+totalPlays+' 次，越战越勇。';
+    else comment += '一共经历了 '+totalPlays+' 次冒险。';
+    if (drumMaxCombo>=30) comment += ' 最高连击 '+drumMaxCombo+'，鼓都为你颤抖。';
+    if (haircutInsults>=5) comment += ' 被骂了 '+haircutInsults+' 次，顾客已在写投诉信。';
+  }
+  document.getElementById('final-comment').innerHTML = comment.replace(/\n/g,'<br>');
 };
 // Auto-run if standalone page
 if (!document.getElementById('section-home')) { window.CenturyApp.loadSummary(); }
