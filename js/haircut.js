@@ -190,15 +190,20 @@
     const distFromTarget = cutY - targetY;
     const absDist = Math.abs(distFromTarget);
     let judgment, points;
-    const tooShort = cutY < targetY - targetHalfW - OK_RANGE;
+    // Stricter judgment for R3-4
+    const strict = currentRound >= 2 ? 0.6 : 1.0;
+    const perfR = PERFECT_RANGE * strict;
+    const goodR = GOOD_RANGE * strict;
+    const okR = OK_RANGE * strict;
+    const tooShort = cutY < targetY - targetHalfW - okR;
 
-    if (absDist <= PERFECT_RANGE) {
+    if (absDist <= perfR) {
       judgment = 'perfect'; points = 100; perfects++;
       SoundEngine.playSnip();
-    } else if (absDist <= GOOD_RANGE) {
+    } else if (absDist <= goodR) {
       judgment = 'good'; points = 60;
       SoundEngine.playSnip();
-    } else if (absDist <= targetHalfW + OK_RANGE) {
+    } else if (absDist <= targetHalfW + okR) {
       judgment = 'ok'; points = 30;
       SoundEngine.playSnip();
     } else {
