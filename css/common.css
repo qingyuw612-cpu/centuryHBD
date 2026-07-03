@@ -107,11 +107,6 @@ button {
   transform: translateY(0);
 }
 
-.btn-small {
-  padding: 8px 20px;
-  font-size: 0.9rem;
-}
-
 /* --- Page Transitions --- */
 .page-enter {
   animation: fadeIn 0.5s ease-out;
