@@ -223,10 +223,30 @@
   }
 
   // ===========================================
-  // Century lights up + Rose portal
+  // Century lights up + Rose portal + Hints
   // ===========================================
   const charContainer = document.getElementById('character-container');
   const rosePortal = document.getElementById('rose-portal');
+  const hintGame = document.getElementById('hint-game');
+  const hintCentury = document.getElementById('hint-century');
+  const hintRose = document.getElementById('hint-rose');
+  let hintGameShown = false, hintCenturyShown = false, hintRoseShown = false;
+
+  // Hide hint on click
+  document.addEventListener('click', () => {
+    if (hintGame && hintGame.classList.contains('show')) {
+      hintGame.classList.remove('show');
+      hintGame.classList.add('gone');
+    }
+    if (hintCentury && hintCentury.classList.contains('show')) {
+      hintCentury.classList.remove('show');
+      hintCentury.classList.add('gone');
+    }
+    if (hintRose && hintRose.classList.contains('show')) {
+      hintRose.classList.remove('show');
+      hintRose.classList.add('gone');
+    }
+  });
 
   function checkProgress() {
     const drum = STORE.getBool('drum_complete');
@@ -235,21 +255,37 @@
     const story = STORE.getBool('story_complete');
 
     // Century lights up when all 3 games done
+    const allDone = drum && phone && haircut;
     if (charContainer) {
-      if (drum && phone && haircut) {
-        charContainer.classList.add('lit');
-      } else {
-        charContainer.classList.remove('lit');
-      }
+      if (allDone) charContainer.classList.add('lit');
+      else charContainer.classList.remove('lit');
     }
 
     // Rose appears when story is done
     if (rosePortal) {
-      if (story) {
-        rosePortal.classList.add('visible');
-      } else {
-        rosePortal.classList.remove('visible');
-      }
+      if (story) rosePortal.classList.add('visible');
+      else rosePortal.classList.remove('visible');
+    }
+
+    // Hint: game (first visit, no games done yet)
+    if (hintGame && !hintGameShown && !drum && !phone && !haircut) {
+      hintGame.classList.add('show');
+      hintGameShown = true;
+      setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
+    }
+
+    // Hint: century lit
+    if (hintCentury && !hintCenturyShown && allDone && !story) {
+      hintCentury.classList.add('show');
+      hintCenturyShown = true;
+      setTimeout(() => { if (hintCentury.classList.contains('show')) hintCentury.classList.add('gone'); }, 6000);
+    }
+
+    // Hint: rose
+    if (hintRose && !hintRoseShown && story) {
+      hintRose.classList.add('show');
+      hintRoseShown = true;
+      setTimeout(() => { if (hintRose.classList.contains('show')) hintRose.classList.add('gone'); }, 6000);
     }
   }
 
