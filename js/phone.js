@@ -53,17 +53,17 @@
 
     init() {
       this.phoneX = width / 2;
-      this.phoneY = height * 0.72;
+      this.phoneY = height * 0.68;
       this.phoneW = Math.min(150, width * 0.38);
       this.phoneH = this.phoneW * 1.94;
 
       this.filmW = this.phoneW + 4;
       this.filmH = this.phoneH + 4;
 
-      // Film starts high above, oscillating horizontally
-      this.filmY = height * 0.12;
-      this.filmX = this.phoneX + (Math.random() - 0.5) * width * 0.6;
-      this.filmSpeed = 100 + Math.random() * 80; // px/s
+      // Film high above, narrow oscillation over phone
+      this.filmY = height * 0.08;
+      this.filmX = this.phoneX + (Math.random() - 0.5) * this.phoneW * 1.2;
+      this.filmSpeed = 180 + Math.random() * 100; // px/s, faster
       this.filmDir = Math.random() > 0.5 ? 1 : -1;
       this.dropping = false;
       this.dropVy = 0;
@@ -73,12 +73,11 @@
 
     update(dt) {
       if (this.dropping) {
-        // Free fall with gravity
-        this.dropVy += 900 * dt; // gravity acceleration
+        this.dropVy += 900 * dt;
         this.filmY += this.dropVy * dt;
 
-        // Land on phone
-        const landY = this.phoneY - this.phoneH/2 - this.filmH/2 + 8;
+        // Film lands centered on phone
+        const landY = this.phoneY;
         if (this.filmY >= landY) {
           this.filmY = landY;
           this.dropping = false;
@@ -87,72 +86,78 @@
           SoundEngine.playSnap();
         }
       } else if (!this.landed) {
-        // Oscillate horizontally
+        // Narrow oscillation: ±phoneW * 0.8 from center
         this.filmX += this.filmSpeed * this.filmDir * dt;
-        const margin = 40;
-        if (this.filmX > width - margin) { this.filmX = width - margin; this.filmDir = -1; }
-        if (this.filmX < margin) { this.filmX = margin; this.filmDir = 1; }
+        const range = this.phoneW * 0.8;
+        const left = this.phoneX - range;
+        const right = this.phoneX + range;
+        if (this.filmX > right) { this.filmX = right; this.filmDir = -1; }
+        if (this.filmX < left) { this.filmX = left; this.filmDir = 1; }
       }
 
-      if (this.landed) {
-        this.landTimer += dt;
-      }
+      if (this.landed) this.landTimer += dt;
     },
 
     draw(ctx, time) {
       const px = this.phoneX, py = this.phoneY;
       const pw = this.phoneW, ph = this.phoneH;
+      const skew = 0.15; // perspective angle
 
-      // === Table/desk surface ===
-      ctx.fillStyle = 'rgba(60,50,40,0.3)';
-      ctx.fillRect(0, py + ph/2 + 5, width, height - py - ph/2);
+      // === Table surface ===
+      ctx.fillStyle = 'rgba(50,40,35,0.25)';
+      ctx.fillRect(0, py + ph/2 + 10, width, height);
 
-      // === Phone body ===
+      // === Phone (skewed for perspective) ===
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.transform(1, skew, 0, 1, 0, 0);
+
       ctx.fillStyle = '#1c1c2e';
       ctx.strokeStyle = '#555';
       ctx.lineWidth = 2;
-      const pr = 14;
+      const pr = 12;
       ctx.beginPath();
-      ctx.moveTo(px - pw/2 + pr, py - ph/2);
-      ctx.lineTo(px + pw/2 - pr, py - ph/2);
-      ctx.arcTo(px + pw/2, py - ph/2, px + pw/2, py - ph/2 + pr, pr);
-      ctx.lineTo(px + pw/2, py + ph/2 - pr);
-      ctx.arcTo(px + pw/2, py + ph/2, px + pw/2 - pr, py + ph/2, pr);
-      ctx.lineTo(px - pw/2 + pr, py + ph/2);
-      ctx.arcTo(px - pw/2, py + ph/2, px - pw/2, py + ph/2 - pr, pr);
-      ctx.lineTo(px - pw/2, py - ph/2 + pr);
-      ctx.arcTo(px - pw/2, py - ph/2, px - pw/2 + pr, py - ph/2, pr);
+      ctx.moveTo(-pw/2 + pr, -ph/2);
+      ctx.lineTo(pw/2 - pr, -ph/2);
+      ctx.arcTo(pw/2, -ph/2, pw/2, -ph/2 + pr, pr);
+      ctx.lineTo(pw/2, ph/2 - pr);
+      ctx.arcTo(pw/2, ph/2, pw/2 - pr, ph/2, pr);
+      ctx.lineTo(-pw/2 + pr, ph/2);
+      ctx.arcTo(-pw/2, ph/2, -pw/2, ph/2 - pr, pr);
+      ctx.lineTo(-pw/2, -ph/2 + pr);
+      ctx.arcTo(-pw/2, -ph/2, -pw/2 + pr, -ph/2, pr);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
       // Screen
       ctx.fillStyle = '#0a0a1e';
-      ctx.fillRect(px - pw/2 + 10, py - ph/2 + 16, pw - 20, ph - 48);
-      ctx.fillStyle = '#333';
-      ctx.beginPath(); ctx.arc(px, py - ph/2 + 8, 4, 0, Math.PI*2); ctx.fill();
+      ctx.fillRect(-pw/2 + 10, -ph/2 + 16, pw - 20, ph - 48);
+      ctx.restore();
 
-      // === Film ===
+      // === Film (also skewed, above phone) ===
       const fx = this.filmX, fy = this.filmY;
       const fw = this.filmW, fh = this.filmH;
 
       ctx.save();
-      ctx.globalAlpha = 0.65;
+      ctx.translate(fx, fy);
+      ctx.transform(1, skew, 0, 1, 0, 0);
+      ctx.globalAlpha = 0.6;
       ctx.fillStyle = '#7eb8da';
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
-      ctx.setLineDash([5, 3]);
-      const fr = 14;
+      ctx.setLineDash([4, 3]);
+      const fr2 = 12;
       ctx.beginPath();
-      ctx.moveTo(fx - fw/2 + fr, fy - fh/2);
-      ctx.lineTo(fx + fw/2 - fr, fy - fh/2);
-      ctx.arcTo(fx + fw/2, fy - fh/2, fx + fw/2, fy - fh/2 + fr, fr);
-      ctx.lineTo(fx + fw/2, fy + fh/2 - fr);
-      ctx.arcTo(fx + fw/2, fy + fh/2, fx + fw/2 - fr, fy + fh/2, fr);
-      ctx.lineTo(fx - fw/2 + fr, fy + fh/2);
-      ctx.arcTo(fx - fw/2, fy + fh/2, fx - fw/2, fy + fh/2 - fr, fr);
-      ctx.lineTo(fx - fw/2, fy - fh/2 + fr);
-      ctx.arcTo(fx - fw/2, fy - fh/2, fx - fw/2 + fr, fy - fh/2, fr);
+      ctx.moveTo(-fw/2 + fr2, -fh/2);
+      ctx.lineTo(fw/2 - fr2, -fh/2);
+      ctx.arcTo(fw/2, -fh/2, fw/2, -fh/2 + fr2, fr2);
+      ctx.lineTo(fw/2, fh/2 - fr2);
+      ctx.arcTo(fw/2, fh/2, fw/2 - fr2, fh/2, fr2);
+      ctx.lineTo(-fw/2 + fr2, fh/2);
+      ctx.arcTo(-fw/2, fh/2, -fw/2, fh/2 - fr2, fr2);
+      ctx.lineTo(-fw/2, -fh/2 + fr2);
+      ctx.arcTo(-fw/2, -fh/2, -fw/2 + fr2, -fh/2, fr2);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -160,30 +165,30 @@
       ctx.globalAlpha = 1;
       ctx.restore();
 
-      // Drop trajectory line (subtle)
+      // Trajectory hint
       if (!this.dropping && !this.landed) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-        ctx.setLineDash([2, 8]);
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.setLineDash([2, 10]);
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(fx, fy + fh/2);
-        ctx.lineTo(fx, py - ph/2);
+        ctx.lineTo(fx + fx * skew, py);
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // Hint
+      // Result / hint
       if (this.landed) {
         const offset = Math.abs(this.filmX - this.phoneX);
-        let result = '';
-        if (offset < 5) result = '完美对齐！';
-        else if (offset < 18) result = '还不错！';
-        else if (offset < 40) result = '有点歪...';
-        else result = '偏太多了！';
-        ctx.fillStyle = offset < 5 ? '#f0d78c' : offset < 18 ? '#7eb8da' : '#db5a5a';
+        let r = ''; let rc = '#db5a5a';
+        if (offset < 5) { r = '完美对齐！✨'; rc = '#f0d78c'; }
+        else if (offset < 15) { r = '还不错！👍'; rc = '#7eb8da'; }
+        else if (offset < 35) { r = '有点歪...😅'; rc = '#b39dda'; }
+        else { r = '偏太多了！💦'; rc = '#db5a5a'; }
+        ctx.fillStyle = rc;
         ctx.font = 'bold 1.3rem "Microsoft YaHei", sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(result, width/2, py + ph/2 + 50);
+        ctx.fillText(r, width/2, py + ph/2 + 55);
       } else if (!this.dropping) {
         const pulse = 0.5 + Math.sin(time * 0.004) * 0.3;
         ctx.fillStyle = `rgba(240,215,140,${pulse})`;
@@ -202,10 +207,9 @@
     getScore() {
       const offset = Math.abs(this.filmX - this.phoneX);
       if (offset < 5) return 100;
-      if (offset < 15) return 80;
-      if (offset < 30) return 55;
-      if (offset < 50) return 30;
-      return 10;
+      if (offset < 15) return 75;
+      if (offset < 35) return 45;
+      return 15;
     },
   };
 
