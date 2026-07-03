@@ -40,13 +40,23 @@ window.CenturyApp.STORE = STORE;
 // =============================================
 const BGM = {
   audio: null,
-  bgmPath: 'assets/bgm/' + encodeURI('世纪末尺度 The Temporal Scale - The 1999.mp3'),
+  _defaultPath: 'assets/bgm/' + encodeURI('世纪末尺度 The Temporal Scale - The 1999.mp3'),
   _unlocked: false,
+
+  setTrack(path) {
+    this._defaultPath = path;
+    if (this.audio) {
+      this.audio.src = path;
+    }
+  },
 
   init() {
     if (this.audio) return;
     try {
-      this.audio = new Audio(this.bgmPath);
+      // Check for page-specific BGM override (data-bgm on body)
+      const override = document.body.getAttribute('data-bgm');
+      const trackPath = override ? 'assets/bgm/' + override : this._defaultPath;
+      this.audio = new Audio(trackPath);
       this.audio.loop = true;
       this.audio.volume = 0.35;
 
