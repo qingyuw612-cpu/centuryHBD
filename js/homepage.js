@@ -281,9 +281,9 @@
       };
     }
 
-    // Rose always visible
+    // Rose only after story complete
     if (rosePortal) {
-      rosePortal.classList.add('visible');
+      if (story) rosePortal.classList.add('visible');
     }
   }
 
