@@ -41,99 +41,58 @@ window.CenturyApp.STORE = STORE;
 const BGM = {
   audio: null,
   bgmPath: 'assets/bgm/' + encodeURI('世纪末尺度 The Temporal Scale - The 1999.mp3'),
-  initialized: false,
+  _unlocked: false,
 
   init() {
-    if (this.initialized) return;
+    if (this.audio) return;
     try {
       this.audio = new Audio(this.bgmPath);
       this.audio.loop = true;
       this.audio.volume = 0.35;
 
-      // Restore position from previous page
-      const savedTime = STORE.getFloat('bgm_time');
-      if (savedTime && savedTime > 0) {
-        this.audio.currentTime = savedTime;
+      // Try to play on first user interaction
+      if (!this._unlocked) {
+        const unlock = () => {
+          this._unlocked = true;
+          this.audio.play().catch(() => {});
+          document.removeEventListener('click', unlock);
+          document.removeEventListener('touchstart', unlock);
+          document.removeEventListener('keydown', unlock);
+        };
+        document.addEventListener('click', unlock);
+        document.addEventListener('touchstart', unlock);
+        document.addEventListener('keydown', unlock);
       }
 
-      // Auto-resume if was playing before navigation
-      const wasPlaying = STORE.getBool('bgm_playing');
-      if (wasPlaying) {
-        this.audio.play().then(() => {
-          STORE.setBool('bgm_playing', true);
-        }).catch(() => {
-          // Browser blocked — resume on first user gesture
-          const resume = () => {
-            this.audio.play().then(() => STORE.setBool('bgm_playing', true)).catch(() => {});
-            document.removeEventListener('click', resume);
-            document.removeEventListener('touchstart', resume);
-            document.removeEventListener('keydown', resume);
-          };
-          document.addEventListener('click', resume);
-          document.addEventListener('touchstart', resume);
-          document.addEventListener('keydown', resume);
-        });
-      }
-
-      // Save position periodically
-      setInterval(() => {
-        if (this.audio && !this.audio.paused) {
-          STORE.set('bgm_time', this.audio.currentTime.toString());
-        }
-      }, 1000);
-
-      // Handle visibility change
+      // Pause when tab hidden, resume when visible
       document.addEventListener('visibilitychange', () => {
         if (!this.audio) return;
         if (document.hidden) {
-          if (!this.audio.paused) {
-            this.audio.pause();
-            STORE.setBool('bgm_playing', false);
-          }
-        } else {
-          if (STORE.getBool('bgm_playing') !== false) {
-            this.audio.play().catch(() => {});
-          }
+          this.audio.pause();
+        } else if (this._unlocked) {
+          this.audio.play().catch(() => {});
         }
       });
-
-      // Save time before navigation
-      window.addEventListener('beforeunload', () => {
-        if (this.audio && !this.audio.paused) {
-          STORE.set('bgm_time', this.audio.currentTime.toString());
-          STORE.setBool('bgm_playing', true);
-        }
-      });
-
-      this.initialized = true;
     } catch(e) {
-      console.warn('BGM initialization failed:', e);
+      console.warn('BGM init failed:', e);
     }
   },
 
   play() {
     if (!this.audio) this.init();
     if (this.audio) {
-      this.audio.play().catch(() => {
-        // Browser blocked autoplay - will retry on next user gesture
-      });
-      STORE.setBool('bgm_playing', true);
+      this._unlocked = true;
+      this.audio.play().catch(() => {});
     }
   },
 
   pause() {
-    if (this.audio) {
-      this.audio.pause();
-      STORE.setBool('bgm_playing', false);
-    }
+    if (this.audio) this.audio.pause();
   },
 
   toggle() {
-    if (this.audio && !this.audio.paused) {
-      this.pause();
-    } else {
-      this.play();
-    }
+    if (this.audio && !this.audio.paused) this.pause();
+    else this.play();
   }
 };
 
