@@ -132,13 +132,28 @@
 }
 @keyframes nextBlink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
 
+/* Click hint — fades after first interaction */
+#click-hint {
+  position: absolute; bottom: 220px; left: 50%;
+  transform: translateX(-50%); z-index: 15;
+  font-family: var(--font-body); font-size: 0.85rem;
+  color: rgba(200,180,150,0.5); pointer-events: none;
+  animation: hintFade 3s ease-out forwards;
+}
+@keyframes hintFade {
+  0% { opacity: 0; }
+  20% { opacity: 0.7; }
+  80% { opacity: 0.5; }
+  100% { opacity: 0; }
+}
+#click-hint.gone { display: none; }
+
 /* ===== Choices ===== */
 #choices {
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%); z-index: 20;
+  position: absolute; bottom: 190px; left: 50%;
+  transform: translateX(-50%); z-index: 20;
   display: flex; flex-direction: column; gap: 10px;
   max-width: 420px; width: 90%;
-  padding: 24px;
 }
 #choices.hidden { display: none; }
 

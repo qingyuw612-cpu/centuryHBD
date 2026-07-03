@@ -346,7 +346,11 @@
   }
 
   // ===== Click anywhere to advance =====
+  const clickHint = document.getElementById('click-hint');
   document.getElementById('story-container').addEventListener('click', (e) => {
+    if (clickHint && !clickHint.classList.contains('gone')) {
+      clickHint.classList.add('gone');
+    }
     if (combatOverlay.classList.contains('hidden') && endingScreenEl.classList.contains('hidden')) {
       if (!e.target.closest('.choice-btn') && !e.target.closest('#combat-actions')) {
         showNext();
