@@ -93,12 +93,12 @@
       </svg>
     </a>
 
-    <!-- Century Character (clickable → story game) -->
-    <a href="story.html" id="character-container"
-       onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')">
+    <!-- Century Character (lights up when all games complete) -->
+    <div id="character-container">
       <img src="assets/century立绘.png" alt="Century" id="century-character">
-      <span class="clickable-glow"></span>
-    </a>
+      <a href="story.html" id="character-link"
+         onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')"></a>
+    </div>
   </main>
 
   <!-- BGM Init Overlay -->
@@ -115,20 +115,9 @@
     <span id="bgm-icon">♪</span>
   </button>
 
-  <!-- Ending Portal (hidden until all games complete) -->
-  <a href="ending.html" id="ending-portal" aria-label="生日祝福"
-     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">
-    <svg viewBox="0 0 60 60" width="60" height="60">
-      <circle cx="30" cy="30" r="25" fill="none" stroke="#f0d78c" stroke-width="1.5">
-        <animate attributeName="r" values="25;28;25" dur="2s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="30" cy="30" r="18" fill="none" stroke="#f0d78c" stroke-width="1">
-        <animate attributeName="r" values="18;15;18" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <text x="30" y="35" text-anchor="middle" fill="#f0d78c" font-size="14">⭐</text>
-    </svg>
-  </a>
+  <!-- Rose portal (appears after story complete) -->
+  <a href="ending.html" id="rose-portal" aria-label="生日祝福"
+     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">🌹</a>
 
   <noscript>
     <div>请启用 JavaScript 以查看此页面。</div>

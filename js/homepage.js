@@ -223,27 +223,38 @@
   }
 
   // ===========================================
-  // Ending Portal
+  // Century lights up + Rose portal
   // ===========================================
-  const endingPortal = document.getElementById('ending-portal');
+  const charContainer = document.getElementById('character-container');
+  const rosePortal = document.getElementById('rose-portal');
 
-  function checkPortal() {
+  function checkProgress() {
     const drum = STORE.getBool('drum_complete');
     const phone = STORE.getBool('phone_complete');
     const haircut = STORE.getBool('haircut_complete');
+    const story = STORE.getBool('story_complete');
 
-    if (endingPortal) {
+    // Century lights up when all 3 games done
+    if (charContainer) {
       if (drum && phone && haircut) {
-        endingPortal.classList.add('visible');
-      } else if (endingPortal.classList.contains('visible')) {
-        endingPortal.classList.remove('visible');
+        charContainer.classList.add('lit');
+      } else {
+        charContainer.classList.remove('lit');
+      }
+    }
+
+    // Rose appears when story is done
+    if (rosePortal) {
+      if (story) {
+        rosePortal.classList.add('visible');
+      } else {
+        rosePortal.classList.remove('visible');
       }
     }
   }
 
-  // Check on load and periodically
-  checkPortal();
-  setInterval(checkPortal, 2000);
+  checkProgress();
+  setInterval(checkProgress, 2000);
 
   // ===========================================
   // Floating object hover sound hint
