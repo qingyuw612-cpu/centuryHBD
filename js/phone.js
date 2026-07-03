@@ -380,7 +380,6 @@
     document.getElementById('results-grade').textContent = grade;
     document.getElementById('results-title-text').textContent = title;
     document.getElementById('res-align').textContent = alignScore + ' 分';
-    document.getElementById('res-peel').textContent = '--';
     document.getElementById('res-bubble').textContent = bubbleScore + ' 分';
     document.getElementById('res-total').textContent = totalScore + ' 分';
 
