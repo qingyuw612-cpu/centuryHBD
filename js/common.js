@@ -58,7 +58,9 @@ const BGM = {
       const trackPath = override ? 'assets/bgm/' + override : this._defaultPath;
       this.audio = new Audio(trackPath);
       this.audio.loop = true;
-      this.audio.volume = 0.35;
+      // Volume: use page override if set, otherwise default 0.35
+      if (!this._volume) this.audio.volume = 0.35;
+      else this.audio.volume = this._volume;
 
       // Try to play on first user interaction
       if (!this._unlocked) {
