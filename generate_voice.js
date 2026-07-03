@@ -1,6 +1,6 @@
 /* ============================================
    Generate TTS voice files using Doubao seed-tts-2.0
-   Usage: node generate_voice.js
+   Per-character voice & speed
    ============================================ */
 
 const fs = require('fs');
@@ -17,27 +17,38 @@ const dialogueMap = JSON.parse(
 const VOICE_DIR = path.join(__dirname, 'assets/voice');
 if (!fs.existsSync(VOICE_DIR)) fs.mkdirSync(VOICE_DIR, { recursive: true });
 
-async function generateTTS(text, filename, isJapanese) {
+// Character voice & speed config
+const CHAR_CONFIG = {
+  narrator:  { speaker: 'zh_female_zhixingnv_uranus_bigtts',    speed: -5 },
+  me:        { speaker: 'zh_female_qingxinnvsheng_uranus_bigtts', speed: 0 },
+  girl:      { speaker: 'zh_female_wenroushunv_uranus_bigtts',  speed: -5 },
+  magician:  { speaker: 'zh_male_aojiaobazong_uranus_bigtts',   speed: 5 },
+  sadMush:   { speaker: 'zh_male_shaonianzixin_uranus_bigtts',  speed: -20 },
+  happyMush: { speaker: 'zh_male_shaonianzixin_uranus_bigtts',  speed: 10 },
+  cat:       { speaker: 'zh_female_sajiaoxuemei_uranus_bigtts', speed: 0 },
+};
+
+const JP_SPEAKER = 'ja_male_bv524_uranus_bigtts';
+
+async function generateTTS(text, filename, charKey, isJapanese) {
+  const cfg = CHAR_CONFIG[charKey] || CHAR_CONFIG.narrator;
   const reqid = crypto.randomUUID();
-  const speaker = isJapanese
-    ? 'zh_female_vv_uranus_bigtts'  // try multilingual speaker for JP
-    : 'zh_female_vv_uranus_bigtts';  // seed-tts-2.0 supports cross-language
 
   const body = JSON.stringify({
     req_params: {
       text: text,
-      speaker: speaker,
+      speaker: isJapanese ? JP_SPEAKER : cfg.speaker,
       model: 'seed-tts-2.0-standard',
       audio_params: {
         format: 'mp3',
         sample_rate: 24000,
-        speech_rate: -5,
+        speech_rate: isJapanese ? 0 : cfg.speed,
         loudness_rate: 0,
       },
     },
   });
 
-  console.log(`  ${filename} (${isJapanese ? 'JP' : 'EN'}) — "${text.slice(0, 50)}..."`);
+  console.log(`  ${filename} [${charKey}] — "${text.slice(0, 45)}..."`);
 
   const resp = await fetch(TTS_URL, {
     method: 'POST',
@@ -56,34 +67,47 @@ async function generateTTS(text, filename, isJapanese) {
     return false;
   }
 
-  const buffer = Buffer.from(await resp.arrayBuffer());
-  if (buffer.length < 200) {
-    console.error(`  ✗ Too small (${buffer.length}B): ${buffer.toString('utf8').slice(0, 200)}`);
+  const respText = await resp.text();
+  const lines = respText.trim().split('\n');
+  let allAudio = Buffer.alloc(0);
+
+  for (const line of lines) {
+    try {
+      const obj = JSON.parse(line);
+      if (obj.code !== 0 && obj.code !== 20000000) {
+        console.error(`  ✗ API code=${obj.code}: ${obj.message}`);
+        return false;
+      }
+      if (obj.data) {
+        allAudio = Buffer.concat([allAudio, Buffer.from(obj.data, 'base64')]);
+      }
+    } catch(e) {
+      console.error(`  ✗ Parse: ${e.message.slice(0, 80)}`);
+      return false;
+    }
+  }
+
+  if (allAudio.length < 200) {
+    console.error(`  ✗ Too small (${allAudio.length}B)`);
     return false;
   }
 
-  fs.writeFileSync(path.join(VOICE_DIR, filename), buffer);
-  console.log(`  ✓ ${filename} (${buffer.length}B)`);
+  fs.writeFileSync(path.join(VOICE_DIR, filename), allAudio);
+  console.log(`  ✓ ${filename} (${allAudio.length}B)`);
   return true;
 }
 
 async function main() {
-  console.log(`\n🎙️  seed-tts-2.0 — Generating ${dialogueMap.length} voice files...\n`);
+  console.log(`\n🎙️  ${dialogueMap.length} voice files with per-character voices...\n`);
 
   let ok = 0, fail = 0;
   for (const item of dialogueMap) {
     const filename = item.id + '.mp3';
-    const filePath = path.join(VOICE_DIR, filename);
+    const charKey = item.char || 'narrator';
 
-    if (fs.existsSync(filePath) && fs.statSync(filePath).size > 500) {
-      console.log(`  ⏭  ${filename} (exists)`);
-      ok++;
-      continue;
-    }
-
-    const result = await generateTTS(item.en, filename, item.jp);
+    const result = await generateTTS(item.en, filename, charKey, item.jp);
     if (result) ok++; else fail++;
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 400));
   }
 
   console.log(`\n✅ ${ok} generated, ${fail} failed.\n`);
