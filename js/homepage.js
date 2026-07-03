@@ -186,21 +186,26 @@
     }
   }
 
-  // First interaction handler
+  // First interaction handler — only show overlay on first visit
+  const alreadyVisited = STORE.getBool('first_visit');
+  if (alreadyVisited) {
+    hideOverlay();
+  }
+
   function onFirstInteraction(e) {
     hideOverlay();
+    STORE.setBool('first_visit', true);
     BGM.play();
-    // Also init SoundEngine context
     SoundEngine._ensure();
     document.removeEventListener('click', onFirstInteraction);
     document.removeEventListener('touchstart', onFirstInteraction);
     document.removeEventListener('keydown', onFirstInteraction);
   }
 
-  if (overlay) {
-    document.addEventListener('click', onFirstInteraction, { once: false });
-    document.addEventListener('touchstart', onFirstInteraction, { once: false, passive: true });
-    document.addEventListener('keydown', onFirstInteraction, { once: false });
+  if (overlay && !alreadyVisited) {
+    document.addEventListener('click', onFirstInteraction);
+    document.addEventListener('touchstart', onFirstInteraction);
+    document.addEventListener('keydown', onFirstInteraction);
   }
 
   // BGM Toggle
