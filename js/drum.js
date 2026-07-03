@@ -491,6 +491,11 @@
     STORE.setBool('drum_complete', true);
     STORE.set('drum_score', score.toString());
     STORE.set('drum_grade', grade);
+    // Track play count and best stats
+    const plays = (STORE.getInt('drum_plays') || 0) + 1;
+    STORE.set('drum_plays', plays.toString());
+    const bestCombo = Math.max(STORE.getInt('drum_max_combo') || 0, maxCombo);
+    STORE.set('drum_max_combo', bestCombo.toString());
     SoundEngine.playChime();
   }
 

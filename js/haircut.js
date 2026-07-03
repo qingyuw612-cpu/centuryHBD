@@ -288,6 +288,12 @@
 
     STORE.setBool('haircut_complete', true);
     STORE.set('haircut_score', totalScore.toString());
+    const plays = (STORE.getInt('haircut_plays') || 0) + 1;
+    STORE.set('haircut_plays', plays.toString());
+    const totInsults = (STORE.getInt('haircut_insults') || 0) + insultCount;
+    STORE.set('haircut_insults', totInsults.toString());
+    const totPerfects = (STORE.getInt('haircut_perfects') || 0) + perfects;
+    STORE.set('haircut_perfects', totPerfects.toString());
     SoundEngine.playChime();
   }
 
@@ -383,34 +389,34 @@
     // === 八字刘海 (natural length, flush with head top, frames face) ===
     ctx.fillStyle = '#1a1032';
 
-    // Left bang — higher, closer to crown
+    // Left bang — wider, sweeping further out
     ctx.beginPath();
     ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx - 10, hy - 44,
-      cx - 32, hy - 30,
-      cx - 30, hy
+      cx - 14, hy - 44,
+      cx - 40, hy - 30,
+      cx - 38, hy + 2
     );
     ctx.bezierCurveTo(
-      cx - 24, hy - 4,
-      cx - 12, hy - 10,
-      cx - 2, hy - 6
+      cx - 30, hy - 2,
+      cx - 16, hy - 8,
+      cx - 3, hy - 4
     );
     ctx.quadraticCurveTo(cx - 1, hy - 20, cx, hy - 45);
     ctx.fill();
 
-    // Right bang
+    // Right bang — wider, sweeping further out
     ctx.beginPath();
     ctx.moveTo(cx, hy - 45);
     ctx.bezierCurveTo(
-      cx + 10, hy - 44,
-      cx + 32, hy - 30,
-      cx + 30, hy
+      cx + 14, hy - 44,
+      cx + 40, hy - 30,
+      cx + 38, hy + 2
     );
     ctx.bezierCurveTo(
-      cx + 24, hy - 4,
-      cx + 12, hy - 10,
-      cx + 2, hy - 6
+      cx + 30, hy - 2,
+      cx + 16, hy - 8,
+      cx + 3, hy - 4
     );
     ctx.quadraticCurveTo(cx + 1, hy - 20, cx, hy - 45);
     ctx.fill();

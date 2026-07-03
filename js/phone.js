@@ -383,6 +383,10 @@
 
     STORE.setBool('phone_complete', true);
     STORE.set('phone_score', totalScore.toString());
+    const plays = (STORE.getInt('phone_plays') || 0) + 1;
+    STORE.set('phone_plays', plays.toString());
+    const bestTime = STORE.getInt('phone_best_time');
+    if (!bestTime || elapsed < bestTime) STORE.set('phone_best_time', elapsed.toString());
     SoundEngine.playChime();
   }
 

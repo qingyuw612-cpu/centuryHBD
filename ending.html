@@ -2,48 +2,43 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎂 生日快乐 Century!</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/ending.css">
 </head>
 <body>
-  <!-- Canvas for fireworks & confetti -->
+  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
+
   <canvas id="ending-canvas"></canvas>
 
-  <!-- Text overlay -->
-  <div id="text-overlay">
-    <div id="happy-birthday" class="reveal-text">Happy Birthday</div>
-    <div id="century-name" class="reveal-text">Century</div>
-    <div id="sub-message" class="reveal-text">✨ 祝你生日快乐 ✨</div>
+  <!-- Main content -->
+  <div id="ending-main">
+    <!-- Left panel: game achievements -->
+    <div id="panel-left" class="side-panel">
+      <h3>🎮 冒险记录</h3>
+      <div id="achievements"></div>
+    </div>
+
+    <!-- Center: birthday greeting -->
+    <div id="panel-center">
+      <div id="happy-birthday">Happy Birthday</div>
+      <div id="century-name">Century</div>
+      <div id="final-comment"></div>
+    </div>
+
+    <!-- Right panel: fun stats -->
+    <div id="panel-right" class="side-panel">
+      <h3>📊 趣味统计</h3>
+      <div id="fun-stats"></div>
+    </div>
   </div>
 
-  <!-- Score card -->
-  <div id="score-card" class="hidden">
-    <h3>冒险记录</h3>
-    <div id="score-drum" class="score-row">
-      <span>🥁 打鼓</span>
-      <span id="sc-drum">--</span>
-    </div>
-    <div id="score-phone" class="score-row">
-      <span>📱 修手机</span>
-      <span id="sc-phone">--</span>
-    </div>
-    <div id="score-haircut" class="score-row">
-      <span>✂️ 理发</span>
-      <span id="sc-haircut">--</span>
-    </div>
-  </div>
-
-  <!-- Links -->
-  <div id="ending-links" class="reveal-text">
+  <!-- Home button -->
+  <div id="ending-links">
     <a href="index.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
   </div>
-
-  <noscript>
-    <div>请启用 JavaScript 以查看此页面。</div>
-  </noscript>
 
   <script src="js/common.js"></script>
   <script src="js/ending.js"></script>
