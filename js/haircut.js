@@ -152,9 +152,9 @@
         tMin = chinY + hairRange * 0.4;
         tMax = chinY + hairRange * 0.7;
         break;
-      default: // R3-4: mid, not too high
-        tMin = chinY + hairRange * 0.15;
-        tMax = chinY + hairRange * 0.45;
+      default: // R3-4: lower-mid, R3 won't be too short
+        tMin = chinY + hairRange * 0.35;
+        tMax = chinY + hairRange * 0.60;
         break;
     }
     targetY = tMin + Math.random() * (tMax - tMin);
@@ -178,7 +178,7 @@
     // Cut off hair BELOW the scissors
     // Per-round minimum hair length to keep scissors range reasonable
     const hairLen = hairBottomY - hairTopY;
-    const minKeep = [0.65, 0.45, 0.30, 0][currentRound]; // fraction of original length to keep
+    const minKeep = [0.65, 0.50, 0.40, 0][currentRound]; // keep more hair for R4
     const minBottom = hairTopY + hairLen * minKeep;
     hairCurrentBottom = Math.max(minBottom, cutY);
 
