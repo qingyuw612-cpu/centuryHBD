@@ -81,7 +81,8 @@
     }
   }
 
-  // ===== Voice =====
+  // ===== Voice (Web Speech API - no API key needed) =====
+  // ===== Voice (MP3 playback) =====
   const voiceBase = 'assets/voice/';
   let currentVoice = null;
 
@@ -91,7 +92,7 @@
     try {
       currentVoice = new Audio(voiceBase + voiceId + '.mp3');
       currentVoice.volume = 0.8;
-      currentVoice.play().catch(() => {}); // ignore autoplay errors
+      currentVoice.play().catch(() => {});
     } catch(e) {}
   }
 

@@ -1,14 +1,14 @@
 /* ============================================
-   Generate TTS voice files using Doubao API
+   Generate TTS voice files using Doubao seed-tts-2.0
    Usage: node generate_voice.js
    ============================================ */
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const API_KEY = 'a77afe65-7f3b-44ec-83cf-2b3dcd2d2f44';
-const APP_ID = 'api-key-20260703170752';
-const TTS_URL = 'https://openspeech.bytedance.com/api/v1/tts';
+const TTS_URL = 'https://openspeech.bytedance.com/api/v3/tts/unidirectional';
 
 const dialogueMap = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'assets/voice/dialogue_map.json'), 'utf8')
@@ -18,17 +18,22 @@ const VOICE_DIR = path.join(__dirname, 'assets/voice');
 if (!fs.existsSync(VOICE_DIR)) fs.mkdirSync(VOICE_DIR, { recursive: true });
 
 async function generateTTS(text, filename, isJapanese) {
+  const reqid = crypto.randomUUID();
+  const speaker = isJapanese
+    ? 'zh_female_vv_uranus_bigtts'  // try multilingual speaker for JP
+    : 'zh_female_vv_uranus_bigtts';  // seed-tts-2.0 supports cross-language
+
   const body = JSON.stringify({
-    app: { appid: APP_ID },
-    user: { uid: 'century-story' },
-    audio: {
-      voice_type: isJapanese ? 'ja-JP-NanamiNeural' : 'en-US-JennyNeural',
-      encoding: 'mp3',
-      speed_ratio: 0.95,
-    },
-    request: {
+    req_params: {
       text: text,
-      text_type: 'plain',
+      speaker: speaker,
+      model: 'seed-tts-2.0-standard',
+      audio_params: {
+        format: 'mp3',
+        sample_rate: 24000,
+        speech_rate: -5,
+        loudness_rate: 0,
+      },
     },
   });
 
@@ -37,7 +42,9 @@ async function generateTTS(text, filename, isJapanese) {
   const resp = await fetch(TTS_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer;${API_KEY}`,
+      'X-Api-Key': API_KEY,
+      'X-Api-Resource-Id': 'seed-tts-2.0',
+      'X-Api-Request-Id': reqid,
       'Content-Type': 'application/json',
     },
     body,
@@ -61,7 +68,7 @@ async function generateTTS(text, filename, isJapanese) {
 }
 
 async function main() {
-  console.log(`\n🎙️  Generating ${dialogueMap.length} voice files...\n`);
+  console.log(`\n🎙️  seed-tts-2.0 — Generating ${dialogueMap.length} voice files...\n`);
 
   let ok = 0, fail = 0;
   for (const item of dialogueMap) {
