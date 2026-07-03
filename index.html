@@ -115,35 +115,39 @@
     <span id="bgm-icon">♪</span>
   </button>
 
-  <!-- Rose portal (appears after story complete, matches floating objects style) -->
+  <!-- Rose portal (appears after story complete) -->
   <a href="ending.html" id="rose-portal" class="floating-object" aria-label="生日祝福"
      onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">
-    <svg viewBox="0 0 120 120" class="obj-svg">
-      <defs>
-        <radialGradient id="rose-grad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ff4060"/>
-          <stop offset="60%" stop-color="#c02040"/>
-          <stop offset="100%" stop-color="#801030"/>
-        </radialGradient>
-      </defs>
-      <!-- Outer petals -->
-      <ellipse cx="45" cy="45" rx="22" ry="30" fill="url(#rose-grad)" transform="rotate(-30,45,45)"/>
-      <ellipse cx="75" cy="45" rx="22" ry="30" fill="url(#rose-grad)" transform="rotate(30,75,45)"/>
-      <ellipse cx="60" cy="35" rx="18" ry="28" fill="url(#rose-grad)" transform="rotate(0,60,35)"/>
-      <!-- Inner petals -->
-      <ellipse cx="55" cy="52" rx="14" ry="20" fill="#ff6080" transform="rotate(-20,55,52)"/>
-      <ellipse cx="65" cy="52" rx="14" ry="20" fill="#ff6080" transform="rotate(20,65,52)"/>
-      <!-- Center -->
-      <circle cx="60" cy="55" r="10" fill="#ffe0c0"/>
-      <circle cx="58" cy="53" r="4" fill="#ffd0a0"/>
-      <!-- Stem -->
-      <path d="M 60 65 Q 58 85 55 105" stroke="#3a6a3a" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <!-- Leaf -->
-      <path d="M 57 80 Q 70 75 72 85 Q 65 88 57 85" fill="#4a8a4a"/>
+    <svg viewBox="0 0 140 140" class="obj-svg">
+      <!-- Stem with thorns -->
+      <path d="M 70 68 Q 67 85 70 105 Q 72 112 68 118" stroke="#a67c30" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <line x1="69" y1="82" x2="62" y2="78" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
+      <line x1="70" y1="95" x2="77" y2="91" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
+      <!-- Left leaf -->
+      <path d="M 68 88 Q 50 82 48 90 Q 52 95 68 92" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
+      <!-- Right leaf -->
+      <path d="M 69 98 Q 85 93 88 100 Q 84 106 69 102" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
+
+      <!-- Outer petals - warm gold/rose tones -->
+      <path d="M 70 55 Q 55 20 40 35 Q 35 50 55 60 Q 45 25 60 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 70 55 Q 85 20 100 35 Q 105 50 85 60 Q 95 25 80 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 70 55 Q 50 10 60 5 Q 75 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 70 55 Q 90 10 80 5 Q 65 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 55 50 Q 30 30 25 45 Q 28 55 50 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 85 50 Q 110 30 115 45 Q 112 55 90 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
+
+      <!-- Middle petals -->
+      <path d="M 70 52 Q 60 30 55 40 Q 55 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
+      <path d="M 70 52 Q 80 30 85 40 Q 85 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
+      <path d="M 70 50 Q 62 38 70 35 Q 78 38 70 50 Z" fill="#e07080" stroke="#f0d78c" stroke-width="1"/>
+
+      <!-- Center spiral -->
+      <circle cx="70" cy="47" r="8" fill="#f0d78c" stroke="#d4a853" stroke-width="1.5"/>
+      <path d="M 67 47 Q 70 42 73 47 Q 70 52 67 47" fill="none" stroke="#a67c30" stroke-width="1"/>
+
       <!-- Glow -->
-      <circle cx="60" cy="50" r="45" fill="none" stroke="rgba(255,100,120,0.2)" stroke-width="3">
-        <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"/>
-      </circle>
+      <circle cx="70" cy="45" r="50" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="3"/>
+      <circle cx="70" cy="45" r="55" fill="none" stroke="rgba(212,168,83,0.08)" stroke-width="2"/>
     </svg>
   </a>
 
