@@ -246,9 +246,7 @@
   const charContainer = document.getElementById('character-container');
   const rosePortal = document.getElementById('rose-portal');
   const hintGame = document.getElementById('hint-game');
-  const hintCentury = document.getElementById('hint-century');
-  const hintRose = document.getElementById('hint-rose');
-  let hintGameShown = false, hintCenturyShown = false, hintRoseShown = false;
+  let hintGameShown = false;
 
   // Hide hint on click
   document.addEventListener('click', () => {
@@ -272,48 +270,20 @@
     const haircut = STORE.getBool('haircut_complete');
     const story = STORE.getBool('story_complete');
 
-    // Individual game objects glow when completed
-    const objDrum = document.getElementById('obj-drum');
-    const objPhone = document.getElementById('obj-phone');
-    const objScissors = document.getElementById('obj-scissors');
-    if (objDrum) objDrum.classList.toggle('completed', drum);
-    if (objPhone) objPhone.classList.toggle('completed', phone);
-    if (objScissors) objScissors.classList.toggle('completed', haircut);
-
-    // Century lights up + clickable when all 3 games done
-    const allDone = drum && phone && haircut;
-    if (charContainer) {
-      if (allDone) {
-        if (!charContainer.classList.contains('lit')) {
-          charContainer.classList.add('lit');
-          charContainer.style.cursor = 'pointer';
-        }
-        // Always ensure click works
-        charContainer.onclick = function(e) {
-          e.preventDefault();
-          CenturyApp.navigateTo('story.html');
-        };
-      }
+    // Always clickable — no conditions
+    if (charContainer && !charContainer._clickReady) {
+      charContainer._clickReady = true;
+      charContainer.classList.add('lit');
+      charContainer.style.cursor = 'pointer';
+      charContainer.onclick = function(e) {
+        e.preventDefault();
+        CenturyApp.navigateTo('story.html');
+      };
     }
 
-    // Rose appears when story is done
+    // Rose always visible
     if (rosePortal) {
-      if (story) rosePortal.classList.add('visible');
-      else rosePortal.classList.remove('visible');
-    }
-
-    // Hint: century lit
-    if (hintCentury && !hintCenturyShown && allDone && !story) {
-      hintCentury.classList.add('show');
-      hintCenturyShown = true;
-      setTimeout(() => { if (hintCentury.classList.contains('show')) hintCentury.classList.add('gone'); }, 6000);
-    }
-
-    // Hint: rose
-    if (hintRose && !hintRoseShown && story) {
-      hintRose.classList.add('show');
-      hintRoseShown = true;
-      setTimeout(() => { if (hintRose.classList.contains('show')) hintRose.classList.add('gone'); }, 6000);
+      rosePortal.classList.add('visible');
     }
   }
 
