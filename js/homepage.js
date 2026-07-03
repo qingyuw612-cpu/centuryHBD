@@ -254,14 +254,6 @@
       hintGame.classList.remove('show');
       hintGame.classList.add('gone');
     }
-    if (hintCentury && hintCentury.classList.contains('show')) {
-      hintCentury.classList.remove('show');
-      hintCentury.classList.add('gone');
-    }
-    if (hintRose && hintRose.classList.contains('show')) {
-      hintRose.classList.remove('show');
-      hintRose.classList.add('gone');
-    }
   });
 
   function checkProgress() {
@@ -270,6 +262,12 @@
     const haircut = STORE.getBool('haircut_complete');
     const story = STORE.getBool('story_complete');
 
+    // Visual: light up Century when all 3 games done
+    const allDone = drum && phone && haircut;
+    if (charContainer) {
+      if (allDone) { charContainer.classList.add('lit'); charContainer.style.cursor = 'pointer'; }
+      else { charContainer.classList.remove('lit'); charContainer.style.cursor = ''; }
+    }
 
     // Rose only after story complete
     if (rosePortal) {
@@ -281,16 +279,19 @@
   setInterval(checkProgress, 2000);
 
   // ===========================================
-  // Century always clickable — bulletproof
+  // Century click: always bound, checks condition on click
   // ===========================================
   document.addEventListener('DOMContentLoaded', function() {
     var c = document.getElementById('character-container');
     if (c) {
-      c.style.cursor = 'pointer';
-      c.classList.add('lit');
       c.addEventListener('click', function(e) {
         e.preventDefault();
-        CenturyApp.navigateTo('story.html');
+        var d = STORE.getBool('drum_complete');
+        var p = STORE.getBool('phone_complete');
+        var h = STORE.getBool('haircut_complete');
+        if (d && p && h) {
+          CenturyApp.navigateTo('story.html');
+        }
       });
     }
   });
