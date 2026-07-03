@@ -243,8 +243,8 @@
         b.vy *= 0.92;
 
         // Check if off screen area
-        if (b.x < this.screenX - 10 || b.x > this.screenX + this.screenW + 10 ||
-            b.y < this.screenY - 10 || b.y > this.screenY + this.screenH + 10) {
+        if (b.x < this.screenX - 30 || b.x > this.screenX + this.screenW + 30 ||
+            b.y < this.screenY - 30 || b.y > this.screenY + this.screenH + 30) {
           b.alive = false;
           this.cleared++;
           SoundEngine.playSnap();
@@ -293,12 +293,12 @@
         ctx.fill();
       }
 
-      // Instruction
+      // Instruction above phone
       ctx.fillStyle = '#e8e0f0';
       ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('在屏幕上滑动，把气泡推向边缘', width/2, sy + sh + 36);
-      ctx.fillText(`剩余气泡: ${this.list.filter(b => b.alive).length}`, width/2, sy + sh + 58);
+      ctx.fillText('在屏幕上滑动，把气泡推向边缘', width/2, sy - 28);
+      ctx.fillText(`剩余气泡: ${this.list.filter(b => b.alive).length}`, width/2, sy - 8);
     },
 
     onPointerMove(ex, ey) {
@@ -309,8 +309,8 @@
         if (dist < b.r + 25) {
           // Push bubble away from finger (higher resistance)
           const nx = dx / dist, ny = dy / dist;
-          b.vx += nx * 60;
-          b.vy += ny * 60;
+          b.vx += nx * 35;
+          b.vy += ny * 35;
         }
       }
     },
@@ -452,16 +452,16 @@
 
   // Random Apple model for intro
   const APPLE_MODELS = [
-    'iPhone 15 Pro Max 1TB 原色钛金属',
-    'iPhone 14 Pro Max 暗紫色',
+    'iPhone 15 Pro Max 原色钛金属',
+    'iPhone 14 Pro 深紫色',
     'iPhone 13 mini 星光色',
-    'iPhone SE (第一代) 玫瑰金',
-    'iPhone X 限量红色版',
-    'iPhone 12 Pro 海军蓝',
-    'iPhone 15 Plus 粉色',
-    'iPhone 11 Pro 午夜绿',
-    'iPhone 8 Plus 金色 256GB',
-    'iPhone 4s 乔布斯纪念版',
+    'iPhone SE (第三代) 午夜色',
+    'iPhone 12 Pro 海蓝色',
+    'iPhone 11 Pro 暗夜绿色',
+    'iPhone XS Max 金色',
+    'iPhone 8 Plus (PRODUCT)RED 特别版',
+    'iPhone 7 亮黑色',
+    'iPhone 5s 香槟金',
   ];
   const introEl = document.getElementById('phone-intro');
   if (introEl) {

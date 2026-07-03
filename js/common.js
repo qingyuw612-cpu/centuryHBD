@@ -78,6 +78,21 @@ const BGM = {
         document.addEventListener('keydown', unlock);
       }
 
+      // Save BGM position before leaving page
+      window.addEventListener('beforeunload', () => {
+        if (this.audio && !this.audio.paused) {
+          STORE.set('bgm_time', this.audio.currentTime.toString());
+          STORE.setBool('bgm_was_playing', true);
+        }
+      });
+
+      // Resume BGM position from previous page
+      const savedTime = STORE.getFloat('bgm_time');
+      const wasPlaying = STORE.getBool('bgm_was_playing');
+      if (savedTime && savedTime > 0 && wasPlaying) {
+        this.audio.currentTime = savedTime;
+      }
+
       // Pause when tab hidden, resume when visible
       document.addEventListener('visibilitychange', () => {
         if (!this.audio) return;
