@@ -295,9 +295,9 @@
       // Timer display
       const elapsed = ((Date.now() - this.startTime) / 1000).toFixed(1);
       const remaining = this.list.filter(b => b.alive).length;
-      ctx.fillStyle = '#e8e0f0';
-      ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
       ctx.textAlign = 'center';
+      ctx.font = 'italic 1rem "Cormorant Garamond", serif';
+      ctx.fillStyle = '#c8b8a0';
       ctx.fillText('在屏幕上滑动，把气泡推向边缘', width/2, sy - 38);
       ctx.fillText(`剩余气泡: ${remaining}  ·  用时: ${elapsed}s`, width/2, sy - 20);
     },
@@ -320,10 +320,10 @@
       const elapsed = (Date.now() - this.startTime) / 1000;
       const ratio = this.cleared / this.totalGenerated;
       if (ratio < 1) return Math.round(ratio * 50);
-      if (elapsed < 10) return 100;
-      if (elapsed < 18) return 85;
-      if (elapsed < 28) return 65;
-      return 45;
+      if (elapsed < 7) return 100;
+      if (elapsed < 14) return 80;
+      if (elapsed < 22) return 55;
+      return 35;
     },
   };
 
