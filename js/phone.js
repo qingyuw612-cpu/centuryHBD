@@ -39,45 +39,75 @@
   window.addEventListener('resize', resize);
 
   // ================================================================
-  // LEVEL 1: ALIGNMENT
+  // LEVEL 1: FREE-FALL ALIGNMENT
   // ================================================================
   const align = {
     phoneX: 0, phoneY: 0, phoneW: 160, phoneH: 310,
-    filmX: 0, filmY: 0, filmW: 164, filmH: 314, filmRot: 0,
-    drag: false, dragOX: 0, dragOY: 0,
-    initOffsetX: 0, initOffsetY: 0, initRot: 0,
-    rotateSpeed: 0,
+    filmX: 0, filmY: 0, filmW: 0, filmH: 0,
+    filmSpeed: 0,       // horizontal speed
+    filmDir: 1,         // 1=right, -1=left
+    dropping: false,
+    dropVy: 0,
+    landed: false,
+    landTimer: 0,
 
     init() {
       this.phoneX = width / 2;
-      this.phoneY = height * 0.45;
-      this.phoneW = Math.min(160, width * 0.42);
+      this.phoneY = height * 0.72;
+      this.phoneW = Math.min(150, width * 0.38);
       this.phoneH = this.phoneW * 1.94;
 
-      this.filmW = this.phoneW + 6;
-      this.filmH = this.phoneH + 6;
+      this.filmW = this.phoneW + 4;
+      this.filmH = this.phoneH + 4;
 
-      // Random offset
-      this.initOffsetX = (Math.random() - 0.5) * 60;
-      this.initOffsetY = (Math.random() - 0.5) * 50;
-      this.initRot = (Math.random() - 0.5) * 0.3; // radians
-      this.rotateSpeed = 0;
-
-      this.filmX = this.phoneX + this.initOffsetX;
-      this.filmY = this.phoneY + this.initOffsetY;
-      this.filmRot = this.initRot;
-      this.drag = false;
+      // Film starts high above, oscillating horizontally
+      this.filmY = height * 0.12;
+      this.filmX = this.phoneX + (Math.random() - 0.5) * width * 0.6;
+      this.filmSpeed = 100 + Math.random() * 80; // px/s
+      this.filmDir = Math.random() > 0.5 ? 1 : -1;
+      this.dropping = false;
+      this.dropVy = 0;
+      this.landed = false;
+      this.landTimer = 0;
     },
 
     update(dt) {
-      // no gravity
+      if (this.dropping) {
+        // Free fall with gravity
+        this.dropVy += 900 * dt; // gravity acceleration
+        this.filmY += this.dropVy * dt;
+
+        // Land on phone
+        const landY = this.phoneY - this.phoneH/2 - this.filmH/2 + 8;
+        if (this.filmY >= landY) {
+          this.filmY = landY;
+          this.dropping = false;
+          this.landed = true;
+          this.landTimer = 0;
+          SoundEngine.playSnap();
+        }
+      } else if (!this.landed) {
+        // Oscillate horizontally
+        this.filmX += this.filmSpeed * this.filmDir * dt;
+        const margin = 40;
+        if (this.filmX > width - margin) { this.filmX = width - margin; this.filmDir = -1; }
+        if (this.filmX < margin) { this.filmX = margin; this.filmDir = 1; }
+      }
+
+      if (this.landed) {
+        this.landTimer += dt;
+      }
     },
 
     draw(ctx, time) {
       const px = this.phoneX, py = this.phoneY;
       const pw = this.phoneW, ph = this.phoneH;
 
-      // Phone body
+      // === Table/desk surface ===
+      ctx.fillStyle = 'rgba(60,50,40,0.3)';
+      ctx.fillRect(0, py + ph/2 + 5, width, height - py - ph/2);
+
+      // === Phone body ===
       ctx.fillStyle = '#1c1c2e';
       ctx.strokeStyle = '#555';
       ctx.lineWidth = 2;
@@ -96,107 +126,86 @@
       ctx.fill();
       ctx.stroke();
 
-      // Screen area
+      // Screen
       ctx.fillStyle = '#0a0a1e';
       ctx.fillRect(px - pw/2 + 10, py - ph/2 + 16, pw - 20, ph - 48);
-      // Camera dot
       ctx.fillStyle = '#333';
       ctx.beginPath(); ctx.arc(px, py - ph/2 + 8, 4, 0, Math.PI*2); ctx.fill();
-      // Home indicator
-      ctx.strokeStyle = '#444';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(px, py + ph/2 - 20, 14, 0, Math.PI); ctx.stroke();
 
-      // === Film (draggable, semi-transparent) ===
+      // === Film ===
+      const fx = this.filmX, fy = this.filmY;
+      const fw = this.filmW, fh = this.filmH;
+
       ctx.save();
-      ctx.translate(this.filmX, this.filmY);
-      ctx.rotate(this.filmRot);
-      ctx.globalAlpha = 0.6;
+      ctx.globalAlpha = 0.65;
       ctx.fillStyle = '#7eb8da';
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 2;
-      ctx.setLineDash([6, 4]);
-      const fr = 16;
-      const fw = this.filmW, fh = this.filmH;
+      ctx.setLineDash([5, 3]);
+      const fr = 14;
       ctx.beginPath();
-      ctx.moveTo(-fw/2 + fr, -fh/2);
-      ctx.lineTo(fw/2 - fr, -fh/2);
-      ctx.arcTo(fw/2, -fh/2, fw/2, -fh/2 + fr, fr);
-      ctx.lineTo(fw/2, fh/2 - fr);
-      ctx.arcTo(fw/2, fh/2, fw/2 - fr, fh/2, fr);
-      ctx.lineTo(-fw/2 + fr, fh/2);
-      ctx.arcTo(-fw/2, fh/2, -fw/2, fh/2 - fr, fr);
-      ctx.lineTo(-fw/2, -fh/2 + fr);
-      ctx.arcTo(-fw/2, -fh/2, -fw/2 + fr, -fh/2, fr);
+      ctx.moveTo(fx - fw/2 + fr, fy - fh/2);
+      ctx.lineTo(fx + fw/2 - fr, fy - fh/2);
+      ctx.arcTo(fx + fw/2, fy - fh/2, fx + fw/2, fy - fh/2 + fr, fr);
+      ctx.lineTo(fx + fw/2, fy + fh/2 - fr);
+      ctx.arcTo(fx + fw/2, fy + fh/2, fx + fw/2 - fr, fy + fh/2, fr);
+      ctx.lineTo(fx - fw/2 + fr, fy + fh/2);
+      ctx.arcTo(fx - fw/2, fy + fh/2, fx - fw/2, fy + fh/2 - fr, fr);
+      ctx.lineTo(fx - fw/2, fy - fh/2 + fr);
+      ctx.arcTo(fx - fw/2, fy - fh/2, fx - fw/2 + fr, fy - fh/2, fr);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
-
-      // Corner markers
-      const cm = 12;
-      ctx.fillStyle = '#f0d78c';
-      [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sy]) => {
-        ctx.fillRect(sx*fw/2 - cm/2, sy*fh/2 - cm/2, cm, cm);
-      });
-
       ctx.restore();
 
-      // Hint
-      const pulse = 0.5 + Math.sin(time * 0.003) * 0.3;
-      ctx.fillStyle = `rgba(240,215,140,${pulse})`;
-      ctx.font = '0.9rem "Microsoft YaHei", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('拖拽移动 · 滚轮或 Q/E 旋转', width/2, py + ph/2 + 50);
-    },
-
-    onPointerDown(ex, ey) {
-      this.drag = true;
-      this.dragOX = ex - this.filmX;
-      this.dragOY = ey - this.filmY;
-    },
-    onPointerMove(ex, ey) {
-      if (!this.drag) return;
-      this.filmX = ex - this.dragOX;
-      this.filmY = ey - this.dragOY;
-    },
-    onPointerUp() {
-      this.drag = false;
-    },
-
-    // Check alignment: 4 corners distance
-    checkAlignment() {
-      const pw = this.phoneW, ph = this.phoneH;
-      const phoneCorners = [
-        { x: this.phoneX - pw/2, y: this.phoneY - ph/2 },
-        { x: this.phoneX + pw/2, y: this.phoneY - ph/2 },
-        { x: this.phoneX - pw/2, y: this.phoneY + ph/2 },
-        { x: this.phoneX + pw/2, y: this.phoneY + ph/2 },
-      ];
-
-      const fw = this.filmW, fh = this.filmH;
-      const cos = Math.cos(this.filmRot), sin = Math.sin(this.filmRot);
-      const filmLocal = [
-        { x: -fw/2, y: -fh/2 }, { x: fw/2, y: -fh/2 },
-        { x: -fw/2, y: fh/2 }, { x: fw/2, y: fh/2 },
-      ];
-      const filmCorners = filmLocal.map(c => ({
-        x: this.filmX + c.x * cos - c.y * sin,
-        y: this.filmY + c.x * sin + c.y * cos,
-      }));
-
-      let maxDist = 0;
-      for (let i = 0; i < 4; i++) {
-        const dx = phoneCorners[i].x - filmCorners[i].x;
-        const dy = phoneCorners[i].y - filmCorners[i].y;
-        maxDist = Math.max(maxDist, Math.sqrt(dx*dx + dy*dy));
+      // Drop trajectory line (subtle)
+      if (!this.dropping && !this.landed) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.setLineDash([2, 8]);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy + fh/2);
+        ctx.lineTo(fx, py - ph/2);
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
 
-      if (maxDist < 10) return 100; // Perfect
-      if (maxDist < 25) return 70;
-      if (maxDist < 45) return 40;
-      return 15;
+      // Hint
+      if (this.landed) {
+        const offset = Math.abs(this.filmX - this.phoneX);
+        let result = '';
+        if (offset < 5) result = '完美对齐！';
+        else if (offset < 18) result = '还不错！';
+        else if (offset < 40) result = '有点歪...';
+        else result = '偏太多了！';
+        ctx.fillStyle = offset < 5 ? '#f0d78c' : offset < 18 ? '#7eb8da' : '#db5a5a';
+        ctx.font = 'bold 1.3rem "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(result, width/2, py + ph/2 + 50);
+      } else if (!this.dropping) {
+        const pulse = 0.5 + Math.sin(time * 0.004) * 0.3;
+        ctx.fillStyle = `rgba(240,215,140,${pulse})`;
+        ctx.font = '1rem "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('点击屏幕放下贴膜！', width/2, height * 0.28);
+      }
+    },
+
+    drop() {
+      if (this.dropping || this.landed) return;
+      this.dropping = true;
+      this.dropVy = 0;
+    },
+
+    getScore() {
+      const offset = Math.abs(this.filmX - this.phoneX);
+      if (offset < 5) return 100;
+      if (offset < 15) return 80;
+      if (offset < 30) return 55;
+      if (offset < 50) return 30;
+      return 10;
     },
   };
 
@@ -391,61 +400,33 @@
   // ================================================================
   // Input
   // ================================================================
+  // Click/tap: drop film or interact with bubbles
   canvas.addEventListener('pointerdown', (e) => {
     e.preventDefault();
-    const rect = canvas.getBoundingClientRect();
-    const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
-
-    // Check confirm button
-    if (state === State.ALIGN && confirmBtn.visible &&
-        ex >= confirmBtn.x && ex <= confirmBtn.x + confirmBtn.w &&
-        ey >= confirmBtn.y && ey <= confirmBtn.y + confirmBtn.h) {
-      finishLevel(align.checkAlignment());
-      return;
-    }
-
-    if (state === State.ALIGN) align.onPointerDown(ex, ey);
+    if (state === State.ALIGN) { align.drop(); return; }
+    if (state === State.BUBBLES) { /* handled in move */ }
   });
 
   canvas.addEventListener('pointermove', (e) => {
     e.preventDefault();
     const rect = canvas.getBoundingClientRect();
     const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
-
-    if (state === State.ALIGN) align.onPointerMove(ex, ey);
-    else if (state === State.BUBBLES) bubbles.onPointerMove(ex, ey);
+    if (state === State.BUBBLES) bubbles.onPointerMove(ex, ey);
   });
 
-  canvas.addEventListener('pointerup', (e) => {
-    e.preventDefault();
-    if (state === State.ALIGN) align.onPointerUp();
-  });
-
-  // Rotate: mouse wheel or two-finger
-  canvas.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    if (state === State.ALIGN) {
-      align.filmRot += e.deltaY > 0 ? 0.03 : -0.03;
-    }
-  });
-
-  // Keyboard: rotate with Q/E, confirm with Space
+  // Keyboard
   document.addEventListener('keydown', (e) => {
-    if (state === State.ALIGN) {
-      if (e.key === 'q') align.filmRot -= 0.05;
-      if (e.key === 'e') align.filmRot += 0.05;
-      if (e.key === ' ') { e.preventDefault(); finishLevel(align.checkAlignment()); }
-    }
+    if (e.key === ' ' && state === State.ALIGN) { e.preventDefault(); align.drop(); }
     if (e.key === ' ' && state === State.DONE) { location.reload(); e.preventDefault(); }
   });
 
-  // Confirm button for align (double-tap or button)
-  // We'll add a confirm button drawn on canvas for level 1
+  // Auto-advance after landing
+  // Handled in game loop
 
   // ================================================================
   // Game Loop
   // ================================================================
-  let confirmBtn = { x: 0, y: 0, w: 140, h: 44, visible: false };
+  const confirmBtn = { x: 0, y: 0, w: 0, h: 0, visible: false };
 
   function gameLoop(timestamp) {
     animId = requestAnimationFrame(gameLoop);
@@ -463,29 +444,9 @@
       case State.ALIGN:
         align.update(dt);
         align.draw(ctx, timestamp);
-        // Confirm button
-        confirmBtn.x = width/2 - 70;
-        confirmBtn.y = height * 0.82;
-        confirmBtn.w = 140; confirmBtn.h = 44;
-        confirmBtn.visible = true;
-        ctx.fillStyle = 'rgba(212,168,83,0.85)';
-        const br = 10;
-        const bx = confirmBtn.x, by = confirmBtn.y, bw = confirmBtn.w, bh = confirmBtn.h;
-        ctx.beginPath();
-        ctx.moveTo(bx + br, by); ctx.lineTo(bx + bw - br, by);
-        ctx.arcTo(bx + bw, by, bx + bw, by + br, br);
-        ctx.lineTo(bx + bw, by + bh - br);
-        ctx.arcTo(bx + bw, by + bh, bx + bw - br, by + bh, br);
-        ctx.lineTo(bx + br, by + bh);
-        ctx.arcTo(bx, by + bh, bx, by + bh - br, br);
-        ctx.lineTo(bx, by + br);
-        ctx.arcTo(bx, by, bx + br, by, br);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillStyle = '#1a1a2e';
-        ctx.font = 'bold 1rem "Cinzel", serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('确认对齐 ✔', width/2, by + bh/2 + 5);
+        if (align.landed && align.landTimer > 1.8) {
+          finishLevel(align.getScore());
+        }
         break;
       case State.BUBBLES:
         bubbles.update(dt);
