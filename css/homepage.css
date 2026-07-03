@@ -55,14 +55,6 @@
   display: block;
 }
 
-/* --- Invisible link overlay on character --- */
-#character-link {
-  position: absolute; inset: 0; z-index: 5;
-  pointer-events: none;
-}
-#character-container.lit #character-link {
-  pointer-events: auto;
-}
 
 /* --- Hint Tooltips --- */
 .hint-tooltip {
