@@ -1,159 +1,243 @@
 /* ============================================
-   Century Birthday - Story Game Styles
+   Cat & Mushroom - Visual Novel Styles
+   复古西幻 Retro Western Fantasy
    ============================================ */
 
 #story-container {
   width: 100vw; height: 100vh; height: 100dvh;
   position: relative; overflow: hidden;
-  background: #0a0818;
+  font-family: var(--font-body);
 }
 
-/* Scene background */
+/* ===== Scene Backgrounds ===== */
 #scene-bg {
+  position: absolute; inset: 0; z-index: 0;
+  transition: background 1.2s ease;
+}
+#bg-overlay {
   position: absolute; inset: 0;
-  transition: background 0.8s;
-  background: radial-gradient(ellipse at 50% 70%, #1a1030 0%, #0a0818 60%);
+  transition: opacity 1s;
 }
-#scene-bg.room { background: radial-gradient(ellipse at 50% 70%, #1a1030 0%, #0d0a18 55%); }
-#scene-bg.forest { background: radial-gradient(ellipse at 50% 60%, #0d1a0d 0%, #060d06 55%); }
-#scene-bg.mushroom { background: radial-gradient(ellipse at 50% 50%, #151025 0%, #0a0815 55%); }
+#bg-particles {
+  position: absolute; inset: 0; pointer-events: none;
+}
 
-/* Character area */
-#character-area {
+/* Room scene */
+#scene-bg.room {
+  background: radial-gradient(ellipse at 60% 30%, #2a1a3a 0%, #1a0e24 30%, #0e0818 70%, #060410 100%);
+}
+#scene-bg.room #bg-overlay {
+  background:
+    /* Window light */
+    radial-gradient(ellipse at 60% 25%, rgba(180,160,200,0.15) 0%, transparent 50%),
+    /* Stone wall texture hints */
+    repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px),
+    /* Floor */
+    linear-gradient(0deg, rgba(30,20,40,0.6) 0%, transparent 30%);
+}
+
+/* Forest scene */
+#scene-bg.forest {
+  background: radial-gradient(ellipse at 40% 50%, #0d1a0d 0%, #060d06 50%, #030603 100%);
+}
+#scene-bg.forest #bg-overlay {
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(100,160,80,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(80,140,60,0.04) 0%, transparent 40%),
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(255,255,255,0.008) 60px, rgba(255,255,255,0.008) 61px);
+}
+
+/* Mushroom scene */
+#scene-bg.mushroom {
+  background: radial-gradient(ellipse at 50% 40%, #1a1030 0%, #0e0a1e 50%, #060412 100%);
+}
+#scene-bg.mushroom #bg-overlay {
+  background:
+    radial-gradient(circle at 30% 55%, rgba(180,140,220,0.08) 0%, transparent 30%),
+    radial-gradient(circle at 65% 45%, rgba(150,200,180,0.06) 0%, transparent 25%),
+    radial-gradient(circle at 50% 60%, rgba(200,160,100,0.05) 0%, transparent 35%);
+}
+
+/* ===== Sprite Zone ===== */
+#sprite-zone {
   position: absolute; top: 0; left: 0;
-  width: 100%; height: 62%;
-  display: flex; align-items: flex-end; justify-content: center;
+  width: 100%; height: 100%; z-index: 5;
+  pointer-events: none;
 }
-#character-sprite {
-  font-size: 8rem; transition: all 0.5s;
-  filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+.vn-sprite {
+  position: absolute; bottom: 15%;
+  font-size: 7rem; opacity: 0;
+  transition: all 0.6s ease;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
 }
+.vn-sprite.show { opacity: 1; }
+#sprite-left { left: 8%; }
+#sprite-right { right: 8%; }
+#sprite-center { left: 50%; transform: translateX(-50%); }
+#sprite-center.show { transform: translateX(-50%) translateY(0); }
 
-/* Dialogue box */
-#dialogue-box {
+/* ===== Dialogue Panel ===== */
+#dialogue-panel {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(0deg, rgba(10,8,24,0.97) 0%, rgba(15,12,30,0.9) 80%, transparent 100%);
-  padding: 30px 28px 28px;
-  min-height: 200px; z-index: 10;
+  z-index: 10;
+  background: linear-gradient(0deg,
+    rgba(12,8,20,0.97) 0%,
+    rgba(16,12,28,0.94) 60%,
+    rgba(20,14,32,0.7) 85%,
+    transparent 100%);
+  padding: 20px 24px 24px;
+  display: flex; align-items: flex-start; gap: 16px;
+  min-height: 170px;
   cursor: pointer;
+  border-top: 1px solid rgba(180,150,120,0.15);
 }
 
+/* Avatar */
+#dialogue-avatar { flex-shrink: 0; }
+#avatar-frame {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(200,170,130,0.5);
+  background: radial-gradient(circle, rgba(30,20,40,0.9), rgba(10,8,20,0.95));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(180,150,120,0.15), inset 0 0 12px rgba(0,0,0,0.3);
+}
+#avatar-emoji { font-size: 2rem; }
+
+/* Dialogue body */
+#dialogue-body { flex: 1; padding-top: 2px; }
 #speaker-name {
-  font-family: var(--font-display); font-size: 1rem;
-  color: var(--color-gold-light); margin-bottom: 10px;
-  letter-spacing: 0.06em;
+  font-family: 'MedievalSharp', var(--font-display), serif;
+  font-size: 0.95rem; color: #c8b898;
+  letter-spacing: 0.08em; margin-bottom: 10px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
-
 #dialogue-text {
-  font-family: var(--font-body); font-size: 1.1rem;
-  color: #e0d8f0; line-height: 1.8;
-  max-width: 600px;
+  font-size: 1.05rem; color: #d8d0c8; line-height: 1.85;
+  max-width: 620px; min-height: 2em;
 }
 
-#dialogue-indicator {
-  position: absolute; bottom: 12px; right: 20px;
-  font-size: 0.75rem; color: rgba(255,255,255,0.3);
-  animation: blink 1.5s ease-in-out infinite;
+#dialogue-next {
+  position: absolute; bottom: 10px; right: 20px;
+  font-size: 0.7rem; color: rgba(200,180,150,0.4);
+  animation: nextBlink 2s ease-in-out infinite;
 }
-@keyframes blink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
+@keyframes nextBlink { 0%,100%{opacity:0.3;} 50%{opacity:1;} }
 
-/* Choices */
+/* ===== Choices ===== */
 #choices {
-  position: absolute; bottom: 120px; left: 50%;
+  position: absolute; bottom: 140px; left: 50%;
   transform: translateX(-50%); z-index: 20;
   display: flex; flex-direction: column; gap: 10px;
-  max-width: 400px; width: 90%;
+  max-width: 420px; width: 90%;
 }
 #choices.hidden { display: none; }
 
 .choice-btn {
-  padding: 14px 24px;
-  background: rgba(26,20,50,0.9); border: 1.5px solid rgba(212,168,83,0.4);
-  border-radius: 12px; color: #e0d8f0;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(30,20,45,0.92), rgba(20,12,35,0.92));
+  border: 1.5px solid rgba(200,170,130,0.35);
+  border-radius: 8px; color: #d0c8b8;
   font-family: var(--font-body); font-size: 1rem;
   text-align: left; cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.25s;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  position: relative; overflow: hidden;
+}
+.choice-btn::before {
+  content: '◆'; margin-right: 10px; color: rgba(200,170,130,0.5);
+  font-size: 0.6rem; vertical-align: middle;
 }
 .choice-btn:hover {
-  background: rgba(42,30,70,0.95); border-color: var(--color-gold);
-  color: var(--color-gold-light);
+  background: linear-gradient(135deg, rgba(50,30,70,0.95), rgba(30,20,50,0.95));
+  border-color: rgba(220,190,140,0.7); color: #e8d8c0;
+  transform: translateX(4px);
+  box-shadow: 0 0 20px rgba(180,150,120,0.15);
 }
 
 /* ===== Combat ===== */
 #combat-overlay {
   position: absolute; inset: 0; z-index: 50;
-  background: rgba(8,4,16,0.92); display: flex;
-  flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(30,10,10,0.9), rgba(8,2,2,0.96));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px;
 }
 #combat-overlay.hidden { display: none; }
-
-#combat-hud {
-  display: flex; gap: 40px; margin-bottom: 30px;
+#combat-scene {
+  display: flex; align-items: center; gap: 40px;
 }
-.combat-hp-bar {
-  width: 140px; height: 22px; background: rgba(255,255,255,0.1);
-  border-radius: 11px; overflow: hidden; position: relative;
-  border: 1px solid rgba(255,255,255,0.2);
+#combat-enemy, #combat-player { text-align: center; }
+#enemy-avatar, #player-avatar {
+  font-size: 5rem; transition: transform 0.2s;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
 }
-.combat-hp-bar div {
-  height: 100%; background: linear-gradient(90deg, #db5a5a, #ff8a80);
-  transition: width 0.3s; border-radius: 11px;
+#enemy-avatar.hit { transform: translateX(-15px); }
+#player-avatar.hit { transform: translateX(15px); }
+#enemy-name, #player-name {
+  font-family: 'MedievalSharp', serif; font-size: 0.9rem;
+  color: #c8b898; margin: 4px 0;
 }
-.combat-hp-bar span {
-  position: absolute; top: 0; left: 0; right: 0; text-align: center;
-  font-size: 0.75rem; color: #fff; line-height: 22px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+.hp-bar {
+  width: 120px; height: 8px; background: rgba(255,255,255,0.08);
+  border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
 }
-
-#combat-area {
-  display: flex; justify-content: space-around; width: 300px;
-  margin-bottom: 24px;
+.hp-bar div {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, #c0392b, #e74c3c);
+  transition: width 0.4s;
 }
-#enemy-sprite, #player-sprite {
-  font-size: 4rem; transition: transform 0.2s;
-}
-#enemy-sprite.hit { transform: translateX(-10px); }
-#player-sprite.hit { transform: translateX(10px); }
-
-#combat-actions { display: flex; gap: 16px; margin-bottom: 16px; }
-.combat-btn { padding: 12px 32px; font-size: 1.1rem; }
-
+#combat-vs { font-size: 2rem; color: rgba(255,200,100,0.6); }
 #combat-log {
-  font-family: var(--font-body); color: #9990b0;
-  font-size: 0.9rem; text-align: center; min-height: 24px;
-  max-width: 360px; line-height: 1.6;
+  font-family: var(--font-body); color: #a09080; font-size: 0.9rem;
+  text-align: center; min-height: 1.5em; max-width: 360px; line-height: 1.6;
 }
+#combat-actions { display: flex; gap: 16px; }
+.combat-btn { padding: 12px 36px; font-size: 1.1rem; }
 
 /* ===== Ending ===== */
 #ending-screen {
   position: absolute; inset: 0; z-index: 60;
-  background: rgba(8,4,16,0.95); display: flex;
-  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 40%, rgba(20,12,30,0.95), rgba(5,2,10,0.98));
+  display: flex; align-items: center; justify-content: center;
 }
 #ending-screen.hidden { display: none; }
-
 #ending-content {
   text-align: center; max-width: 480px; padding: 40px;
   animation: fadeUp 1s ease-out;
 }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
 .ending-icon { font-size: 5rem; margin-bottom: 16px; }
 .ending-title {
-  font-family: var(--font-display); font-size: 1.8rem;
-  color: var(--color-gold-light); margin-bottom: 12px;
-  letter-spacing: 0.06em;
+  font-family: 'MedievalSharp', var(--font-display), serif;
+  font-size: 1.8rem; color: #c8b898; margin-bottom: 12px;
+  letter-spacing: 0.08em; text-shadow: 0 0 30px rgba(200,180,150,0.3);
 }
 .ending-subtitle {
-  font-family: var(--font-body); font-size: 1.1rem;
-  color: var(--color-lavender); line-height: 1.8; margin-bottom: 28px;
-  font-style: italic;
+  font-family: var(--font-body); font-size: 1.05rem;
+  color: #a098b0; line-height: 1.9; margin-bottom: 28px;
+}
+
+/* ===== Ambient particles (floating dust/motes) ===== */
+.mote {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: rgba(200,180,150,0.3);
+  animation: moteFloat linear infinite;
+}
+@keyframes moteFloat {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-80vh) translateX(20px); opacity: 0; }
 }
 
 @media (max-width: 480px) {
-  #dialogue-text { font-size: 0.95rem; }
-  .choice-btn { font-size: 0.9rem; padding: 12px 18px; }
-  #character-sprite { font-size: 5rem; }
-  #combat-hud { gap: 20px; }
-  .combat-hp-bar { width: 100px; }
+  #dialogue-text { font-size: 0.9rem; }
+  #dialogue-panel { padding: 14px 14px 18px; min-height: 150px; }
+  #avatar-frame { width: 48px; height: 48px; }
+  #avatar-emoji { font-size: 1.4rem; }
+  .vn-sprite { font-size: 4rem; }
+  .choice-btn { font-size: 0.9rem; padding: 14px 18px; }
+  #combat-scene { gap: 20px; }
+  #enemy-avatar, #player-avatar { font-size: 3rem; }
+  .hp-bar { width: 80px; }
 }

@@ -1,44 +1,89 @@
 /* ============================================
-   Century Birthday - Story Game JS
-   Cat & Mushroom visual novel + combat
+   Cat & Mushroom - Visual Novel Engine
    ============================================ */
 
 (function() {
-  const { BGM, SoundEngine } = window.CenturyApp;
+  const { BGM, STORE, SoundEngine } = window.CenturyApp;
 
+  // DOM
   const sceneBg = document.getElementById('scene-bg');
-  const charSprite = document.getElementById('character-sprite');
+  const bgParticles = document.getElementById('bg-particles');
+  const avatarEmoji = document.getElementById('avatar-emoji');
   const speakerName = document.getElementById('speaker-name');
   const dialogueText = document.getElementById('dialogue-text');
-  const dialogueIndicator = document.getElementById('dialogue-indicator');
-  const dialogueBox = document.getElementById('dialogue-box');
+  const dialogueNext = document.getElementById('dialogue-next');
+  const dialoguePanel = document.getElementById('dialogue-panel');
   const choicesEl = document.getElementById('choices');
   const combatOverlay = document.getElementById('combat-overlay');
-  const endingScreen = document.getElementById('ending-screen');
+  const endingScreenEl = document.getElementById('ending-screen');
   const endingContent = document.getElementById('ending-content');
 
+  // Sprites
+  const spriteLeft = document.getElementById('sprite-left');
+  const spriteRight = document.getElementById('sprite-right');
+  const spriteCenter = document.getElementById('sprite-center');
+
+  // Dialogue queue
   let dialogueQueue = [];
   let currentCallback = null;
   let isTyping = false;
+  let currentFullText = '';
   let typewriterTimer = null;
-  let currentScene = 'room';
-  let storyFlags = {};
+  let remainingChoices = [];
 
-  // ===== Scene management =====
+  // Character definitions
+  const CHARS = {
+    narrator:  { name: '旁白',  avatar: '📖' },
+    me:        { name: '我',    avatar: '🗡️' },
+    girl:      { name: '女孩',  avatar: '😿' },
+    magician:  { name: '魔术师', avatar: '🧙‍♂️' },
+    sadMush:   { name: '忧郁的蘑菇', avatar: '🍄' },
+    happyMush: { name: '乐观的蘑菇', avatar: '🍄' },
+    cat:       { name: '猫',    avatar: '🐱' },
+  };
+
+  // ===== Scene =====
   function setScene(scene) {
-    currentScene = scene;
     sceneBg.className = scene;
-    const sprites = {
-      room: '🧎‍♀️', forest: '🧙‍♂️', mushroom: '🍄', combat: '⚔️'
-    };
-    charSprite.textContent = sprites[scene] || '';
+    // Clear sprites
+    [spriteLeft, spriteRight, spriteCenter].forEach(s => s.classList.remove('show'));
+    // Spawn ambient motes
+    spawnMotes();
   }
 
-  // ===== Dialogue system =====
-  let currentFullText = '';
+  function showSprite(pos, emoji) {
+    const el = pos === 'left' ? spriteLeft : pos === 'right' ? spriteRight : spriteCenter;
+    el.textContent = emoji;
+    el.className = 'vn-sprite show';
+    if (pos === 'center') el.classList.add('show');
+    // Position
+    if (pos === 'left') el.style.left = '8%';
+    else if (pos === 'right') { el.style.left = 'auto'; el.style.right = '8%'; }
+    else el.style.left = '50%';
+  }
 
-  function say(speaker, text, callback) {
-    dialogueQueue.push({ speaker, text, callback });
+  function clearSprites() {
+    [spriteLeft, spriteRight, spriteCenter].forEach(s => s.classList.remove('show'));
+  }
+
+  // ===== Ambient motes =====
+  function spawnMotes() {
+    bgParticles.innerHTML = '';
+    for (let i = 0; i < 15; i++) {
+      const mote = document.createElement('div');
+      mote.className = 'mote';
+      mote.style.left = Math.random() * 100 + '%';
+      mote.style.top = (60 + Math.random() * 40) + '%';
+      mote.style.width = mote.style.height = (1 + Math.random() * 3) + 'px';
+      mote.style.animationDuration = (6 + Math.random() * 10) + 's';
+      mote.style.animationDelay = Math.random() * 8 + 's';
+      bgParticles.appendChild(mote);
+    }
+  }
+
+  // ===== Dialogue =====
+  function say(charKey, text, callback) {
+    dialogueQueue.push({ charKey, text, callback });
     if (dialogueQueue.length === 1 && !isTyping) showNext();
   }
 
@@ -50,10 +95,13 @@
     }
 
     const d = dialogueQueue.shift();
-    speakerName.textContent = d.speaker;
+    const ch = CHARS[d.charKey] || CHARS.narrator;
+
+    speakerName.textContent = ch.name;
+    avatarEmoji.textContent = ch.avatar;
     currentFullText = d.text;
     dialogueText.textContent = '';
-    dialogueIndicator.style.display = 'none';
+    dialogueNext.style.display = 'none';
     currentCallback = d.callback || null;
     typewriter(0);
   }
@@ -62,10 +110,10 @@
     isTyping = true;
     if (i < currentFullText.length) {
       dialogueText.textContent += currentFullText[i];
-      typewriterTimer = setTimeout(() => typewriter(i + 1), 30);
+      typewriterTimer = setTimeout(() => typewriter(i + 1), 28);
     } else {
       isTyping = false;
-      dialogueIndicator.style.display = 'block';
+      dialogueNext.style.display = 'block';
     }
   }
 
@@ -73,166 +121,164 @@
     clearTimeout(typewriterTimer);
     dialogueText.textContent = currentFullText;
     isTyping = false;
-    dialogueIndicator.style.display = 'block';
+    dialogueNext.style.display = 'block';
   }
 
-  function showChoices(choices) {
+  function showChoices(opts) {
     choicesEl.innerHTML = '';
     choicesEl.classList.remove('hidden');
-    choices.forEach(c => {
+    opts.forEach(o => {
       const btn = document.createElement('button');
       btn.className = 'choice-btn';
-      btn.textContent = c.label;
+      btn.textContent = o.label;
       btn.addEventListener('click', () => {
         choicesEl.classList.add('hidden');
-        c.action();
+        o.action();
       });
       choicesEl.appendChild(btn);
     });
   }
 
-  // ===== Story Scenes =====
-  let remainingChoices = [];
-
+  // ===== Story: Scene 1 - Room =====
   function scene1_room() {
     setScene('room');
-    remainingChoices = ['choice1', 'choice2', 'choice3'];
-    say('旁白', '空旷的小房间。一个女孩坐在地上哭。');
-    say('我', '你为什么在哭？');
-    say('女孩', '我的猫变成蘑菇了。', () => showNextChoice());
+    remainingChoices = ['c1', 'c2', 'c3'];
+    showSprite('center', '😿');
+    say('narrator', '空旷的小房间。一个女孩坐在地上哭。');
+    say('me', '你为什么在哭？');
+    say('girl', '我的猫变成蘑菇了。', () => showNextChoice());
   }
 
   function showNextChoice() {
     if (remainingChoices.length === 0) {
+      clearSprites();
       scene2_forest();
       return;
     }
     const opts = [];
-    if (remainingChoices.includes('choice1')) opts.push({ label: '猫怎么会变成蘑菇呢？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice1'); scene1_choice1(); } });
-    if (remainingChoices.includes('choice2')) opts.push({ label: '这是谁干的？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice2'); scene1_choice2(); } });
-    if (remainingChoices.includes('choice3')) opts.push({ label: '是毒蘑菇还是普通的蘑菇？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'choice3'); scene1_choice3(); } });
+    if (remainingChoices.includes('c1')) opts.push({ label: '猫怎么会变成蘑菇呢？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'c1'); choice1(); } });
+    if (remainingChoices.includes('c2')) opts.push({ label: '这是谁干的？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'c2'); choice2(); } });
+    if (remainingChoices.includes('c3')) opts.push({ label: '是毒蘑菇还是普通的蘑菇？', action: () => { remainingChoices = remainingChoices.filter(c => c !== 'c3'); choice3(); } });
     showChoices(opts);
   }
 
-  function scene1_choice1() {
-    say('我', '猫怎么会变成蘑菇呢？');
-    say('女孩', '（忧郁地抬起头瞪了你一眼）我不想提起这件事。', () => showNextChoice());
+  function choice1() {
+    say('me', '猫怎么会变成蘑菇呢？');
+    say('girl', '（忧郁地抬起头瞪了你一眼）我不想提起这件事。', () => showNextChoice());
   }
 
-  function scene1_choice2() {
-    say('我', '这是谁干的？');
-    say('女孩', '一个魔术师。他的嘴脸十分狡猾丑陋，他的魔杖十分冷峻锋利。他是魔鬼的母亲，他是赌徒的儿子。');
-    say('我', '我会帮助你找到魔术师，让他把猫变回来。');
-    say('女孩', '感谢你的帮助，但是当你找到他的时候，请直接干掉他，我不再需要他。', () => showNextChoice());
+  function choice2() {
+    say('me', '这是谁干的？');
+    say('girl', '一个魔术师。他的嘴脸十分狡猾丑陋，他的魔杖十分冷峻锋利。他是魔鬼的母亲，他是赌徒的儿子。');
+    say('me', '我会帮助你找到魔术师，让他把猫变回来。');
+    say('girl', '感谢你的帮助，但是当你找到他的时候，请直接干掉他，我不再需要他。', () => showNextChoice());
   }
 
-  function scene1_choice3() {
-    say('我', '是毒蘑菇还是普通的蘑菇？这或许可以提供一些有用的参考。');
-    say('女孩', '我的猫毛发光泽柔顺，性格温顺柔和。当它变成蘑菇时，它的色彩斑斓鲜艳，让人垂涎欲滴。');
-    say('我', '我知道了，我会帮助你把你的猫变回来的。', () => showNextChoice());
+  function choice3() {
+    say('me', '是毒蘑菇还是普通的蘑菇？这或许可以提供一些有用的参考。');
+    say('girl', '我的猫毛发光泽柔顺，性格温顺柔和。当它变成蘑菇时，它的色彩斑斓鲜艳，让人垂涎欲滴。');
+    say('me', '我知道了，我会帮助你把你的猫变回来的。', () => showNextChoice());
   }
 
+  // ===== Story: Scene 2 - Forest =====
   function scene2_forest() {
     setScene('forest');
-    say('旁白', '你找到了魔术师。他站在一片幽暗的树林中。');
-    say('我', '你好，魔术师。');
-    say('魔术师', '你好，邋遢的女孩。你的头发过长，请让我帮你改善它。');
-    say('我', '我遇到一个伤心的小孩，她的猫变成了蘑菇。请问你知道是怎么回事吗？');
-    say('魔术师', '猫是一种邪恶的生物，它们生性桀骜不驯，却凭借浓密的毛发和优美的外表蛊惑他人。蘑菇是一种善良的生物，它们可以被切成小块——放到披萨里，汉堡里，汤里，炒饭里，包子里，饺子里。', () => {
+    showSprite('right', '🧙‍♂️');
+    say('narrator', '你找到了魔术师。他站在一片幽暗的树林中，魔杖散发着冷光。');
+    say('me', '你好，魔术师。');
+    say('magician', '你好，邋遢的女孩。你的头发过长，请让我帮你改善它。');
+    say('me', '我遇到一个伤心的小孩，她的猫变成了蘑菇。请问你知道是怎么回事吗？');
+    say('magician', '猫是一种邪恶的生物，它们生性桀骜不驯，却凭借浓密的毛发和优美的外表蛊惑他人。蘑菇是一种善良的生物，它们可以被切成小块——放到披萨里，汉堡里，汤里，炒饭里，包子里，饺子里。', () => {
       showChoices([
-        { label: '我讨厌吃蘑菇', action: () => scene2_hateMushroom() },
-        { label: '我喜欢吃蘑菇', action: () => scene2_loveMushroom() },
+        { label: '我讨厌吃蘑菇', action: () => hateMushroom() },
+        { label: '我喜欢吃蘑菇', action: () => loveMushroom() },
       ]);
     });
   }
 
-  function scene2_hateMushroom() {
-    say('我', '我讨厌吃蘑菇。我讨厌披萨里出现蘑菇。我讨厌汉堡里出现蘑菇。我讨厌汤里出现蘑菇。我讨厌炒饭里出现蘑菇。我讨厌包子里出现蘑菇。我讨厌饺子里出现蘑菇。蘑菇可以被切成小块，使它的存在难以察觉，但是它的气味沾染了每一粒米饭。');
-    scene2_afterFood();
+  function hateMushroom() {
+    say('me', '我讨厌吃蘑菇。我讨厌披萨里出现蘑菇。我讨厌汉堡里出现蘑菇。我讨厌汤里出现蘑菇。我讨厌炒饭里出现蘑菇。我讨厌包子里出现蘑菇。我讨厌饺子里出现蘑菇。蘑菇可以被切成小块，使它的存在难以察觉，但是它的气味沾染了每一粒米饭。');
+    afterFood();
   }
 
-  function scene2_loveMushroom() {
-    say('我', '我喜欢吃蘑菇。蘑菇的口感Q弹劲道，味道鲜美可口。我爱吃蘑菇披萨，蘑菇汉堡，蘑菇饭，蘑菇包子，蘑菇饺子，蘑菇汤。世纪最伟大的食物就是蘑菇了。');
-    scene2_afterFood();
+  function loveMushroom() {
+    say('me', '我喜欢吃蘑菇。蘑菇的口感Q弹劲道，味道鲜美可口。我爱吃蘑菇披萨，蘑菇汉堡，蘑菇饭，蘑菇包子，蘑菇饺子，蘑菇汤。世纪最伟大的食物就是蘑菇了。');
+    afterFood();
   }
 
-  function scene2_afterFood() {
-    say('魔术师', '我也是一个明事理的人。既然你的女孩对她的猫变成蘑菇这一件事感到难过，那说明我们的谋求不同。道不同不相为谋。我尊重所有人的意见，但是我不认为我做的事情有错误。');
-    say('我', '你是一个不知悔改的巫师，我要让你意识到自己的错误。');
-    say('旁白', '战斗开始！', () => { startCombat(); });
+  function afterFood() {
+    say('magician', '我也是一个明事理的人。既然你的女孩对她的猫变成蘑菇这一件事感到难过，那说明我们的谋求不同。道不同不相为谋。我尊重所有人的意见，但是我不认为我做的事情有错误。');
+    say('me', '你是一个不知悔改的巫师，我要让你意识到自己的错误。');
+    say('narrator', '战斗开始！', () => { startCombat(); });
   }
 
   // ===== Combat =====
   function startCombat() {
     combatOverlay.classList.remove('hidden');
-    dialogueBox.style.display = 'none';
+    dialoguePanel.style.display = 'none';
     choicesEl.classList.add('hidden');
 
     let playerHP = 100, enemyHP = 100;
     let playerDefending = false;
     const log = document.getElementById('combat-log');
-    const playerFill = document.getElementById('player-hp-fill');
     const enemyFill = document.getElementById('enemy-hp-fill');
-    const enemySprite = document.getElementById('enemy-sprite');
-    const playerSprite = document.getElementById('player-sprite');
+    const playerFill = document.getElementById('player-hp-fill');
+    const enemyAv = document.getElementById('enemy-avatar');
+    const playerAv = document.getElementById('player-avatar');
 
     function updateHP() {
-      playerFill.style.width = Math.max(0, playerHP) + '%';
       enemyFill.style.width = Math.max(0, enemyHP) + '%';
+      playerFill.style.width = Math.max(0, playerHP) + '%';
     }
     updateHP();
+    log.textContent = '魔术师举起魔杖，魔光闪烁！';
 
-    function enemyAttack() {
-      const dmg = Math.floor(Math.random() * 15) + 8;
-      const effective = playerDefending ? Math.floor(dmg * 0.3) : dmg;
+    function enemyTurn() {
+      const dmg = Math.floor(Math.random() * 14) + 7;
+      const effective = playerDefending ? Math.floor(dmg * 0.25) : dmg;
       playerHP -= effective;
-      playerSprite.classList.add('hit');
-      setTimeout(() => playerSprite.classList.remove('hit'), 200);
+      playerAv.classList.add('hit');
+      setTimeout(() => playerAv.classList.remove('hit'), 200);
       log.textContent = playerDefending
-        ? `魔术师攻击！防御挡住了大部分伤害！(-${effective})`
-        : `魔术师攻击！造成 ${effective} 点伤害。`;
+        ? `魔术师施法！防御挡住了大部分伤害 (-${effective})`
+        : `魔术师施法！造成 ${effective} 点伤害。`;
       updateHP();
-      if (playerHP <= 0) {
-        playerHP = 20; // mercy
-        log.textContent += ' 你勉强站起来了...';
-      }
+      if (playerHP <= 0) { playerHP = 15; log.textContent += ' 你咬紧牙关站了起来...'; }
     }
 
     document.getElementById('btn-attack').onclick = () => {
       if (enemyHP <= 0) return;
       playerDefending = false;
-      const dmg = Math.floor(Math.random() * 20) + 12;
+      const dmg = Math.floor(Math.random() * 18) + 14;
       enemyHP -= dmg;
-      enemySprite.classList.add('hit');
-      setTimeout(() => enemySprite.classList.remove('hit'), 200);
-      log.textContent = `你攻击魔术师！造成 ${dmg} 点伤害。`;
+      enemyAv.classList.add('hit');
+      setTimeout(() => enemyAv.classList.remove('hit'), 200);
+      log.textContent = `你挥剑斩向魔术师！造成 ${dmg} 点伤害。`;
       updateHP();
       if (enemyHP <= 0) {
-        log.textContent = '魔术师被击败了！他无力地倒在地上。';
+        log.textContent = '魔术师被击败了！他踉跄着倒下，魔杖滚落在地。';
         setTimeout(() => {
           combatOverlay.classList.add('hidden');
-          dialogueBox.style.display = '';
+          dialoguePanel.style.display = '';
+          clearSprites();
           scene3_mushroom();
-        }, 1500);
-      } else {
-        setTimeout(enemyAttack, 800);
-      }
+        }, 1800);
+      } else { setTimeout(enemyTurn, 900); }
     };
 
     document.getElementById('btn-defend').onclick = () => {
       playerDefending = true;
-      log.textContent = '你摆出防御姿态...';
-      setTimeout(enemyAttack, 600);
+      log.textContent = '你举起盾牌，准备格挡下一次攻击。';
+      setTimeout(enemyTurn, 700);
     };
-
-    log.textContent = '魔术师举起魔杖！选择攻击或防御。';
   }
 
-  // ===== Mushroom scene =====
+  // ===== Scene 3: Mushroom =====
   function scene3_mushroom() {
     setScene('mushroom');
-    say('旁白', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目。');
-    say('我', '这就是那只猫变的蘑菇吗……', () => {
+    showSprite('center', '🍄');
+    say('narrator', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目，在幽暗中微微发光。');
+    say('me', '这就是那只猫变的蘑菇吗……', () => {
       showChoices([
         { label: '这是一个忧郁的蘑菇', action: () => ending_sad() },
         { label: '这是一个乐观的蘑菇', action: () => ending_happy() },
@@ -242,19 +288,18 @@
 
   function ending_sad() {
     setScene('mushroom');
-    charSprite.textContent = '🍄';
-
-    say('我', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。');
-    say('忧郁的蘑菇', '所有品尝过我的人都死了。我感到时间的流逝，自然的残忍。我在永无止境的暗夜中踽踽独行，唯有雨水清洗我。月下三更暖，正午半月弯，而我只是千千万万个蘑菇中最普通的一个。你为什么要与我说话？');
-    say('我', '我遇到一个比你更加忧郁的女孩，她说她怀念你的猫形态。我见不得他人落泪，因此我长途跋涉而来，杀掉了魔术师，想要带你回去。');
-    say('忧郁的蘑菇', '我原本是猫，魔术师把我变成毒蘑菇，让我吸满大自然的雨露。成为猫的时候，我只是静止地存在就可以被解读为诱惑。但成为一个蘑菇，让我的生命中充满了欢笑。');
-    say('忧郁的蘑菇', '夜深人静之时，天地都在为我落泪。吹着风的夜晚，黑夜的思绪逐渐飘离。呐，今后该如何是好呢！');
-    say('我', '那便不必再骗自己了。蘑菇的欢笑，是你说给自己听的谎言；猫的沉默，才是你唯一诚实的时刻。魔术师已死，他的咒语随他埋进了土里，可我还记得你原本的模样——');
-    say('旁白', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……', () => {
-      charSprite.textContent = '🐱';
+    showSprite('center', '🍄');
+    say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。');
+    say('sadMush', '所有品尝过我的人都死了。我感到时间的流逝，自然的残忍。我在永无止境的暗夜中踽踽独行，唯有雨水清洗我。月下三更暖，正午半月弯，而我只是千千万万个蘑菇中最普通的一个。你为什么要与我说话？');
+    say('me', '我遇到一个比你更加忧郁的女孩，她说她怀念你的猫形态。我见不得他人落泪，因此我长途跋涉而来，杀掉了魔术师，想要带你回去。');
+    say('sadMush', '我原本是猫，魔术师把我变成毒蘑菇，让我吸满大自然的雨露。成为猫的时候，我只是静止地存在就可以被解读为诱惑。但成为一个蘑菇，让我的生命中充满了欢笑。');
+    say('sadMush', '夜深人静之时，天地都在为我落泪。吹着风的夜晚，黑夜的思绪逐渐飘离。呐，今后该如何是好呢！');
+    say('me', '那便不必再骗自己了。蘑菇的欢笑，是你说给自己听的谎言；猫的沉默，才是你唯一诚实的时刻。魔术师已死，他的咒语随他埋进了土里，可我还记得你原本的模样——');
+    say('narrator', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……', () => {
+      showSprite('center', '🐱');
     });
-    say('猫', '（吟唱）だから僕はきのこを辞めた。');
-    say('我', '和我一起走吧！', () => {
+    say('cat', '（吟唱）だから僕はきのこを辞めた。');
+    say('me', '和我一起走吧！', () => {
       showEnding('重归猫女', '🐱',
         '女孩高兴地发现猫又回来了，一切都像平常一样照常进行。<br><br>但是在一个没有人注意的角落，有一块土地里彻底失去了一个蘑菇……');
     });
@@ -262,23 +307,22 @@
 
   function ending_happy() {
     setScene('mushroom');
-    charSprite.textContent = '🍄';
-
-    say('我', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。');
-    say('乐观的蘑菇', '我偏爱阴暗潮湿的角落，这里是我的花园。我不用叫，不用舔毛，不用伸懒腰，就可以享受无穷无尽的宁静。自然是造物者之无尽藏，而我只是一个专一的蘑菇。');
-    say('乐观的蘑菇', '每个蘑菇都有自己的造诣。我可以成为猫，让女孩为我尖叫；也可以成为蟑螂，让女孩为我尖叫；也可以成为蘑菇，让女孩为我落泪。固然受人追捧，但是唯有蘑菇才享受一片寂静的雨林。我只是宁静地存在，观赏这一切流逝的情绪，而我始终不变。');
-    say('我', '看来，你已经完全接纳了自己的蘑菇身份。');
-    say('乐观的蘑菇', '我生来就是蘑菇，蘑菇是蘑菇，天经地义。真相啊，爱啊，世界啊，痛苦啊，人生啊，怎么样都好啦。');
-    say('我', '那我便不再多言了——去打扰一场无欲无求的宁静，本身就是一种冒犯。愿你继续做你的蘑菇，快乐地生活一辈子吧。');
-    say('旁白', '你转身离开了。蘑菇在身后安静地发光。', () => {
+    showSprite('center', '🍄');
+    say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。');
+    say('happyMush', '我偏爱阴暗潮湿的角落，这里是我的花园。我不用叫，不用舔毛，不用伸懒腰，就可以享受无穷无尽的宁静。自然是造物者之无尽藏，而我只是一个专一的蘑菇。');
+    say('happyMush', '每个蘑菇都有自己的造诣。我可以成为猫，让女孩为我尖叫；也可以成为蟑螂，让女孩为我尖叫；也可以成为蘑菇，让女孩为我落泪。固然受人追捧，但是唯有蘑菇才享受一片寂静的雨林。我只是宁静地存在，观赏这一切流逝的情绪，而我始终不变。');
+    say('me', '看来，你已经完全接纳了自己的蘑菇身份。');
+    say('happyMush', '我生来就是蘑菇，蘑菇是蘑菇，天经地义。真相啊，爱啊，世界啊，痛苦啊，人生啊，怎么样都好啦。');
+    say('me', '那我便不再多言了——去打扰一场无欲无求的宁静，本身就是一种冒犯。愿你继续做你的蘑菇，快乐地生活一辈子吧。');
+    say('narrator', '你转身离开了。蘑菇在身后安静地发光。', () => {
       showEnding('音乐小子', '🍄',
         '蘑菇带来了一阵短暂的蘑菇风潮，但很快归于平静。<br><br>他不需要被拯救，因为他本来就是完整的。');
     });
   }
 
   function showEnding(title, icon, subtitle) {
-    endingScreen.classList.remove('hidden');
-    dialogueBox.style.display = 'none';
+    endingScreenEl.classList.remove('hidden');
+    dialoguePanel.style.display = 'none';
     endingContent.innerHTML = `
       <div class="ending-icon">${icon}</div>
       <div class="ending-title">达成结局：《${title}》</div>
@@ -290,8 +334,8 @@
   }
 
   // ===== Click to advance =====
-  dialogueBox.addEventListener('click', () => {
-    if (combatOverlay.classList.contains('hidden') && endingScreen.classList.contains('hidden')) {
+  dialoguePanel.addEventListener('click', () => {
+    if (combatOverlay.classList.contains('hidden') && endingScreenEl.classList.contains('hidden')) {
       showNext();
     }
   });

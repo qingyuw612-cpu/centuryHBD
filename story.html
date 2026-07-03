@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🍄 猫与蘑菇 - Century</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=MedievalSharp&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/story.css">
 </head>
@@ -12,42 +12,62 @@
   <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
 
   <div id="story-container">
-    <!-- Background scene -->
-    <div id="scene-bg"></div>
-
-    <!-- Character sprite area -->
-    <div id="character-area">
-      <div id="character-sprite"></div>
+    <!-- Background layers -->
+    <div id="scene-bg">
+      <div id="bg-overlay"></div>
+      <div id="bg-particles"></div>
     </div>
 
-    <!-- Dialogue box -->
-    <div id="dialogue-box">
-      <div id="speaker-name"></div>
-      <div id="dialogue-text"></div>
-      <div id="dialogue-indicator">▼ 点击继续</div>
+    <!-- Main VN area -->
+    <div id="vn-main">
+      <!-- Character sprite zone -->
+      <div id="sprite-zone">
+        <div id="sprite-left" class="vn-sprite"></div>
+        <div id="sprite-center" class="vn-sprite"></div>
+        <div id="sprite-right" class="vn-sprite"></div>
+      </div>
+
+      <!-- Dialogue panel -->
+      <div id="dialogue-panel">
+        <div id="dialogue-avatar">
+          <div id="avatar-frame">
+            <span id="avatar-emoji"></span>
+          </div>
+        </div>
+        <div id="dialogue-body">
+          <div id="speaker-name"></div>
+          <div id="dialogue-text"></div>
+        </div>
+        <div id="dialogue-next">▼</div>
+      </div>
     </div>
 
     <!-- Choices -->
-    <div id="choices"></div>
+    <div id="choices" class="hidden"></div>
 
-    <!-- Combat overlay -->
+    <!-- Combat -->
     <div id="combat-overlay" class="hidden">
-      <div id="combat-hud">
-        <div class="combat-hp-bar"><div id="player-hp-fill"></div><span>我</span></div>
-        <div class="combat-hp-bar"><div id="enemy-hp-fill"></div><span>魔术师</span></div>
+      <div id="combat-scene">
+        <div id="combat-enemy">
+          <div id="enemy-avatar">🧙‍♂️</div>
+          <div id="enemy-name">魔术师</div>
+          <div class="hp-bar"><div id="enemy-hp-fill"></div></div>
+        </div>
+        <div id="combat-vs">⚡</div>
+        <div id="combat-player">
+          <div id="player-avatar">⚔️</div>
+          <div id="player-name">我</div>
+          <div class="hp-bar"><div id="player-hp-fill"></div></div>
+        </div>
       </div>
-      <div id="combat-area">
-        <div id="enemy-sprite">🧙‍♂️</div>
-        <div id="player-sprite">⚔️</div>
-      </div>
+      <div id="combat-log"></div>
       <div id="combat-actions">
         <button class="btn combat-btn" id="btn-attack">⚔️ 攻击</button>
         <button class="btn combat-btn" id="btn-defend">🛡️ 防御</button>
       </div>
-      <div id="combat-log"></div>
     </div>
 
-    <!-- Ending screen -->
+    <!-- Ending -->
     <div id="ending-screen" class="hidden">
       <div id="ending-content"></div>
     </div>
