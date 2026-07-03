@@ -280,26 +280,21 @@
     if (objPhone) objPhone.classList.toggle('completed', phone);
     if (objScissors) objScissors.classList.toggle('completed', haircut);
 
-    // Century lights up when all 3 games done
+    // Century lights up + clickable when all 3 games done
     const allDone = drum && phone && haircut;
-    const charLink = document.getElementById('character-link');
     if (charContainer) {
-      if (allDone) {
+      if (allDone && !charContainer._clickSet) {
         charContainer.classList.add('lit');
         charContainer.style.cursor = 'pointer';
-        charContainer.onclick = function(e) {
+        charContainer._clickSet = true;
+        charContainer.addEventListener('click', (e) => {
           e.preventDefault();
           CenturyApp.navigateTo('story.html');
-        };
-      } else {
+        });
+      } else if (!allDone) {
         charContainer.classList.remove('lit');
         charContainer.style.cursor = '';
-        charContainer.onclick = null;
       }
-    }
-    // Also toggle link visibility
-    if (charLink) {
-      charLink.style.pointerEvents = allDone ? 'auto' : 'none';
     }
 
     // Rose appears when story is done
