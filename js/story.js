@@ -84,7 +84,7 @@
   // ===== Voice (Web Speech API - no API key needed) =====
   // ===== Voice (MP3 playback) =====
   const voiceEl = new Audio();
-  voiceEl.volume = 0.8;
+  voiceEl.volume = 0.55;
   voiceEl.preload = 'auto';
 
   function playVoice(voiceId) {
@@ -160,7 +160,7 @@
     setScene('room');
     remainingChoices = ['c1', 'c2', 'c3'];
     showSprite('center', '😿');
-    say('narrator', '空旷的小房间。一个女孩坐在地上哭。', null, 's01');
+    say('narrator', '空旷的小房间。一个女孩坐在地上哭。');
     say('me', '你为什么在哭？', null, 's02');
     say('girl', '我的猫变成蘑菇了。', () => showNextChoice(), 's03');
   }
@@ -200,7 +200,7 @@
   function scene2_forest() {
     setScene('forest');
     showSprite('right', '🧙‍♂️');
-    say('narrator', '你找到了魔术师。他站在一片幽暗的树林中，魔杖散发着冷光。', null, 's13');
+    say('narrator', '你找到了魔术师。他站在一片幽暗的树林中，魔杖散发着冷光。');
     say('me', '你好，魔术师。', null, 's14');
     say('magician', '你好，邋遢的女孩。你的头发过长，请让我帮你改善它。', null, 's15');
     say('me', '我遇到一个伤心的小孩，她的猫变成了蘑菇。请问你知道是怎么回事吗？', null, 's16');
@@ -225,7 +225,7 @@
   function afterFood() {
     say('magician', '我也是一个明事理的人。既然你的女孩对她的猫变成蘑菇这一件事感到难过，那说明我们的谋求不同。道不同不相为谋。我尊重所有人的意见，但是我不认为我做的事情有错误。', null, 's20');
     say('me', '你是一个不知悔改的巫师，我要让你意识到自己的错误。', null, 's21');
-    say('narrator', '战斗开始！', () => { startCombat(); }, 's22');
+    say('narrator', '战斗开始！', () => { startCombat(); });
   }
 
   // ===== Combat =====
@@ -293,7 +293,7 @@
   function scene3_mushroom() {
     setScene('mushroom');
     showSprite('center', '🍄');
-    say('narrator', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目，在幽暗中微微发光。', null, 's23');
+    say('narrator', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目，在幽暗中微微发光。');
     say('me', '这就是那只猫变的蘑菇吗……', () => {
       showChoices([
         { label: '这是一个忧郁的蘑菇', action: () => ending_sad() },
@@ -313,7 +313,7 @@
     say('me', '那便不必再骗自己了。蘑菇的欢笑，是你说给自己听的谎言；猫的沉默，才是你唯一诚实的时刻。魔术师已死，他的咒语随他埋进了土里，可我还记得你原本的模样——', null, 's30');
     say('narrator', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……', () => {
       showSprite('center', '🐱');
-    }, 's31');
+    });
     say('cat', '（吟唱）だから僕はきのこを辞めた。', null, 's32');
     say('me', '和我一起走吧！', () => {
       showEnding('重归猫女', '🐱',
