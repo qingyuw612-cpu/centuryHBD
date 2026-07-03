@@ -333,10 +333,13 @@
     STORE.setBool('story_complete', true);
   }
 
-  // ===== Click to advance =====
-  dialoguePanel.addEventListener('click', () => {
+  // ===== Click anywhere to advance =====
+  document.getElementById('story-container').addEventListener('click', (e) => {
     if (combatOverlay.classList.contains('hidden') && endingScreenEl.classList.contains('hidden')) {
-      showNext();
+      // Don't advance if clicking a choice button
+      if (!e.target.closest('.choice-btn') && !e.target.closest('#combat-actions')) {
+        showNext();
+      }
     }
   });
 
