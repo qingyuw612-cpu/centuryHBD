@@ -9,34 +9,16 @@
   <link rel="stylesheet" href="css/ending.css">
 </head>
 <body>
-  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
-
   <canvas id="ending-canvas"></canvas>
 
-  <!-- Main content -->
-  <div id="ending-main">
-    <!-- Left panel: game achievements -->
-    <div id="panel-left" class="side-panel">
-      <h3>🎮 冒险记录</h3>
-      <div id="achievements"></div>
-    </div>
-
-    <!-- Center: birthday greeting -->
-    <div id="panel-center">
-      <div id="happy-birthday">Happy Birthday</div>
-      <div id="century-name">Century</div>
-      <div id="final-comment"></div>
-    </div>
-
-    <!-- Right panel: fun stats -->
-    <div id="panel-right" class="side-panel">
-      <h3>📊 趣味统计</h3>
-      <div id="fun-stats"></div>
-    </div>
+  <div id="text-overlay">
+    <div id="happy-birthday" class="reveal-text">Happy Birthday</div>
+    <div id="century-name" class="reveal-text">Century</div>
+    <div id="sub-message" class="reveal-text">✨ 祝你生日快乐 ✨</div>
   </div>
 
-  <!-- Home button -->
-  <div id="ending-links">
+  <div id="ending-links" class="reveal-text">
+    <a href="summary.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('summary.html')">查看冒险记录 📊</a>
     <a href="index.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
   </div>
 

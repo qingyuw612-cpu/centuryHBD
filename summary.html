@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 冒险记录 - Century</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/summary.css">
+</head>
+<body>
+  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
+
+  <div id="summary-container">
+    <div id="summary-scroll">
+      <!-- Left: achievements -->
+      <div id="panel-left" class="side-panel">
+        <h3>🎮 冒险记录</h3>
+        <div id="achievements"></div>
+      </div>
+
+      <!-- Center: weighted comment -->
+      <div id="panel-center">
+        <div id="final-comment"></div>
+        <a href="ending.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">🎂 生日祝福</a>
+      </div>
+
+      <!-- Right: fun stats -->
+      <div id="panel-right" class="side-panel">
+        <h3>📊 趣味统计</h3>
+        <div id="fun-stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/summary.js"></script>
+</body>
+</html>
