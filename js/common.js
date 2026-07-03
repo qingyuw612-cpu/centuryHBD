@@ -57,18 +57,21 @@ const BGM = {
       }
 
       // Auto-resume if was playing before navigation
-      if (STORE.getBool('bgm_playing')) {
-        this.audio.play().catch(() => {
+      const wasPlaying = STORE.getBool('bgm_playing');
+      if (wasPlaying) {
+        this.audio.play().then(() => {
+          STORE.setBool('bgm_playing', true);
+        }).catch(() => {
           // Browser blocked — resume on first user gesture
           const resume = () => {
-            this.audio.play().catch(() => {});
+            this.audio.play().then(() => STORE.setBool('bgm_playing', true)).catch(() => {});
             document.removeEventListener('click', resume);
             document.removeEventListener('touchstart', resume);
             document.removeEventListener('keydown', resume);
           };
-          document.addEventListener('click', resume, { once: true });
-          document.addEventListener('touchstart', resume, { once: true });
-          document.addEventListener('keydown', resume, { once: true });
+          document.addEventListener('click', resume);
+          document.addEventListener('touchstart', resume);
+          document.addEventListener('keydown', resume);
         });
       }
 
