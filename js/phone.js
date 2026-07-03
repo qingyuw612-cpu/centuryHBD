@@ -446,6 +446,25 @@
     }
   }
 
+  // Random Apple model for intro
+  const APPLE_MODELS = [
+    'iPhone 15 Pro Max 1TB 原色钛金属',
+    'iPhone 14 Pro Max 暗紫色',
+    'iPhone 13 mini 星光色',
+    'iPhone SE (第一代) 玫瑰金',
+    'iPhone X 限量红色版',
+    'iPhone 12 Pro 海军蓝',
+    'iPhone 15 Plus 粉色',
+    'iPhone 11 Pro 午夜绿',
+    'iPhone 8 Plus 金色 256GB',
+    'iPhone 4s 乔布斯纪念版',
+  ];
+  const introEl = document.getElementById('phone-intro');
+  if (introEl) {
+    const model = APPLE_MODELS[Math.floor(Math.random() * APPLE_MODELS.length)];
+    introEl.innerHTML = '修好了一个 ' + model + '，<br>可以贴膜了！';
+  }
+
   // Story
   if (storyStart) {
     storyStart.addEventListener('click', () => {
