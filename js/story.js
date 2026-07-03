@@ -84,23 +84,33 @@
   // ===== Voice (Web Speech API - no API key needed) =====
   // ===== Voice (MP3 playback) =====
   const voiceBase = 'assets/voice/';
-  let currentVoice = null;
+  let voiceAudio = null;
+  let voiceUnlocked = false;
+
+  // Unlock audio on first user interaction
+  function unlockVoice() {
+    if (voiceUnlocked) return;
+    voiceAudio = new Audio();
+    voiceAudio.volume = 0.8;
+    // Play silent to unlock
+    voiceAudio.play().then(() => {
+      voiceAudio.pause();
+      voiceAudio.currentTime = 0;
+      voiceUnlocked = true;
+    }).catch(() => {});
+  }
 
   function playVoice(voiceId) {
-    stopVoice();
-    if (!voiceId) return;
-    try {
-      currentVoice = new Audio(voiceBase + voiceId + '.mp3');
-      currentVoice.volume = 0.8;
-      currentVoice.play().catch(() => {});
-    } catch(e) {}
+    if (!voiceId || !voiceAudio) return;
+    voiceAudio.pause();
+    voiceAudio.src = voiceBase + voiceId + '.mp3';
+    voiceAudio.play().catch(() => {});
   }
 
   function stopVoice() {
-    if (currentVoice) {
-      currentVoice.pause();
-      currentVoice.currentTime = 0;
-      currentVoice = null;
+    if (voiceAudio) {
+      voiceAudio.pause();
+      voiceAudio.currentTime = 0;
     }
   }
 
@@ -362,8 +372,8 @@
 
   // ===== Click anywhere to advance =====
   document.getElementById('story-container').addEventListener('click', (e) => {
+    unlockVoice();
     if (combatOverlay.classList.contains('hidden') && endingScreenEl.classList.contains('hidden')) {
-      // Don't advance if clicking a choice button
       if (!e.target.closest('.choice-btn') && !e.target.closest('#combat-actions')) {
         showNext();
       }
