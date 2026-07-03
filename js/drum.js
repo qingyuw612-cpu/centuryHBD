@@ -316,6 +316,9 @@
 
     if (!bestNote) return;
 
+    // Only hit notes near the hit line — ignore notes too far above
+    if (bestDelta > OK_WINDOW * 2) return;
+
     let judgment, baseScore;
     if (bestDelta <= PERFECT_WINDOW)      { judgment = 'perfect'; baseScore = 300; perfects++; }
     else if (bestDelta <= GOOD_WINDOW)    { judgment = 'good';    baseScore = 200; goods++; }

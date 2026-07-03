@@ -93,9 +93,11 @@
       </svg>
     </a>
 
-    <!-- Century Character -->
+    <!-- Century Character (lights up when all games complete) -->
     <div id="character-container">
       <img src="assets/century立绘.png" alt="Century" id="century-character">
+      <a href="story.html" id="character-link"
+         onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')"></a>
     </div>
   </main>
 
@@ -112,11 +114,6 @@
   <button id="bgm-toggle" aria-label="音乐开关" title="音乐开关">
     <span id="bgm-icon">♪</span>
   </button>
-
-  <!-- Hint tooltips -->
-  <div id="hint-game" class="hint-tooltip">这些漂浮的是什么？点一下看看… ✨</div>
-  <div id="hint-century" class="hint-tooltip">我好像…可以触碰他了？</div>
-  <div id="hint-rose" class="hint-tooltip">一朵玫瑰…是送给我的吗？</div>
 
   <!-- Rose portal (appears after story complete) -->
   <a href="ending.html" id="rose-portal" class="floating-object" aria-label="生日祝福"

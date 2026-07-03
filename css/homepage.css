@@ -32,7 +32,7 @@
   max-width: 400px;
   animation: charFloat 4s ease-in-out infinite,
              charTilt 6s ease-in-out infinite;
-  z-index: 10;
+  z-index: 2;
   filter: drop-shadow(0 0 30px rgba(179, 157, 218, 0.3))
           drop-shadow(0 0 60px rgba(126, 184, 218, 0.15));
   transition: filter 0.5s;
@@ -55,30 +55,18 @@
   display: block;
 }
 
-
-/* --- Hint Tooltips --- */
-.hint-tooltip {
-  position: fixed; z-index: 110; pointer-events: none;
-  font-family: var(--font-body); font-size: 1rem;
-  color: #f0d78c; text-align: center;
-  line-height: 1.6; opacity: 0; transition: opacity 0.8s;
-  text-shadow: 0 0 20px rgba(240,215,140,0.6);
+/* --- Invisible link overlay on character --- */
+#character-link {
+  position: absolute; inset: 0; z-index: 5;
+  pointer-events: none;
 }
-.hint-tooltip.show { opacity: 1; animation: hintPulse 2s ease-in-out infinite; }
-.hint-tooltip.gone { display: none; }
-
-@keyframes hintPulse {
-  0%,100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-#hint-game {
-  top: 8%; left: 5%; text-align: left;
+#character-container.lit #character-link {
+  pointer-events: auto;
 }
 
 /* --- Rose Portal --- */
 #rose-portal {
-  position: fixed; bottom: 12%; right: 6%; z-index: 50;
+  position: fixed; bottom: 30%; right: 6%; z-index: 50;
   width: min(120px, 22vw); opacity: 0; pointer-events: none;
   transition: opacity 0.8s, filter var(--transition-normal);
   animation: selfRotate 12s linear infinite;
@@ -111,14 +99,8 @@
 }
 
 .floating-object:hover {
-  filter: drop-shadow(0 0 18px rgba(240,215,140,0.7))
-          drop-shadow(0 0 40px rgba(240,215,140,0.3));
-  transform: scale(1.12);
-}
-.floating-object.completed:hover {
-  filter: drop-shadow(0 0 35px rgba(255,255,200,1))
-          drop-shadow(0 0 60px rgba(240,215,140,0.9))
-          drop-shadow(0 0 110px rgba(240,215,140,0.6));
+  filter: drop-shadow(0 0 18px rgba(240, 215, 140, 0.7))
+          drop-shadow(0 0 40px rgba(240, 215, 140, 0.3));
   transform: scale(1.12);
 }
 
@@ -157,21 +139,6 @@
 @keyframes selfRotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-/* Completed glow */
-.floating-object.completed::before {
-  content: '';
-  position: absolute; inset: -15px;
-  border-radius: 50%;
-  border: 3px solid rgba(240,215,140,0.6);
-  box-shadow: 0 0 25px rgba(240,215,140,0.5), 0 0 60px rgba(240,215,140,0.25);
-  animation: completedPulse 2s ease-in-out infinite;
-  pointer-events: none;
-}
-@keyframes completedPulse {
-  0%,100% { opacity: 0.5; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
 }
 
 /* Hover override - combine rotation + hover */

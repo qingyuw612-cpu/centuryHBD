@@ -190,16 +190,6 @@
   const alreadyVisited = STORE.getBool('first_visit');
   if (alreadyVisited) {
     hideOverlay();
-    BGM.play();
-    // Show game hint if no games completed yet
-    const noGamesDone = !STORE.getBool('drum_complete') && !STORE.getBool('phone_complete') && !STORE.getBool('haircut_complete');
-    if (hintGame && !hintGameShown && noGamesDone) {
-      setTimeout(() => {
-        hintGame.classList.add('show');
-        hintGameShown = true;
-        setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
-      }, 500);
-    }
   }
 
   function onFirstInteraction(e) {
@@ -207,14 +197,6 @@
     STORE.setBool('first_visit', true);
     BGM.play();
     SoundEngine._ensure();
-    // Show game hint after overlay dismissed
-    setTimeout(() => {
-      if (hintGame && !hintGameShown) {
-        hintGame.classList.add('show');
-        hintGameShown = true;
-        setTimeout(() => { if (hintGame.classList.contains('show')) hintGame.classList.add('gone'); }, 8000);
-      }
-    }, 500);
     document.removeEventListener('click', onFirstInteraction);
     document.removeEventListener('touchstart', onFirstInteraction);
     document.removeEventListener('keydown', onFirstInteraction);
@@ -241,82 +223,38 @@
   }
 
   // ===========================================
-  // Century lights up + Rose portal + Hints
+  // Century lights up + Rose portal
   // ===========================================
   const charContainer = document.getElementById('character-container');
   const rosePortal = document.getElementById('rose-portal');
-  const hintGame = document.getElementById('hint-game');
-  let hintGameShown = false;
-
-  // Hide hint on click
-  document.addEventListener('click', () => {
-    if (hintGame && hintGame.classList.contains('show')) {
-      hintGame.classList.remove('show');
-      hintGame.classList.add('gone');
-    }
-  });
 
   function checkProgress() {
-    var drum = STORE.getBool('drum_complete');
-    var phone = STORE.getBool('phone_complete');
-    var haircut = STORE.getBool('haircut_complete');
-    var story = STORE.getBool('story_complete');
+    const drum = STORE.getBool('drum_complete');
+    const phone = STORE.getBool('phone_complete');
+    const haircut = STORE.getBool('haircut_complete');
+    const story = STORE.getBool('story_complete');
 
-    // Debug: show status in console
-    console.log('[checkProgress] drum='+drum+' phone='+phone+' haircut='+haircut+' story='+story);
-
-    var allDone = drum && phone && haircut;
-    var c = document.getElementById('character-container');
-    if (c) {
-      if (allDone) {
-        c.classList.add('lit');
-        c.style.cursor = 'pointer';
-        c.style.outline = '3px solid gold'; // visible debug
+    // Century lights up when all 3 games done
+    if (charContainer) {
+      if (drum && phone && haircut) {
+        charContainer.classList.add('lit');
       } else {
-        c.classList.remove('lit');
-        c.style.cursor = '';
-        c.style.outline = '';
+        charContainer.classList.remove('lit');
       }
     }
 
-    var r = document.getElementById('rose-portal');
-    if (r && story) r.classList.add('visible');
-
-    // Hint
-    var hg = document.getElementById('hint-game');
-    if (hg && !window._hintGameShown && !drum && !phone && !haircut) {
-      hg.classList.add('show');
-      window._hintGameShown = true;
-      setTimeout(function() { if (hg.classList.contains('show')) hg.classList.add('gone'); }, 8000);
+    // Rose appears when story is done
+    if (rosePortal) {
+      if (story) {
+        rosePortal.classList.add('visible');
+      } else {
+        rosePortal.classList.remove('visible');
+      }
     }
   }
 
   checkProgress();
   setInterval(checkProgress, 2000);
-
-  // ===========================================
-  // Century click: bound immediately, checks condition on click
-  // ===========================================
-  function bindCentury() {
-    var c = document.getElementById('character-container');
-    if (c) {
-      c.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var d = STORE.getBool('drum_complete');
-        var p = STORE.getBool('phone_complete');
-        var h = STORE.getBool('haircut_complete');
-        if (d && p && h) {
-          CenturyApp.navigateTo('story.html');
-        }
-      });
-    }
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bindCentury);
-  } else {
-    bindCentury();
-  }
 
   // ===========================================
   // Floating object hover sound hint
