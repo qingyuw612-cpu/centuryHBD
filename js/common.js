@@ -375,13 +375,32 @@ window.CenturyApp.SoundEngine = SoundEngine;
 // Navigation Helper
 // =============================================
 window.CenturyApp.navigateTo = function(url) {
-  // Save BGM state before navigation
   if (BGM.audio && !BGM.audio.paused) {
     STORE.set('bgm_time', BGM.audio.currentTime.toString());
     STORE.setBool('bgm_playing', true);
   }
   document.body.classList.add('page-exit');
   setTimeout(() => { window.location.href = url; }, 200);
+};
+
+// Section switching (no page reload — BGM continues)
+window.CenturyApp.showSection = function(name) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+  var home = document.getElementById('section-home');
+  if (home) home.style.display = 'none';
+
+  if (name === 'home') {
+    if (home) home.style.display = '';
+    return;
+  }
+
+  var sec = document.getElementById('section-' + name);
+  if (sec) {
+    sec.classList.remove('hidden');
+    // Trigger section-specific init
+    if (name === 'ending' && window.CenturyApp.startEnding) window.CenturyApp.startEnding();
+    if (name === 'summary' && window.CenturyApp.loadSummary) window.CenturyApp.loadSummary();
+  }
 };
 
 // =============================================

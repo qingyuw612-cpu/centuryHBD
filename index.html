@@ -9,154 +9,120 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/common.css">
   <link rel="stylesheet" href="css/homepage.css">
+  <link rel="stylesheet" href="css/ending.css">
+  <link rel="stylesheet" href="css/summary.css">
 </head>
 <body>
 
-  <!-- Starfield Canvas -->
-  <canvas id="starfield"></canvas>
+  <!-- ==================== HOME SECTION ==================== -->
+  <div id="section-home">
+    <canvas id="starfield"></canvas>
+    <main id="scene">
+      <!-- Drum -->
+      <a href="drum.html" class="floating-object" id="obj-drum" onclick="event.preventDefault(); CenturyApp.navigateTo('drum.html')">
+        <svg viewBox="0 0 120 120" class="obj-svg">
+          <ellipse cx="60" cy="75" rx="45" ry="12" fill="#3a2a1a" stroke="#d4a853" stroke-width="2"/>
+          <rect x="15" y="35" width="90" height="40" fill="url(#drum-body)" stroke="#d4a853" stroke-width="2"/>
+          <ellipse cx="60" cy="35" rx="45" ry="12" fill="#f5f0e8" stroke="#d4a853" stroke-width="2"/>
+          <ellipse cx="60" cy="35" rx="38" ry="9" fill="none" stroke="#ccc" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <ellipse cx="60" cy="35" rx="20" ry="5" fill="none" stroke="#ccc" stroke-width="0.5"/>
+          <line x1="20" y1="45" x2="100" y2="45" stroke="#c0b090" stroke-width="0.8"/>
+          <line x1="22" y1="50" x2="98" y2="50" stroke="#c0b090" stroke-width="0.8"/>
+          <line x1="24" y1="55" x2="96" y2="55" stroke="#c0b090" stroke-width="0.8"/>
+          <line x1="35" y1="70" x2="25" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
+          <line x1="85" y1="70" x2="95" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
+          <ellipse cx="60" cy="75" rx="50" ry="35" fill="none" stroke="rgba(240,215,140,0.15)" stroke-width="4"/>
+          <defs><linearGradient id="drum-body" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4a3520"/><stop offset="30%" stop-color="#6b4d30"/><stop offset="70%" stop-color="#6b4d30"/><stop offset="100%" stop-color="#3a2a1a"/></linearGradient></defs>
+        </svg>
+      </a>
+      <!-- Phone -->
+      <a href="phone.html" class="floating-object" id="obj-phone" onclick="event.preventDefault(); CenturyApp.navigateTo('phone.html')">
+        <svg viewBox="0 0 100 180" class="obj-svg">
+          <rect x="20" y="10" width="60" height="160" rx="12" ry="12" fill="#1c1c2e" stroke="#d4a853" stroke-width="2.5"/>
+          <rect x="27" y="25" width="46" height="100" rx="4" ry="4" fill="#0a0a1e"/>
+          <rect x="30" y="28" width="40" height="94" rx="3" ry="3" fill="#12122a"/>
+          <circle cx="50" cy="65" r="15" fill="none" stroke="rgba(126,184,218,0.3)" stroke-width="2"/>
+          <circle cx="50" cy="65" r="8" fill="rgba(126,184,218,0.2)"/>
+          <circle cx="50" cy="142" r="8" fill="none" stroke="#555" stroke-width="1.5"/>
+          <circle cx="50" cy="18" r="3" fill="#d4a853"/>
+          <rect x="40" y="12" width="20" height="3" rx="1.5" fill="#444"/>
+          <rect x="15" y="5" width="70" height="170" rx="16" fill="none" stroke="rgba(179,157,218,0.15)" stroke-width="4"/>
+        </svg>
+      </a>
+      <!-- Scissors -->
+      <a href="haircut.html" class="floating-object" id="obj-scissors" onclick="event.preventDefault(); CenturyApp.navigateTo('haircut.html')">
+        <svg viewBox="0 0 140 140" class="obj-svg">
+          <path d="M 40 20 L 105 85 L 100 90 L 35 25 Z" fill="#d0d5e0" stroke="#999" stroke-width="1"/>
+          <path d="M 40 20 L 105 85" stroke="#fff" stroke-width="0.8" opacity="0.6"/>
+          <path d="M 100 20 L 35 85 L 40 90 L 105 25 Z" fill="#c0c5d0" stroke="#999" stroke-width="1"/>
+          <path d="M 100 20 L 35 85" stroke="#fff" stroke-width="0.8" opacity="0.4"/>
+          <circle cx="70" cy="55" r="5" fill="#d4a853" stroke="#a67c30" stroke-width="1"/>
+          <ellipse cx="28" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(-20, 28, 112)"/>
+          <ellipse cx="112" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(20, 112, 112)"/>
+          <circle cx="70" cy="65" r="55" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="5"/>
+        </svg>
+      </a>
+      <!-- Century -->
+      <div id="character-container">
+        <img src="assets/century立绘.png" alt="Century" id="century-character">
+        <a href="story.html" id="character-link" onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')"></a>
+      </div>
+      <!-- Rose -->
+      <a href="#" class="floating-object" id="rose-portal" onclick="event.preventDefault(); CenturyApp.showSection('ending')">
+        <svg viewBox="0 0 140 140" class="obj-svg">
+          <path d="M 70 68 Q 67 85 70 105 Q 72 112 68 118" stroke="#a67c30" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <line x1="69" y1="82" x2="62" y2="78" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
+          <line x1="70" y1="95" x2="77" y2="91" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
+          <path d="M 68 88 Q 50 82 48 90 Q 52 95 68 92" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
+          <path d="M 69 98 Q 85 93 88 100 Q 84 106 69 102" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
+          <path d="M 70 55 Q 55 20 40 35 Q 35 50 55 60 Q 45 25 60 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 70 55 Q 85 20 100 35 Q 105 50 85 60 Q 95 25 80 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 70 55 Q 50 10 60 5 Q 75 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 70 55 Q 90 10 80 5 Q 65 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 55 50 Q 30 30 25 45 Q 28 55 50 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 85 50 Q 110 30 115 45 Q 112 55 90 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 70 52 Q 60 30 55 40 Q 55 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
+          <path d="M 70 52 Q 80 30 85 40 Q 85 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
+          <path d="M 70 50 Q 62 38 70 35 Q 78 38 70 50 Z" fill="#e07080" stroke="#f0d78c" stroke-width="1"/>
+          <circle cx="70" cy="47" r="8" fill="#f0d78c" stroke="#d4a853" stroke-width="1.5"/>
+          <path d="M 67 47 Q 70 42 73 47 Q 70 52 67 47" fill="none" stroke="#a67c30" stroke-width="1"/>
+          <circle cx="70" cy="45" r="50" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="3"/>
+        </svg>
+      </a>
+    </main>
+    <div id="bgm-overlay"><div id="bgm-overlay-content"><div class="overlay-star">✦</div><p class="overlay-text">点击任意处开始</p><p class="overlay-sub">Tap anywhere to begin</p></div></div>
+    <button id="bgm-toggle" aria-label="音乐开关"><span id="bgm-icon">♪</span></button>
+  </div>
 
-  <!-- Main Scene Container -->
-  <main id="scene">
-
-    <!-- Floating Object: Snare Drum (top-right) -->
-    <a href="drum.html" class="floating-object" id="obj-drum" aria-label="打鼓游戏"
-       onclick="event.preventDefault(); CenturyApp.navigateTo('drum.html')">
-      <svg viewBox="0 0 120 120" class="obj-svg">
-        <!-- Drum body (cylinder) -->
-        <ellipse cx="60" cy="75" rx="45" ry="12" fill="#3a2a1a" stroke="#d4a853" stroke-width="2"/>
-        <rect x="15" y="35" width="90" height="40" fill="url(#drum-body)" stroke="#d4a853" stroke-width="2"/>
-        <ellipse cx="60" cy="35" rx="45" ry="12" fill="#f5f0e8" stroke="#d4a853" stroke-width="2"/>
-        <!-- Drum head pattern -->
-        <ellipse cx="60" cy="35" rx="38" ry="9" fill="none" stroke="#ccc" stroke-width="0.5" stroke-dasharray="3,3"/>
-        <ellipse cx="60" cy="35" rx="20" ry="5" fill="none" stroke="#ccc" stroke-width="0.5"/>
-        <!-- Snares -->
-        <line x1="20" y1="45" x2="100" y2="45" stroke="#c0b090" stroke-width="0.8"/>
-        <line x1="22" y1="50" x2="98" y2="50" stroke="#c0b090" stroke-width="0.8"/>
-        <line x1="24" y1="55" x2="96" y2="55" stroke="#c0b090" stroke-width="0.8"/>
-        <!-- Drum legs -->
-        <line x1="35" y1="70" x2="25" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
-        <line x1="85" y1="70" x2="95" y2="105" stroke="#8a7a5a" stroke-width="3" stroke-linecap="round"/>
-        <!-- Glow -->
-        <ellipse cx="60" cy="75" rx="50" ry="35" fill="none" stroke="rgba(240,215,140,0.15)" stroke-width="4"/>
-        <defs>
-          <linearGradient id="drum-body" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#4a3520"/>
-            <stop offset="30%" stop-color="#6b4d30"/>
-            <stop offset="70%" stop-color="#6b4d30"/>
-            <stop offset="100%" stop-color="#3a2a1a"/>
-          </linearGradient>
-        </defs>
-      </svg>
-    </a>
-
-    <!-- Floating Object: Phone (bottom-left) -->
-    <a href="phone.html" class="floating-object" id="obj-phone" aria-label="修手机"
-       onclick="event.preventDefault(); CenturyApp.navigateTo('phone.html')">
-      <svg viewBox="0 0 100 180" class="obj-svg">
-        <!-- Phone body -->
-        <rect x="20" y="10" width="60" height="160" rx="12" ry="12" fill="#1c1c2e" stroke="#d4a853" stroke-width="2.5"/>
-        <!-- Screen -->
-        <rect x="27" y="25" width="46" height="100" rx="4" ry="4" fill="#0a0a1e"/>
-        <rect x="30" y="28" width="40" height="94" rx="3" ry="3" fill="#12122a"/>
-        <!-- Screen content glow -->
-        <circle cx="50" cy="65" r="15" fill="none" stroke="rgba(126,184,218,0.3)" stroke-width="2"/>
-        <circle cx="50" cy="65" r="8" fill="rgba(126,184,218,0.2)"/>
-        <!-- Home button -->
-        <circle cx="50" cy="142" r="8" fill="none" stroke="#555" stroke-width="1.5"/>
-        <!-- Camera dot -->
-        <circle cx="50" cy="18" r="3" fill="#d4a853"/>
-        <!-- Speaker -->
-        <rect x="40" y="12" width="20" height="3" rx="1.5" fill="#444"/>
-        <!-- Glow -->
-        <rect x="15" y="5" width="70" height="170" rx="16" fill="none" stroke="rgba(179,157,218,0.15)" stroke-width="4"/>
-      </svg>
-    </a>
-
-    <!-- Floating Object: Scissors (top-left) -->
-    <a href="haircut.html" class="floating-object" id="obj-scissors" aria-label="理发游戏"
-       onclick="event.preventDefault(); CenturyApp.navigateTo('haircut.html')">
-      <svg viewBox="0 0 140 140" class="obj-svg">
-        <!-- Blade 1 -->
-        <path d="M 40 20 L 105 85 L 100 90 L 35 25 Z" fill="#d0d5e0" stroke="#999" stroke-width="1"/>
-        <path d="M 40 20 L 105 85" stroke="#fff" stroke-width="0.8" opacity="0.6"/>
-        <!-- Blade 2 -->
-        <path d="M 100 20 L 35 85 L 40 90 L 105 25 Z" fill="#c0c5d0" stroke="#999" stroke-width="1"/>
-        <path d="M 100 20 L 35 85" stroke="#fff" stroke-width="0.8" opacity="0.4"/>
-        <!-- Pivot screw -->
-        <circle cx="70" cy="55" r="5" fill="#d4a853" stroke="#a67c30" stroke-width="1"/>
-        <!-- Handle 1 -->
-        <ellipse cx="28" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(-20, 28, 112)"/>
-        <!-- Handle 2 -->
-        <ellipse cx="112" cy="112" rx="18" ry="12" fill="none" stroke="#d4a853" stroke-width="4" transform="rotate(20, 112, 112)"/>
-        <!-- Glow -->
-        <circle cx="70" cy="65" r="55" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="5"/>
-      </svg>
-    </a>
-
-    <!-- Century Character (lights up when all games complete) -->
-    <div id="character-container">
-      <img src="assets/century立绘.png" alt="Century" id="century-character">
-      <a href="story.html" id="character-link"
-         onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')"></a>
+  <!-- ==================== ENDING SECTION ==================== -->
+  <div id="section-ending" class="page-section hidden">
+    <canvas id="ending-canvas"></canvas>
+    <div id="text-overlay">
+      <div id="happy-birthday" class="reveal-text">Happy Birthday</div>
+      <div id="century-name" class="reveal-text">Century</div>
+      <div id="sub-message" class="reveal-text">✨ 祝你生日快乐 ✨</div>
     </div>
-  </main>
-
-  <!-- BGM Init Overlay -->
-  <div id="bgm-overlay">
-    <div id="bgm-overlay-content">
-      <div class="overlay-star">✦</div>
-      <p class="overlay-text">点击任意处开始</p>
-      <p class="overlay-sub">Tap anywhere to begin</p>
+    <div id="ending-links" class="reveal-text">
+      <a href="#" class="btn" onclick="CenturyApp.showSection('summary')">查看冒险记录 📊</a>
+      <a href="#" class="btn" onclick="CenturyApp.showSection('home')">返回首页</a>
     </div>
   </div>
 
-  <!-- BGM Toggle Button -->
-  <button id="bgm-toggle" aria-label="音乐开关" title="音乐开关">
-    <span id="bgm-icon">♪</span>
-  </button>
-
-  <!-- Rose portal (appears after story complete) -->
-  <a href="ending.html" id="rose-portal" class="floating-object" aria-label="生日祝福"
-     onclick="event.preventDefault(); CenturyApp.navigateTo('ending.html')">
-    <svg viewBox="0 0 140 140" class="obj-svg">
-      <!-- Stem with thorns -->
-      <path d="M 70 68 Q 67 85 70 105 Q 72 112 68 118" stroke="#a67c30" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <line x1="69" y1="82" x2="62" y2="78" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
-      <line x1="70" y1="95" x2="77" y2="91" stroke="#a67c30" stroke-width="2" stroke-linecap="round"/>
-      <!-- Left leaf -->
-      <path d="M 68 88 Q 50 82 48 90 Q 52 95 68 92" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
-      <!-- Right leaf -->
-      <path d="M 69 98 Q 85 93 88 100 Q 84 106 69 102" fill="#6b4d30" stroke="#d4a853" stroke-width="1"/>
-
-      <!-- Outer petals - warm gold/rose tones -->
-      <path d="M 70 55 Q 55 20 40 35 Q 35 50 55 60 Q 45 25 60 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 70 55 Q 85 20 100 35 Q 105 50 85 60 Q 95 25 80 20 Q 70 18 70 35 Z" fill="#c04050" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 70 55 Q 50 10 60 5 Q 75 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 70 55 Q 90 10 80 5 Q 65 0 70 35 Z" fill="#a03040" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 55 50 Q 30 30 25 45 Q 28 55 50 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 85 50 Q 110 30 115 45 Q 112 55 90 55 Z" fill="#d05060" stroke="#d4a853" stroke-width="1.5"/>
-
-      <!-- Middle petals -->
-      <path d="M 70 52 Q 60 30 55 40 Q 55 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
-      <path d="M 70 52 Q 80 30 85 40 Q 85 50 70 55 Z" fill="#e06070" stroke="#f0d78c" stroke-width="1"/>
-      <path d="M 70 50 Q 62 38 70 35 Q 78 38 70 50 Z" fill="#e07080" stroke="#f0d78c" stroke-width="1"/>
-
-      <!-- Center spiral -->
-      <circle cx="70" cy="47" r="8" fill="#f0d78c" stroke="#d4a853" stroke-width="1.5"/>
-      <path d="M 67 47 Q 70 42 73 47 Q 70 52 67 47" fill="none" stroke="#a67c30" stroke-width="1"/>
-
-      <!-- Glow -->
-      <circle cx="70" cy="45" r="50" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="3"/>
-      <circle cx="70" cy="45" r="55" fill="none" stroke="rgba(212,168,83,0.08)" stroke-width="2"/>
-    </svg>
-  </a>
-
-  <noscript>
-    <div>请启用 JavaScript 以查看此页面。</div>
-    <div>Please enable JavaScript to view this page.</div>
-  </noscript>
+  <!-- ==================== SUMMARY SECTION ==================== -->
+  <div id="section-summary" class="page-section hidden">
+    <div id="summary-container">
+      <div id="summary-scroll">
+        <div id="panel-left" class="side-panel"><h3>🎮 冒险记录</h3><div id="achievements"></div></div>
+        <div id="panel-center"><div id="final-comment"></div><a href="#" class="btn" onclick="CenturyApp.showSection('ending')">🎂 生日祝福</a></div>
+        <div id="panel-right" class="side-panel"><h3>📊 趣味统计</h3><div id="fun-stats"></div></div>
+      </div>
+    </div>
+    <a href="#" class="back-btn" style="position:fixed;top:16px;left:16px;z-index:1000" onclick="CenturyApp.showSection('home')">◂</a>
+  </div>
 
   <script src="js/common.js"></script>
   <script src="js/homepage.js"></script>
+  <script src="js/ending.js"></script>
+  <script src="js/summary.js"></script>
 </body>
 </html>

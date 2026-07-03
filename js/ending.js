@@ -82,7 +82,16 @@
     if(timeSinceStart>=6){document.getElementById('ending-links').style.opacity='1';}
   }
 
-  BGM.init(); BGM.play();
-  gameLoop._lastTs=performance.now();
-  animId=requestAnimationFrame(gameLoop);
+  var started=false;
+  window.CenturyApp.startEnding=function(){
+    if(started)return;started=true;
+    gameLoop._lastTs=performance.now();
+    animId=requestAnimationFrame(gameLoop);
+  };
+  // standalone page
+  if(!document.getElementById('section-home')){
+    BGM.init();BGM.play();
+    gameLoop._lastTs=performance.now();
+    animId=requestAnimationFrame(gameLoop);
+  }
 })();

@@ -107,6 +107,10 @@ button {
   transform: translateY(0);
 }
 
+/* --- Page Sections (SPA) --- */
+.page-section { display: block; }
+.page-section.hidden { display: none; }
+
 /* --- Page Transitions --- */
 .page-enter {
   animation: fadeIn 0.5s ease-out;

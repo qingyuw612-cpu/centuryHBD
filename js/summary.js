@@ -2,7 +2,7 @@
    Century Birthday - Summary Page JS
    ============================================ */
 
-(function() {
+window.CenturyApp.loadSummary = function() {
   const { STORE } = window.CenturyApp;
 
   const drumScore = STORE.getInt('drum_score') || 0;
@@ -107,4 +107,6 @@
   if (drumMaxCombo >= 30) comment += ` 最高连击 <b>${drumMaxCombo}</b>，鼓都为你颤抖。`;
 
   document.getElementById('final-comment').innerHTML = comment;
-})();
+};
+// Auto-run if standalone page
+if (!document.getElementById('section-home')) { window.CenturyApp.loadSummary(); }
