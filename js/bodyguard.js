@@ -43,15 +43,16 @@
   const BIG_IMAGES = [];
   const CAMERA_EMOJIS = ['📸','📷','🎥','📹'];
 
-  // Preload Big images
-  const imageFiles = ['assets/bodyguard/比格4.png', 'assets/bodyguard/比格5.jpg'];
+  // Preload Big images — auto-scan: 比格1~20 .png/.jpg/.jpeg/.webp
   let imagesLoaded = 0;
-  imageFiles.forEach(src => {
-    const img = new Image();
-    img.onload = () => { imagesLoaded++; };
-    img.src = src;
-    BIG_IMAGES.push(img);
-  });
+  for (let i = 1; i <= 20; i++) {
+    ['png', 'jpg', 'jpeg', 'webp'].forEach(ext => {
+      const img = new Image();
+      img.onload = () => { imagesLoaded++; BIG_IMAGES.push(img); };
+      img.onerror = () => {};
+      img.src = `assets/bodyguard/比格${i}.${ext}`;
+    });
+  }
 
   class Target {
     constructor(type) {
