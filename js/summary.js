@@ -52,6 +52,20 @@ window.CenturyApp.loadSummary = function() {
     icon:'·', name:'贴膜', title: phoneTitles[getPhoneGrade()]||'贴膜工', grade: getPhoneGrade(),
     sub: `${phoneScore}分${phoneBestTime?' · 最快 '+phoneBestTime+' 秒':''}${phonePlays>1?' · 共 '+phonePlays+' 次':''}`,
   });
+  var bgPlays = STORE.getInt('bodyguard_plays') || 0;
+  var bgScore = STORE.getInt('bodyguard_score') || 0;
+  var bgCaught = STORE.getInt('bodyguard_caught') || 0;
+  var bgCamera = STORE.getInt('bodyguard_camera') || 0;
+  if (bgPlays > 0) {
+    var bgPct = bgCaught / Math.max(1, bgCaught + bgCamera);
+    var bgGrade = bgPct >= 0.9 ? 'S' : bgPct >= 0.7 ? 'A' : bgPct >= 0.5 ? 'B' : 'C';
+    var bgTitles = { S:'鹰眼', A:'火眼金睛', B:'合格保安', C:'不太在状态' };
+    games.push({
+      icon:'·', name:'上班', title: bgTitles[bgGrade]||'保安', grade: bgGrade,
+      sub: `${bgScore}分 · 接住 ${bgCaught} · 被拍 ${bgCamera}${bgPlays>1?' · 共 '+bgPlays+' 次':''}`,
+    });
+  }
+
   if (storyComplete) {
     var endingType = STORE.get('story_ending') || '未知';
     games.push({
@@ -81,6 +95,7 @@ window.CenturyApp.loadSummary = function() {
   if (drumPlays > 1) funs.push(`打鼓 <span>${drumPlays}</span> 次`);
   if (haircutPlays > 1) funs.push(`理发 <span>${haircutPlays}</span> 次`);
   if (phonePlays > 1) funs.push(`贴膜 <span>${phonePlays}</span> 次`);
+  if (bgPlays > 0) funs.push(`接住比格 <span>${bgCaught}</span> 次 · 被拍 <span>${bgCamera}</span> 次`);
   if (storyComplete) funs.push('结局：' + (STORE.get('story_ending')||'未知'));
   if (funs.length === 0) funs.push('暂无数据');
   funEl.innerHTML = funs.map(f => `<div class="stat-item">${f}</div>`).join('');
@@ -108,6 +123,13 @@ window.CenturyApp.loadSummary = function() {
     if (pg==='S') parts.push('贴膜技艺堪称完美，「'+pt+'」当之无愧');
     else if (phoneBestTime&&phoneBestTime<10) parts.push('手速惊人，'+phoneBestTime+'秒清空气泡');
     else parts.push('「'+pt+'」——贴膜之路仍在继续');
+  }
+  if (bgPlays > 0) {
+    var bgGrade2 = bgPct >= 0.9 ? 'S' : bgPct >= 0.7 ? 'A' : bgPct >= 0.5 ? 'B' : 'C';
+    var bgt = { S:'鹰眼', A:'火眼金睛', B:'合格保安', C:'不太在状态' }[bgGrade2]||'保安';
+    if (bgGrade2==='S') parts.push('眼神锐利如鹰，上班零失误');
+    else if (bgCamera>=5) parts.push('上班时被拍了 '+bgCamera+' 次，小红书都传遍了');
+    else parts.push('作为「'+bgt+'」，完成了今天的上班');
   }
   if (storyComplete) {
     parts.push('在猫与蘑菇的故事中抵达了「'+(STORE.get('story_ending')||'未知')+'」');

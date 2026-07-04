@@ -260,6 +260,10 @@
 
     STORE.setBool('bodyguard_complete', true);
     STORE.set('bodyguard_score', score.toString());
+    STORE.set('bodyguard_caught', totalCaught.toString());
+    STORE.set('bodyguard_camera', cameraHits.toString());
+    var plays = (STORE.getInt('bodyguard_plays') || 0) + 1;
+    STORE.set('bodyguard_plays', plays.toString());
     SoundEngine.playChime();
   }
 

@@ -230,6 +230,18 @@
   const charContainer = document.getElementById('character-container');
   const rosePortal = document.getElementById('rose-portal');
 
+  // Century click: requires all 4 games complete
+  const charLink = document.getElementById('character-link');
+  if (charLink) {
+    charLink.addEventListener('click', function(e) {
+      if (!(STORE.getBool('drum_complete') && STORE.getBool('phone_complete') &&
+            STORE.getBool('haircut_complete') && STORE.getBool('bodyguard_complete'))) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+  }
+
   function checkProgress() {
     const drum = STORE.getBool('drum_complete');
     const phone = STORE.getBool('phone_complete');
@@ -238,7 +250,7 @@
 
     // Century lights up when all 3 games done
     if (charContainer) {
-      if (drum && phone && haircut) {
+      if (drum && phone && haircut && STORE.getBool('bodyguard_complete')) {
         charContainer.classList.add('lit');
       } else {
         charContainer.classList.remove('lit');
