@@ -212,8 +212,6 @@
   function spawnTarget(forceType) {
     const r = Math.random();
     var type = forceType || (r < 0.55 ? 'big' : 'camera');
-    // Only spawn Big if images are loaded
-    if (type === 'big' && BIG_IMAGES.length === 0) type = 'camera';
     targets.push(new Target(type));
   }
 
@@ -358,11 +356,17 @@
 
   // Pre-spawn initial targets
   for (let i = 0; i < 8; i++) spawnTarget();
-  // Story dialog
-  if (storyStart) storyStart.addEventListener('click', () => {
-    if (storyDialog) storyDialog.classList.add('hidden');
-    SoundEngine._ensure();
-  });
+  // Story dialog — wait for images before starting
+  if (storyStart) {
+    storyStart.addEventListener('click', function startGame() {
+      if (BIG_IMAGES.length === 0) {
+        storyStart.textContent = '加载中...';
+        return;
+      }
+      if (storyDialog) storyDialog.classList.add('hidden');
+      SoundEngine._ensure();
+    });
+  }
   if (storyDialog) storyDialog.addEventListener('click', e => {
     if (e.target === storyDialog) { storyDialog.classList.add('hidden'); SoundEngine._ensure(); }
   });
