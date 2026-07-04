@@ -178,7 +178,7 @@
 
   function updateLayout() {
     hitY = height * HIT_Y_RATIO;
-    trackW = Math.min(80, width * 0.16);
+    trackW = Math.min(120, width * 0.22);
     const totalW = trackW * 4;
     const startX = (width - totalW) / 2;
     trackXs = [
@@ -196,7 +196,7 @@
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_H = 28;
+  const NOTE_H = 36;
 
   class Note {
     constructor(beat, trackId) {
