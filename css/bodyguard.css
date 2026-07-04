@@ -15,6 +15,7 @@
 .story-icon { font-size: 4rem; margin-bottom: 16px; animation: storyBounce 1.5s ease-in-out infinite; }
 @keyframes storyBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 .story-text { font-family: var(--font-display); font-size: 1.1rem; color: var(--color-gold-light); line-height: 1.8; letter-spacing: 0.05em; margin-bottom: 28px; }
+.story-loading { font-family: var(--font-body); font-size: 0.8rem; color: rgba(200,190,210,0.5); margin-bottom: 16px; }
 
 /* Instructions */
 #instructions {

@@ -378,6 +378,8 @@
         storyStart.textContent = '加载中...';
         return;
       }
+      var lm = document.getElementById('story-loading-msg');
+      if (lm) lm.style.display = 'none';
       if (storyDialog) storyDialog.classList.add('hidden');
       SoundEngine._ensure();
     });

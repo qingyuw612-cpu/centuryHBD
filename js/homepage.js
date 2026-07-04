@@ -227,6 +227,12 @@
     });
   }
 
+  // Hide loading hint after a moment
+  setTimeout(function() {
+    var lh = document.getElementById('loading-hint');
+    if (lh) lh.classList.add('gone');
+  }, 3000);
+
   // BGM Toggle + Label
   const bgmLabel = document.getElementById('bgm-label');
   if (bgmToggle) {
