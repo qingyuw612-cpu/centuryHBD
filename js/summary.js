@@ -59,9 +59,9 @@ window.CenturyApp.loadSummary = function() {
   if (bgPlays > 0) {
     var bgPct = bgCaught / Math.max(1, bgCaught + bgCamera);
     var bgGrade = bgPct >= 0.9 ? 'S' : bgPct >= 0.7 ? 'A' : bgPct >= 0.5 ? 'B' : 'C';
-    var bgTitles = { S:'鹰眼', A:'火眼金睛', B:'合格保安', C:'不太在状态' };
+    var bgTitles = { S:'零失误', A:'火眼金睛', B:'合格上班族', C:'不太在状态' };
     games.push({
-      icon:'·', name:'上班', title: bgTitles[bgGrade]||'保安', grade: bgGrade,
+      icon:'·', name:'上班', title: bgTitles[bgGrade]||'上班族', grade: bgGrade,
       sub: `${bgScore}分 · 接住 ${bgCaught} · 被拍 ${bgCamera}${bgPlays>1?' · 共 '+bgPlays+' 次':''}`,
     });
   }
@@ -126,7 +126,7 @@ window.CenturyApp.loadSummary = function() {
   }
   if (bgPlays > 0) {
     var bgGrade2 = bgPct >= 0.9 ? 'S' : bgPct >= 0.7 ? 'A' : bgPct >= 0.5 ? 'B' : 'C';
-    var bgt = { S:'鹰眼', A:'火眼金睛', B:'合格保安', C:'不太在状态' }[bgGrade2]||'保安';
+    var bgt = { S:'零失误', A:'火眼金睛', B:'合格上班族', C:'不太在状态' }[bgGrade2]||'上班族';
     if (bgGrade2==='S') parts.push('眼神锐利如鹰，上班零失误');
     else if (bgCamera>=5) parts.push('上班时被拍了 '+bgCamera+' 次，小红书都传遍了');
     else parts.push('作为「'+bgt+'」，完成了今天的上班');
