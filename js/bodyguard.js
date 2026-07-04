@@ -16,10 +16,10 @@
   let width, height, animId;
   let mx = 0, my = 0; // mouse position
   const SIGHT_R = 46; // sight circle radius
-  const LOCK_TIME = 0.2; // seconds to lock
+  const LOCK_TIME = 0.15; // seconds to lock
 
   let targets = [];
-  let score = 0, combo = 0, lives = 3;
+  let score = 0, combo = 0, lives = 2;
   let totalCaught = 0, totalCameraHits = 0;
   let state = 'playing'; // playing | over
 
@@ -156,7 +156,7 @@
   function spawnTarget() {
     // More cameras than bigs (ratio ~3:1)
     const r = Math.random();
-    targets.push(new Target(r < 0.45 ? 'big' : 'camera'));
+    targets.push(new Target(r < 0.55 ? 'big' : 'camera'));
   }
 
   // ===== Game Loop =====
