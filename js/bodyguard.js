@@ -183,8 +183,25 @@
         ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
         ctx.restore();
       } else {
-        ctx.fillStyle = 'rgba(60,20,20,0.85)';
+        // Camera: red circle with drawn lens
+        ctx.fillStyle = 'rgba(60,20,20,0.9)';
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
+        // Inner lens ring
+        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, this.r * 0.55, 0, Math.PI * 2); ctx.stroke();
+        // Lens dot
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.beginPath(); ctx.arc(0, 0, this.r * 0.2, 0, Math.PI * 2); ctx.fill();
+        // Flash icon (top-right)
+        ctx.fillStyle = 'rgba(255,200,100,0.8)';
+        var fs = this.r * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(this.r * 0.3, -this.r * 0.3);
+        ctx.lineTo(this.r * 0.5, -this.r * 0.55);
+        ctx.lineTo(this.r * 0.35, -this.r * 0.25);
+        ctx.lineTo(this.r * 0.55, -this.r * 0.45);
+        ctx.closePath(); ctx.fill();
       }
       ctx.strokeStyle = inSight
         ? (this.type === 'big' ? '#f0d78c' : '#ff6060')
