@@ -52,37 +52,31 @@
   // ===========================================
   function generateChart() {
     const c = [];
-
-    // Helper: add note at beat for a track
     function n(beat, trackId) { c.push({ beat, track: trackId }); }
 
-    // === Phrase 1 (beats 0-7): "Happy birthday to you" ===
-    // Kick on 1 & 3
-    n(0, 0); n(2, 0); n(4, 0); n(6, 0);
-    // Snare on 2 & 4
+    // Phrase 1: Happy birthday to you
+    n(0, 0); n(2, 0); n(4, 0);
     n(1, 1); n(3, 1); n(5, 1);
-    // Hi-hat quarter notes
-    for (let b = 0; b <= 6; b++) n(b, 2);
-    // Crash on phrase end
+    for (let b = 0; b <= 5; b += 2) n(b, 2); // hi-hat every 2 beats
     n(5.5, 3);
 
-    // === Phrase 2 (beats 8-15): "Happy birthday to you" ===
-    n(8, 0); n(10, 0); n(12, 0); n(14, 0);
+    // Phrase 2
+    n(8, 0); n(10, 0); n(12, 0);
     n(9, 1); n(11, 1); n(13, 1);
-    for (let b = 8; b <= 14; b++) n(b, 2);
+    for (let b = 8; b <= 13; b += 2) n(b, 2);
     n(13.5, 3);
 
-    // === Phrase 3 (beats 16-23): "Happy birthday dear Century" ===
-    n(16, 0); n(18, 0); n(20, 0); n(22, 0);
+    // Phrase 3
+    n(16, 0); n(18, 0); n(20, 0);
     n(17, 1); n(19, 1); n(21, 1);
-    for (let b = 16; b <= 22; b++) n(b, 2);
-    n(18.5, 3); n(21.5, 3);
+    for (let b = 16; b <= 22; b += 2) n(b, 2);
+    n(18.5, 3);
 
-    // === Phrase 4 (beats 24-31): "Happy birthday to you" (final) ===
-    n(24, 0); n(26, 0); n(28, 0); n(30, 0);
+    // Phrase 4
+    n(24, 0); n(26, 0); n(28, 0);
     n(25, 1); n(27, 1); n(29, 1);
-    for (let b = 24; b <= 30; b++) n(b, 2);
-    n(29, 3); n(29.5, 3);
+    for (let b = 24; b <= 29; b += 2) n(b, 2);
+    n(29, 3);
 
     return c;
   }
