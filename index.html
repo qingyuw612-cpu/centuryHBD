@@ -69,44 +69,59 @@
         <img src="assets/century.png" alt="Century" id="century-character">
         <a href="story.html" id="character-link" onclick="event.preventDefault(); CenturyApp.navigateTo('story.html')"></a>
       </div>
-      <!-- Big (bodyguard game, bottom-right) -->
+      <!-- Big (bodyguard game, bottom-right) — 比格多栋 -->
       <a href="bodyguard.html" class="floating-object" id="obj-big" aria-label="视线追踪"
          onclick="event.preventDefault(); CenturyApp.navigateTo('bodyguard.html')">
-        <svg viewBox="0 0 120 120" class="obj-svg">
-          <!-- Body -->
-          <ellipse cx="60" cy="65" rx="28" ry="32" fill="url(#big-body)" stroke="#d4a853" stroke-width="2"/>
-          <!-- Ears -->
-          <ellipse cx="38" cy="38" rx="14" ry="18" fill="#5a3a20" stroke="#d4a853" stroke-width="1.5" transform="rotate(-15,38,38)"/>
-          <ellipse cx="82" cy="38" rx="14" ry="18" fill="#5a3a20" stroke="#d4a853" stroke-width="1.5" transform="rotate(15,82,38)"/>
+        <svg viewBox="0 0 130 140" class="obj-svg">
+          <!-- Big floppy ears (beagle style, brown) -->
+          <ellipse cx="28" cy="42" rx="20" ry="26" fill="#6b3a1f" stroke="#d4a853" stroke-width="1.8" transform="rotate(-20,28,42)"/>
+          <ellipse cx="102" cy="42" rx="20" ry="26" fill="#6b3a1f" stroke="#d4a853" stroke-width="1.8" transform="rotate(20,102,42)"/>
           <!-- Inner ears -->
-          <ellipse cx="38" cy="38" rx="8" ry="12" fill="#8a6a4a" transform="rotate(-15,38,38)"/>
-          <ellipse cx="82" cy="38" rx="8" ry="12" fill="#8a6a4a" transform="rotate(15,82,38)"/>
-          <!-- Face -->
-          <ellipse cx="60" cy="58" rx="22" ry="24" fill="#c8a882" stroke="#a67c30" stroke-width="1"/>
-          <!-- Eyes -->
-          <ellipse cx="50" cy="54" rx="5" ry="6" fill="#3a2a1a"/>
-          <ellipse cx="70" cy="54" rx="5" ry="6" fill="#3a2a1a"/>
+          <ellipse cx="28" cy="42" rx="10" ry="16" fill="#9b6a4a" transform="rotate(-20,28,42)"/>
+          <ellipse cx="102" cy="42" rx="10" ry="16" fill="#9b6a4a" transform="rotate(20,102,42)"/>
+
+          <!-- Body (yellow-white beagle fur) -->
+          <ellipse cx="65" cy="82" rx="32" ry="36" fill="#f0d8a0" stroke="#d4a853" stroke-width="2"/>
+          <!-- Belly -->
+          <ellipse cx="65" cy="88" rx="22" ry="24" fill="#faf0d8"/>
+
+          <!-- Head -->
+          <ellipse cx="65" cy="52" rx="30" ry="28" fill="#f0d8a0" stroke="#d4a853" stroke-width="2"/>
+          <!-- Head top dark patch -->
+          <ellipse cx="65" cy="34" rx="18" ry="14" fill="#c89050"/>
+
+          <!-- Mischievous eyes (downward angle, asymmetrical) -->
+          <ellipse cx="53" cy="50" rx="7" ry="8" fill="#fff"/>
+          <ellipse cx="77" cy="50" rx="7" ry="8" fill="#fff"/>
+          <!-- Pupils (off-center for crazy look) -->
+          <circle cx="51" cy="52" r="4" fill="#1a0a00"/>
+          <circle cx="75" cy="52" r="4" fill="#1a0a00"/>
           <!-- Eye shine -->
-          <circle cx="52" cy="52" r="2" fill="#fff"/>
-          <circle cx="72" cy="52" r="2" fill="#fff"/>
+          <circle cx="49" cy="50" r="1.5" fill="#fff"/>
+
           <!-- Nose -->
-          <ellipse cx="60" cy="62" rx="5" ry="3.5" fill="#3a2a1a"/>
-          <!-- Mouth -->
-          <path d="M 52 69 Q 60 76 68 69" fill="none" stroke="#3a2a1a" stroke-width="1.8" stroke-linecap="round"/>
-          <!-- Arms -->
-          <ellipse cx="32" cy="68" rx="8" ry="5" fill="#5a3a20" stroke="#d4a853" stroke-width="1" transform="rotate(-30,32,68)"/>
-          <ellipse cx="88" cy="68" rx="8" ry="5" fill="#5a3a20" stroke="#d4a853" stroke-width="1" transform="rotate(30,88,68)"/>
+          <ellipse cx="65" cy="63" rx="7" ry="5" fill="#2a1a08"/>
+
+          <!-- Grinning mouth with teeth -->
+          <path d="M 48 72 Q 56 85 65 85 Q 74 85 82 72" fill="none" stroke="#2a1a08" stroke-width="2" stroke-linecap="round"/>
+          <!-- Teeth -->
+          <rect x="55" y="72" width="6" height="7" rx="1" fill="#fff" stroke="#2a1a08" stroke-width="0.8"/>
+          <rect x="69" y="72" width="6" height="7" rx="1" fill="#fff" stroke="#2a1a08" stroke-width="0.8"/>
+
+          <!-- Arms (paws raised mischievously) -->
+          <ellipse cx="28" cy="78" rx="9" ry="6" fill="#f0d8a0" stroke="#d4a853" stroke-width="1.2" transform="rotate(-40,28,78)"/>
+          <ellipse cx="102" cy="78" rx="9" ry="6" fill="#f0d8a0" stroke="#d4a853" stroke-width="1.2" transform="rotate(40,102,78)"/>
+
           <!-- Feet -->
-          <ellipse cx="47" cy="94" rx="10" ry="5" fill="#5a3a20" stroke="#d4a853" stroke-width="1.2"/>
-          <ellipse cx="73" cy="94" rx="10" ry="5" fill="#5a3a20" stroke="#d4a853" stroke-width="1.2"/>
+          <ellipse cx="50" cy="116" rx="12" ry="6" fill="#f0d8a0" stroke="#d4a853" stroke-width="1.2"/>
+          <ellipse cx="80" cy="116" rx="12" ry="6" fill="#f0d8a0" stroke="#d4a853" stroke-width="1.2"/>
+
+          <!-- Tail -->
+          <path d="M 92 95 Q 108 88 115 95" fill="none" stroke="#f0d8a0" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 115 95 Q 118 98 115 95" fill="none" stroke="#d4a853" stroke-width="1.5" stroke-linecap="round"/>
+
           <!-- Glow -->
-          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="3"/>
-          <defs>
-            <linearGradient id="big-body" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#5a3a20"/>
-              <stop offset="100%" stop-color="#3a2210"/>
-            </linearGradient>
-          </defs>
+          <circle cx="65" cy="65" r="58" fill="none" stroke="rgba(240,215,140,0.12)" stroke-width="3"/>
         </svg>
       </a>
 
