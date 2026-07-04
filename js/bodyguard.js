@@ -388,6 +388,40 @@
     if (e.target === storyDialog) { storyDialog.classList.add('hidden'); SoundEngine._ensure(); }
   });
 
+  // ===== BGM =====
+  function startBGM() {
+    if (!SoundEngine._ensure()) return;
+    var ctx = SoundEngine.ctx, beat = [200,200,200,300,200,200,200,350];
+    var t = ctx.currentTime;
+    beat.forEach(function(f,i) {
+      var o = ctx.createOscillator(); o.type = 'square';
+      var g = ctx.createGain();
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0, t+i*0.18);
+      g.gain.linearRampToValueAtTime(0.04, t+i*0.18+0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t+i*0.18+0.12);
+      o.connect(g).connect(ctx.destination);
+      o.start(t+i*0.18); o.stop(t+i*0.18+0.15);
+    });
+    var loop = setInterval(function() {
+      if (!SoundEngine._ensure()) return;
+      var t2 = SoundEngine.ctx.currentTime;
+      beat.forEach(function(f,i) {
+        var o = SoundEngine.ctx.createOscillator(); o.type = 'square';
+        var g = SoundEngine.ctx.createGain();
+        o.frequency.value = f;
+        g.gain.setValueAtTime(0, t2+i*0.18);
+        g.gain.linearRampToValueAtTime(0.04, t2+i*0.18+0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, t2+i*0.18+0.12);
+        o.connect(g).connect(SoundEngine.ctx.destination);
+        o.start(t2+i*0.18); o.stop(t2+i*0.18+0.15);
+      });
+    }, 1440);
+    return loop;
+  }
+  var bgmLoop = null;
+  document.addEventListener('click', function bgmStart() { if(!bgmLoop) bgmLoop=startBGM(); }, {once:true});
+
   updateHUD();
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
