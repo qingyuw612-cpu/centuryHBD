@@ -63,8 +63,9 @@ const BGM = {
       if (!this._volume) this.audio.volume = 0.35;
       else this.audio.volume = this._volume;
 
-      // Try to play on first user interaction
-      if (!this._unlocked) {
+      // Always set up unlock listener (user gesture needed for audio)
+      if (!this._unlockListenerSet) {
+        this._unlockListenerSet = true;
         const unlock = () => {
           this._unlocked = true;
           if (this._volume) this.audio.volume = this._volume;
@@ -404,9 +405,9 @@ window.CenturyApp.showSection = function(name) {
 };
 
 // =============================================
-// Auto-init on page load
+// Auto-init on page load (immediate, not waiting for DOMContentLoaded)
 // =============================================
+BGM.init();
 document.addEventListener('DOMContentLoaded', () => {
   document.body.classList.add('page-enter');
-  BGM.init();
 });

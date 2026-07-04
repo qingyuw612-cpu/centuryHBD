@@ -190,6 +190,8 @@
   const alreadyVisited = STORE.getBool('first_visit');
   if (alreadyVisited) {
     hideOverlay();
+    BGM.init();
+    BGM.play();
   }
 
   function onFirstInteraction(e) {
