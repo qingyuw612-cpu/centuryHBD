@@ -178,7 +178,7 @@
 
   function updateLayout() {
     hitY = height * HIT_Y_RATIO;
-    trackW = Math.min(120, width * 0.22);
+    trackW = Math.min(160, width * 0.23);
     const totalW = trackW * 4;
     const startX = (width - totalW) / 2;
     trackXs = [
@@ -196,14 +196,14 @@
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_H = 36;
+  const NOTE_H = 55;
 
   class Note {
     constructor(beat, trackId) {
       this.time = (beat + 7) * BEAT_DURATION;
       this.trackId = trackId;
       this.track = TRACKS[trackId];
-      this.y = -100; // start above screen
+      this.y = -100;
       this.hit = false;
       this.missed = false;
     }
@@ -215,28 +215,32 @@
 
     draw(ctx) {
       if (this.hit || this.missed) return;
-      if (this.y < -60 || this.y > height + 60) return;
+      if (this.y < -80 || this.y > height + 80) return;
 
       const cx = trackXs[this.trackId];
       const cy = this.y;
+      const barW = trackW * 0.85;
+      const bx = cx - barW / 2, by = cy - NOTE_H / 2;
+      const br = 8;
 
       ctx.save();
 
-      // Glow (smaller to reduce overlap flicker)
-      const glowGrad = ctx.createRadialGradient(cx, cy, NOTE_H * 0.2, cx, cy, NOTE_H * 1.6);
+      // Glow
+      const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, barW * 0.6);
       glowGrad.addColorStop(0, this.track.glowColor);
       glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, NOTE_H * 1.6, 0, Math.PI * 2);
+      ctx.roundRect(bx - 6, by - 6, barW + 12, NOTE_H + 12, br + 4);
       ctx.fill();
 
-      // Note bar (rounded rect)
-      const barW = trackW * 0.75;
-      const bx = cx - barW / 2, by = cy - NOTE_H / 2;
-      const br = 6;
-      ctx.fillStyle = this.track.color;
-      ctx.strokeStyle = '#fff';
+      // Main bar
+      const bodyGrad = ctx.createLinearGradient(0, by, 0, by + NOTE_H);
+      bodyGrad.addColorStop(0, this.track.color);
+      bodyGrad.addColorStop(0.4, this.track.glowColor);
+      bodyGrad.addColorStop(1, this.track.color);
+      ctx.fillStyle = bodyGrad;
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)';
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(bx + br, by);
@@ -250,6 +254,14 @@
       ctx.arcTo(bx, by, bx + br, by, br);
       ctx.closePath();
       ctx.fill();
+      ctx.stroke();
+
+      // Shine line
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(bx + 8, by + 6);
+      ctx.lineTo(bx + barW - 8, by + 6);
       ctx.stroke();
 
       ctx.restore();
@@ -282,15 +294,15 @@
       ctx.strokeStyle = this.color;
       ctx.lineWidth = 3 + (1 - p) * 3;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, NOTE_H + p * 45, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, NOTE_H/2 + p * 45, 0, Math.PI * 2);
       ctx.stroke();
 
       const texts = { perfect: 'Perfect!', good: 'Good', ok: 'OK', miss: 'Miss' };
-      const fz = 24 + (1 - p) * 16;
+      const fz = 28 + (1 - p) * 16;
       ctx.font = `bold ${fz}px "Cinzel", serif`;
       ctx.fillStyle = this.color;
       ctx.textAlign = 'center';
-      ctx.fillText(texts[this.judgment], this.x, this.y - NOTE_H - 16 - p * 25);
+      ctx.fillText(texts[this.judgment], this.x, this.y - NOTE_H/2 - 20 - p * 25);
       ctx.restore();
     }
   }
@@ -555,7 +567,7 @@
       // Hit zone indicator
       const hzAlpha = 0.15 + Math.sin(timestamp * 0.003) * 0.05;
       ctx.fillStyle = tr.glowColor.replace('0.6', hzAlpha.toString());
-      ctx.fillRect(tx - trackW / 2 + 2, hitY - NOTE_H, trackW - 4, NOTE_H * 2);
+      ctx.fillRect(tx - trackW / 2 + 2, hitY - NOTE_H/2, trackW - 4, NOTE_H);
 
       // Hit line
       ctx.strokeStyle = 'rgba(255,255,255,0.25)';
