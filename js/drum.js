@@ -55,26 +55,26 @@
     function n(beat, trackId) { c.push({ beat, track: trackId }); }
 
     // Phrase 1: Happy birthday to you
-    n(0, 0); n(2, 0); n(4, 0);
-    n(1, 1); n(3, 1); n(5, 1);
-    for (let b = 0; b <= 5; b += 2) n(b, 2); // hi-hat every 2 beats
-    n(5.5, 3);
+    n(0, 0); n(3, 0);
+    n(1, 1); n(4, 1);
+    for (let b = 0; b <= 5; b += 2) n(b, 2);
+    n(5, 3);
 
     // Phrase 2
-    n(8, 0); n(10, 0); n(12, 0);
-    n(9, 1); n(11, 1); n(13, 1);
+    n(8, 0); n(11, 0);
+    n(9, 1); n(12, 1);
     for (let b = 8; b <= 13; b += 2) n(b, 2);
-    n(13.5, 3);
+    n(13, 3);
 
     // Phrase 3
-    n(16, 0); n(18, 0); n(20, 0);
-    n(17, 1); n(19, 1); n(21, 1);
+    n(16, 0); n(19, 0);
+    n(17, 1); n(20, 1);
     for (let b = 16; b <= 22; b += 2) n(b, 2);
-    n(18.5, 3);
+    n(22, 3);
 
     // Phrase 4
-    n(24, 0); n(26, 0); n(28, 0);
-    n(25, 1); n(27, 1); n(29, 1);
+    n(24, 0); n(27, 0);
+    n(25, 1); n(28, 1);
     for (let b = 24; b <= 29; b += 2) n(b, 2);
     n(29, 3);
 
@@ -190,7 +190,7 @@
   // ===========================================
   // Note Class
   // ===========================================
-  const NOTE_H = 55;
+  const NOTE_H = 80;
 
   class Note {
     constructor(beat, trackId) {
