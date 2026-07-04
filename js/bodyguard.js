@@ -76,11 +76,10 @@
           case 3: this.x = Math.random() * width; this.y = height + 40; break;
         }
       }
-      this.vx = ((Math.random() - 0.5) * 2) * (100 + Math.random() * 100);
-      this.vy = ((Math.random() - 0.5) * 2) * (100 + Math.random() * 100);
-      // Strong bias toward center
-      this.vx += (width/2 - this.x) * 0.08;
-      this.vy += (height/2 - this.y) * 0.08;
+      this.vx = ((Math.random() - 0.5) * 2) * (140 + Math.random() * 120);
+      this.vy = ((Math.random() - 0.5) * 2) * (140 + Math.random() * 120);
+      this.vx += (width/2 - this.x) * 0.1;
+      this.vy += (height/2 - this.y) * 0.1;
 
       this.lockProgress = 0;
       this.locked = false;
@@ -173,10 +172,10 @@
 
   // ===== Spawning =====
   let spawnTimer = 0;
-  function spawnTarget() {
-    // More cameras than bigs (ratio ~3:1)
+  function spawnTarget(forceType) {
     const r = Math.random();
-    targets.push(new Target(r < 0.55 ? 'big' : 'camera'));
+    const type = forceType || (r < 0.55 ? 'big' : 'camera');
+    targets.push(new Target(type));
   }
 
   // ===== Game Loop =====
@@ -238,8 +237,11 @@
 
     // Spawn
     spawnTimer += dt;
-    const maxTargets = 15;
-    if (targets.length < maxTargets && spawnTimer > 0.8) {
+    const maxTargets = 22;
+    // Force Big if none on screen
+    const bigCount = targets.filter(t => t.type === 'big' && !t.locked).length;
+    if (bigCount < 2) spawnTarget('big');
+    if (targets.length < maxTargets && spawnTimer > 0.55) {
       spawnTimer = 0;
       spawnTarget();
     }
