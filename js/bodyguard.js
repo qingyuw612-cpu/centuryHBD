@@ -49,19 +49,26 @@
         ? BIG_EMOJIS[Math.floor(Math.random() * BIG_EMOJIS.length)]
         : CAMERA_EMOJIS[Math.floor(Math.random() * CAMERA_EMOJIS.length)];
 
-      // Spawn from random edge
-      const edge = Math.floor(Math.random() * 4);
-      switch (edge) {
-        case 0: this.x = -40; this.y = Math.random() * height; break;
-        case 1: this.x = width + 40; this.y = Math.random() * height; break;
-        case 2: this.x = Math.random() * width; this.y = -40; break;
-        case 3: this.x = Math.random() * width; this.y = height + 40; break;
+      // Spawn from edge OR inside visible area
+      if (Math.random() < 0.5) {
+        // Inside visible area
+        this.x = 60 + Math.random() * (width - 120);
+        this.y = 60 + Math.random() * (height - 120);
+      } else {
+        // From random edge
+        const edge = Math.floor(Math.random() * 4);
+        switch (edge) {
+          case 0: this.x = -40; this.y = Math.random() * height; break;
+          case 1: this.x = width + 40; this.y = Math.random() * height; break;
+          case 2: this.x = Math.random() * width; this.y = -40; break;
+          case 3: this.x = Math.random() * width; this.y = height + 40; break;
+        }
       }
-      this.vx = ((Math.random() - 0.5) * 2) * (60 + Math.random() * 80);
-      this.vy = ((Math.random() - 0.5) * 2) * (60 + Math.random() * 80);
+      this.vx = ((Math.random() - 0.5) * 2) * (100 + Math.random() * 100);
+      this.vy = ((Math.random() - 0.5) * 2) * (100 + Math.random() * 100);
       // Strong bias toward center
-      this.vx += (width/2 - this.x) * 0.06;
-      this.vy += (height/2 - this.y) * 0.06;
+      this.vx += (width/2 - this.x) * 0.08;
+      this.vy += (height/2 - this.y) * 0.08;
 
       this.lockProgress = 0;
       this.locked = false;
@@ -272,6 +279,8 @@
     ctx.beginPath(); ctx.arc(mx, my, 3, 0, Math.PI * 2); ctx.fill();
   }
 
+  // Pre-spawn initial targets
+  for (let i = 0; i < 8; i++) spawnTarget();
   updateHUD();
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
