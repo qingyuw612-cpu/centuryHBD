@@ -11,8 +11,24 @@
 <body data-bgm="off">
   <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
 
+  <!-- Story intro -->
+  <div id="story-dialog">
+    <div class="story-card">
+      <div class="story-icon">👁️</div>
+      <p class="story-text">上班了。粉丝们举着比格来找你。<br>你很感动。但那些镜头…还是算了吧。</p>
+      <button class="btn" id="story-start">开始上班</button>
+    </div>
+  </div>
+
   <div id="game-container">
     <canvas id="bodyguard-canvas"></canvas>
+
+    <!-- Instructions -->
+    <div id="instructions">视线圈对准比格停留0.15秒 · 躲避红色摄像机</div>
+
+    <!-- Toast commentary -->
+    <div id="toast"></div>
+
     <div id="hud">
       <div id="hud-score">0</div>
       <div id="hud-combo"></div>

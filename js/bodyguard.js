@@ -12,6 +12,48 @@
   const hudCombo = document.getElementById('hud-combo');
   const hudLives = document.getElementById('hud-lives');
   const resultsEl = document.getElementById('results');
+  const toastEl = document.getElementById('toast');
+  const storyDialog = document.getElementById('story-dialog');
+  const storyStart = document.getElementById('story-start');
+
+  // ===== Toast =====
+  let toastTimer = null;
+  function toast(msg, duration) {
+    if (!toastEl) return;
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), duration || 2000);
+  }
+
+  // Floating commentary pool
+  const FLOAT_TEXTS = [
+    '一个比格晃过来了。它对你是真爱。',
+    '专心找比格。摄像机什么的，假装没看到。',
+    '比格在人群中闪闪发光——那是冲你来的。',
+    '红色闪烁 = 镜头。别对视，别对视，别对视。',
+    '又有粉丝来了。假装不经意地看一眼。',
+    '保持专注。一个合格的i人不需要看镜头。',
+    '比格冲你眨了眨眼。它喜欢你。',
+    '镜头正在寻找你的脸。不给它机会。',
+    '那个举着手机晃来晃去的…准没好事。',
+    '深呼吸。比格需要你，镜头不配拥有你。',
+  ];
+  const BIG_LOCK_TEXTS = [
+    '接住了。粉丝心满意足。',
+    '又一个比格被你收入视线。你今天很受欢迎。',
+    '比格在你眼中停留了片刻——它感受到了。',
+    '好的，这个粉丝今天值了。',
+    '粉丝+1。Century嘴角微微上扬。',
+  ];
+  const CAM_LOCK_TEXTS = [
+    '咔嚓。你下意识别开了脸——但晚了。',
+    '被拍到了。照片将在三秒内传遍小红书。',
+    '一台摄像机捕捉到了你的表情。',
+    '你又和镜头对视了。作为一个i人，这是工伤。',
+    '镜头+1。今天的小红书素材有了。',
+  ];
+  const COUNTDOWN_PROMPTS = { 10: '快下班了，再撑一下。', 5: '最后五秒。比格还在等你，镜头就别管了。' };
 
   let width, height, animId;
   let mx = 0, my = 0; // mouse position
@@ -173,6 +215,7 @@
 
   // ===== Spawning =====
   let spawnTimer = 0;
+  let floatTimer = 0;
   function spawnTarget(forceType) {
     const r = Math.random();
     const type = forceType || (r < 0.55 ? 'big' : 'camera');
@@ -199,19 +242,14 @@
     let grade, comment;
     const pct = totalCaught / Math.max(1, totalCaught + cameraHits);
 
-    if (pct >= 0.9 && cameraHits <= 1) { grade = '鹰眼保镖'; comment = '全场最佳。Century 演出结束后请你吃了顿饭。'; }
-    else if (pct >= 0.7) { grade = '火眼金睛'; comment = '大部分威胁都被你挡下了。Century 对你点了点头。'; }
-    else if (pct >= 0.5) { grade = '合格保安'; comment = '勉强及格。至少演出没出大乱子。'; }
+    if (pct >= 0.9 && cameraHits <= 1) { grade = '完美上班'; comment = '无比格漏接，零镜头事故。今天是一场完美的上班。'; }
+    else if (pct >= 0.7) { grade = '基本稳了'; comment = '有几个镜头拍到了你，但问题不大——照片P一下还能用。'; }
+    else if (pct >= 0.5) { grade = '勉强及格'; comment = '被拍得有点多。你在小红书上看到了自己的表情包，心情复杂。'; }
     else if (cameraHits >= 5) {
-      grade = '被拍到了';
-      const cs = [
-        '第二天你登上了八卦杂志封面：「Century 保镖当众摸鱼」。你的职业生涯…结束了？',
-        '你的表情包已经病毒式传播。恭喜，你比 Century 还红了。',
-        '记者们蜂拥而上。Century 叹了口气：「下次还是我自己来吧。」',
-      ];
-      comment = cs[Math.floor(Math.random() * cs.length)];
+      grade = '被拍麻了';
+      comment = '小红书上的路人都在问：「这个被拍了一百次的鼓手是谁？」';
     }
-    else { grade = '眼神不太好'; comment = 'Century 礼貌地问你需不需要配副眼镜。'; }
+    else { grade = '不太在状态'; comment = '今天镜头有点多。下次上班请集中注意力。'; }
 
     document.getElementById('results-title').textContent = title;
     document.getElementById('results-grade').textContent = grade;
@@ -234,7 +272,20 @@
     // Countdown
     timeLeft -= dt;
     if (timeLeft <= 0) { endGame(); return; }
+    // Countdown prompts
+    var sec = Math.ceil(timeLeft);
+    if (COUNTDOWN_PROMPTS[sec] && !window['_prompted' + sec]) {
+      window['_prompted' + sec] = true;
+      toast(COUNTDOWN_PROMPTS[sec], 2000);
+    }
     updateHUD();
+
+    // Floating commentary
+    floatTimer += dt;
+    if (floatTimer > 5 + Math.random() * 5) {
+      floatTimer = 0;
+      toast(FLOAT_TEXTS[Math.floor(Math.random() * FLOAT_TEXTS.length)], 2500);
+    }
 
     // Spawn
     spawnTimer += dt;
@@ -262,10 +313,12 @@
             score += 100 + combo * 20;
             combo++; totalCaught++;
             SoundEngine.playSnap();
+            if (Math.random() < 0.5) toast(BIG_LOCK_TEXTS[Math.floor(Math.random() * BIG_LOCK_TEXTS.length)], 1500);
           } else {
             score = Math.max(0, score - 50);
             cameraHits++; combo = 0;
             SoundEngine.playWahWah();
+            toast(CAM_LOCK_TEXTS[Math.floor(Math.random() * CAM_LOCK_TEXTS.length)], 2000);
           }
           updateHUD();
           targets.splice(i, 1);
@@ -305,6 +358,15 @@
 
   // Pre-spawn initial targets
   for (let i = 0; i < 8; i++) spawnTarget();
+  // Story dialog
+  if (storyStart) storyStart.addEventListener('click', () => {
+    if (storyDialog) storyDialog.classList.add('hidden');
+    SoundEngine._ensure();
+  });
+  if (storyDialog) storyDialog.addEventListener('click', e => {
+    if (e.target === storyDialog) { storyDialog.classList.add('hidden'); SoundEngine._ensure(); }
+  });
+
   updateHUD();
   gameLoop._lastTs = performance.now();
   animId = requestAnimationFrame(gameLoop);
