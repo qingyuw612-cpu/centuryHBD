@@ -210,7 +210,25 @@
     document.addEventListener('keydown', onFirstInteraction);
   }
 
-  // BGM Toggle
+  // Sidebar toggle
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('sidebar-hidden');
+    });
+    // Close sidebar on outside click
+    document.addEventListener('click', (e) => {
+      if (!sidebar.classList.contains('sidebar-hidden') &&
+          !sidebar.contains(e.target) && e.target !== sidebarToggle) {
+        sidebar.classList.add('sidebar-hidden');
+      }
+    });
+  }
+
+  // BGM Toggle + Label
+  const bgmLabel = document.getElementById('bgm-label');
   if (bgmToggle) {
     bgmToggle.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -220,6 +238,12 @@
       } else {
         BGM.play();
         bgmToggle.classList.remove('muted');
+      }
+      // Show BGM label briefly
+      if (bgmLabel) {
+        bgmLabel.classList.add('show');
+        clearTimeout(bgmLabel._timer);
+        bgmLabel._timer = setTimeout(() => bgmLabel.classList.remove('show'), 2500);
       }
     });
   }
