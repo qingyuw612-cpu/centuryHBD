@@ -40,16 +40,26 @@
   canvas.addEventListener('touchstart', e => { e.preventDefault(); mx = e.touches[0].clientX; my = e.touches[0].clientY; }, {passive:false});
 
   // ===== Target Types =====
-  const BIG_EMOJIS = ['🐕','🌟','🎸','🎵','💎','🔥','👑','🎤','💫','✨'];
+  const BIG_IMAGES = [];
   const CAMERA_EMOJIS = ['📸','📷','🎥','📹'];
+
+  // Preload Big images
+  const imageFiles = ['assets/bodyguard/比格4.png', 'assets/bodyguard/比格5.jpg'];
+  let imagesLoaded = 0;
+  imageFiles.forEach(src => {
+    const img = new Image();
+    img.onload = () => { imagesLoaded++; };
+    img.src = src;
+    BIG_IMAGES.push(img);
+  });
 
   class Target {
     constructor(type) {
       this.type = type; // 'big' or 'camera'
-      this.r = 22 + Math.random() * 18;
-      this.emoji = type === 'big'
-        ? BIG_EMOJIS[Math.floor(Math.random() * BIG_EMOJIS.length)]
-        : CAMERA_EMOJIS[Math.floor(Math.random() * CAMERA_EMOJIS.length)];
+      this.r = 28 + Math.random() * 20;
+      this.emoji = type === 'big' ? null : CAMERA_EMOJIS[Math.floor(Math.random() * CAMERA_EMOJIS.length)];
+      this.image = (type === 'big' && BIG_IMAGES.length > 0)
+        ? BIG_IMAGES[Math.floor(Math.random() * BIG_IMAGES.length)] : null;
 
       // Spawn from edge OR inside visible area
       if (Math.random() < 0.5) {
@@ -127,17 +137,25 @@
       }
 
       // Body
-      ctx.fillStyle = this.type === 'big' ? 'rgba(30,20,50,0.85)' : 'rgba(60,20,20,0.85)';
+      if (this.type === 'big' && this.image && this.image.complete) {
+        ctx.save();
+        ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.clip();
+        ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
+        ctx.restore();
+      } else {
+        ctx.fillStyle = this.type === 'big' ? 'rgba(30,20,50,0.85)' : 'rgba(60,20,20,0.85)';
+        ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
+        if (this.emoji) {
+          ctx.font = `${this.r}px serif`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(this.emoji, 0, 0);
+        }
+      }
       ctx.strokeStyle = inSight
         ? (this.type === 'big' ? '#f0d78c' : '#ff6060')
         : 'rgba(255,255,255,0.2)';
       ctx.lineWidth = inSight ? 3 : 1.5;
-      ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-
-      // Emoji
-      ctx.font = `${this.r}px serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText(this.emoji, 0, 0);
+      ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.stroke();
 
       // Progress ring
       if (this.lockProgress > 0) {
