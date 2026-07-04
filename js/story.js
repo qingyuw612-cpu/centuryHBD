@@ -79,17 +79,12 @@
 
   // ===== Voice (Web Speech API - no API key needed) =====
   // ===== Voice (MP3 playback) =====
-  const voiceEl = new Audio();
-  voiceEl.volume = 0.55;
-  voiceEl.preload = 'auto';
-
-  // Preload all voice files
+  // Preload first few voice files only (rest lazy-load on first use)
   const voiceCache = {};
   function preloadVoices() {
-    for (let i = 1; i <= 40; i++) {
+    for (let i = 1; i <= 5; i++) {
       const id = 's' + String(i).padStart(2, '0');
       const a = new Audio();
-      a.preload = 'auto';
       a.src = 'assets/voice/' + id + '.mp3';
       a.load();
       voiceCache[id] = a;
@@ -100,13 +95,13 @@
   function playVoice(voiceId) {
     if (!voiceId) return;
     var cached = voiceCache[voiceId];
-    if (cached) {
-      cached.currentTime = 0;
-      cached.play().catch(() => {});
-    } else {
-      voiceEl.src = 'assets/voice/' + voiceId + '.mp3';
-      voiceEl.play().catch(() => {});
+    if (!cached) {
+      cached = new Audio('assets/voice/' + voiceId + '.mp3');
+      cached.volume = 0.55;
+      voiceCache[voiceId] = cached;
     }
+    cached.currentTime = 0;
+    cached.play().catch(() => {});
   }
 
   // ===== Dialogue =====
