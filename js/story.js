@@ -114,6 +114,8 @@
 
   function showNext() {
     if (isTyping) { finishTypewriter(); return; }
+    // Stop current voice
+    for (var k in voiceCache) { var a = voiceCache[k]; if (a && !a.paused) { a.pause(); a.currentTime = 0; } }
     if (dialogueQueue.length === 0) {
       if (currentCallback) { const cb = currentCallback; currentCallback = null; cb(); }
       return;
