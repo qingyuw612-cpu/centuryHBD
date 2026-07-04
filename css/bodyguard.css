@@ -1,0 +1,50 @@
+/* ============================================
+   Century Birthday - Bodyguard Game
+   ============================================ */
+
+#game-container {
+  position: relative; width: 100vw; height: 100vh; height: 100dvh;
+  overflow: hidden; cursor: none;
+  background: radial-gradient(ellipse at 50% 50%, #1a1030, #080818);
+}
+#bodyguard-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+#hud {
+  position: absolute; top: 16px; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 20px;
+  z-index: 20; pointer-events: none; font-family: var(--font-display);
+}
+#hud-score { font-size: 1.4rem; font-weight: 700; color: var(--color-gold-light); }
+#hud-combo { font-size: 1rem; color: var(--color-lavender); opacity: 0; transition: opacity 0.2s; }
+#hud-combo.active { opacity: 1; }
+#hud-lives { font-size: 1.2rem; color: #ff6b5b; letter-spacing: 2px; }
+
+/* Results */
+#results {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; background: rgba(8,8,24,0.85); backdrop-filter: blur(8px);
+}
+#results.hidden { display: none; }
+.results-card {
+  background: linear-gradient(145deg, #1a1640, #0f0d28);
+  border: 2px solid var(--color-gold-dark); border-radius: 20px;
+  padding: 36px 44px; text-align: center; max-width: 400px; width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: cardAppear 0.5s ease-out;
+}
+@keyframes cardAppear { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.results-title { font-family: var(--font-display); font-size: 1.2rem; color: var(--color-text-dim); margin-bottom: 4px; }
+.results-grade {
+  font-family: var(--font-display); font-size: 1.6rem; font-weight: 900;
+  color: var(--color-gold-light); text-shadow: 0 0 40px rgba(240,215,140,0.5);
+  margin-bottom: 12px;
+}
+.results-comment { font-family: var(--font-body); font-size: 0.95rem; color: var(--color-lavender); font-style: italic; margin-bottom: 20px; line-height: 1.7; }
+.results-stats { margin-bottom: 24px; }
+.stat-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 1rem; }
+.stat-label { color: var(--color-text-dim); }
+.stat-value { color: var(--color-text); font-weight: 600; }
+.perfect-color { color: #f0d78c; }
+.miss-color { color: #db5a5a; }
+.results-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }

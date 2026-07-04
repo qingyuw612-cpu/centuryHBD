@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>👁️ 视线追踪 - Century</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/bodyguard.css">
+</head>
+<body data-bgm="off">
+  <a href="index.html" class="back-btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">◂</a>
+
+  <div id="game-container">
+    <canvas id="bodyguard-canvas"></canvas>
+    <div id="hud">
+      <div id="hud-score">0</div>
+      <div id="hud-combo"></div>
+      <div id="hud-lives">♥♥♥</div>
+    </div>
+    <div id="results" class="hidden">
+      <div class="results-card">
+        <h2 class="results-title" id="results-title"></h2>
+        <div class="results-grade" id="results-grade"></div>
+        <p class="results-comment" id="results-comment"></p>
+        <div class="results-stats">
+          <div class="stat-row"><span class="stat-label">得分</span><span class="stat-value" id="res-score">0</span></div>
+          <div class="stat-row"><span class="stat-label">锁定比格</span><span class="stat-value perfect-color" id="res-caught">0</span></div>
+          <div class="stat-row"><span class="stat-label">被拍到</span><span class="stat-value miss-color" id="res-camera">0</span></div>
+        </div>
+        <div class="results-buttons">
+          <button class="btn" onclick="location.reload()">再来一局</button>
+          <a href="index.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/bodyguard.js"></script>
+</body>
+</html>
