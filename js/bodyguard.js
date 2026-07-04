@@ -83,7 +83,6 @@
 
   // ===== Target Types =====
   const BIG_IMAGES = [];
-  const CAMERA_EMOJIS = ['📸','📷','🎥','📹'];
 
   // Preload Big images — auto-scan: 比格1~20 .png/.jpg/.jpeg/.webp
   let imagesLoaded = 0;
@@ -98,9 +97,8 @@
 
   class Target {
     constructor(type) {
-      this.type = type; // 'big' or 'camera'
+      this.type = type;
       this.r = 28 + Math.random() * 20;
-      this.emoji = type === 'big' ? null : CAMERA_EMOJIS[Math.floor(Math.random() * CAMERA_EMOJIS.length)];
       this.image = (type === 'big' && BIG_IMAGES.length > 0)
         ? BIG_IMAGES[Math.floor(Math.random() * BIG_IMAGES.length)] : null;
 
@@ -185,13 +183,8 @@
         ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
         ctx.restore();
       } else {
-        // Fallback: use emoji or styled circle
-        var fallbackEmoji = this.type === 'big' ? '🐻' : (this.emoji || '📸');
-        ctx.fillStyle = this.type === 'big' ? 'rgba(40,30,20,0.8)' : 'rgba(60,20,20,0.85)';
+        ctx.fillStyle = 'rgba(60,20,20,0.85)';
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
-        ctx.font = `${this.r * 0.8}px serif`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(fallbackEmoji, 0, 0);
       }
       ctx.strokeStyle = inSight
         ? (this.type === 'big' ? '#f0d78c' : '#ff6060')
@@ -218,7 +211,9 @@
   let floatTimer = 0;
   function spawnTarget(forceType) {
     const r = Math.random();
-    const type = forceType || (r < 0.55 ? 'big' : 'camera');
+    var type = forceType || (r < 0.55 ? 'big' : 'camera');
+    // Only spawn Big if images are loaded
+    if (type === 'big' && BIG_IMAGES.length === 0) type = 'camera';
     targets.push(new Target(type));
   }
 
