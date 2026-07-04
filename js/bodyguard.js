@@ -19,8 +19,10 @@
   const LOCK_TIME = 0.15; // seconds to lock
 
   let targets = [];
-  let score = 0, combo = 0, lives = 2;
-  let totalCaught = 0, totalCameraHits = 0;
+  let score = 0, combo = 0;
+  let timeLeft = 25; // seconds
+  let cameraHits = 0;
+  let totalCaught = 0;
   let state = 'playing'; // playing | over
 
   function resize() {
@@ -164,43 +166,41 @@
     hudScore.textContent = score;
     if (combo > 1) { hudCombo.textContent = combo + 'x Combo'; hudCombo.classList.add('active'); }
     else hudCombo.classList.remove('active');
-    hudLives.textContent = '♥'.repeat(Math.max(0, lives));
+    var timerEl = document.getElementById('hud-timer');
+    if (timerEl) timerEl.textContent = Math.ceil(timeLeft) + 's';
   }
 
-  function endGame(reason) {
+  function endGame() {
     state = 'over';
-    showResults(reason);
+    showResults();
   }
 
-  function showResults(reason) {
+  function showResults() {
     resultsEl.classList.remove('hidden');
-    let title, grade, comment;
+    const title = '演出结束';
+    let grade, comment;
+    const pct = totalCaught / Math.max(1, totalCaught + cameraHits);
 
-    if (reason === 'camera') {
-      const comments = [
-        '咔嚓！第二天你登上了八卦杂志的封面。标题：「Century 保镖当众摸鱼，偶像遭围堵」。你的职业生涯…结束了？',
-        '摄像机捕捉到了你茫然的眼神。社交媒体上，你的表情包已经病毒式传播。恭喜，你比 Century 还红了。',
-        '被拍到了！记者们蜂拥而上。Century 在后台叹了口气：「下次还是我自己来吧。」',
-        '闪光灯亮起的瞬间，你知道一切都完了。你的保镖执照被吊销，只能在便利店打工度过余生。',
+    if (pct >= 0.9 && cameraHits <= 1) { grade = '鹰眼保镖'; comment = '全场最佳。Century 演出结束后请你吃了顿饭。'; }
+    else if (pct >= 0.7) { grade = '火眼金睛'; comment = '大部分威胁都被你挡下了。Century 对你点了点头。'; }
+    else if (pct >= 0.5) { grade = '合格保安'; comment = '勉强及格。至少演出没出大乱子。'; }
+    else if (cameraHits >= 5) {
+      grade = '被拍到了';
+      const cs = [
+        '第二天你登上了八卦杂志封面：「Century 保镖当众摸鱼」。你的职业生涯…结束了？',
+        '你的表情包已经病毒式传播。恭喜，你比 Century 还红了。',
+        '记者们蜂拥而上。Century 叹了口气：「下次还是我自己来吧。」',
       ];
-      title = '被拍到了！';
-      grade = 'GAME OVER';
-      comment = comments[Math.floor(Math.random() * comments.length)];
-    } else {
-      title = '演出结束';
-      const pct = totalCaught / Math.max(1, totalCaught + totalCameraHits);
-      if (pct >= 0.9) { grade = '鹰眼保镖'; comment = '全场最佳。Century 演出结束后请你吃了顿饭。'; }
-      else if (pct >= 0.7) { grade = '火眼金睛'; comment = '大部分威胁都被你挡下了。Century 对你点了点头。'; }
-      else if (pct >= 0.5) { grade = '合格保安'; comment = '勉强及格。至少演出没出大乱子。'; }
-      else { grade = '眼神不太好'; comment = 'Century 礼貌地问你需不需要配副眼镜。'; }
+      comment = cs[Math.floor(Math.random() * cs.length)];
     }
+    else { grade = '眼神不太好'; comment = 'Century 礼貌地问你需不需要配副眼镜。'; }
 
     document.getElementById('results-title').textContent = title;
     document.getElementById('results-grade').textContent = grade;
     document.getElementById('results-comment').textContent = comment;
     document.getElementById('res-score').textContent = score;
     document.getElementById('res-caught').textContent = totalCaught;
-    document.getElementById('res-camera').textContent = totalCameraHits;
+    document.getElementById('res-camera').textContent = cameraHits;
 
     STORE.setBool('bodyguard_complete', true);
     STORE.set('bodyguard_score', score.toString());
@@ -212,6 +212,11 @@
     const dt = Math.min(0.05, (ts - (gameLoop._lastTs || ts)) / 1000);
     gameLoop._lastTs = ts;
     if (state === 'over') return;
+
+    // Countdown
+    timeLeft -= dt;
+    if (timeLeft <= 0) { endGame(); return; }
+    updateHUD();
 
     // Spawn
     spawnTimer += dt;
@@ -238,10 +243,8 @@
             SoundEngine.playSnap();
           } else {
             score = Math.max(0, score - 50);
-            lives--; totalCameraHits++;
-            combo = 0;
+            cameraHits++; combo = 0;
             SoundEngine.playWahWah();
-            if (lives <= 0) { endGame('camera'); return; }
           }
           updateHUD();
           targets.splice(i, 1);
