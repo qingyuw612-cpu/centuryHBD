@@ -351,6 +351,7 @@
 
   function finishGame() {
     state = State.DONE;
+    clearInterval(bgmLoop);
     showResults();
   }
 

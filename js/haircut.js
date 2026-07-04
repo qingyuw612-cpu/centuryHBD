@@ -267,6 +267,7 @@
   function endGame() {
     state = State.ENDED;
     cutBtn.classList.add('disabled');
+    clearInterval(bgmLoop);
     showResults();
   }
 

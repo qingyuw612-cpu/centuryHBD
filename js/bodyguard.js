@@ -240,6 +240,7 @@
 
   function endGame() {
     state = 'over';
+    clearInterval(bgmLoop);
     document.getElementById('game-container').style.cursor = '';
     showResults();
   }
