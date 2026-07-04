@@ -87,6 +87,29 @@
 }
 #final-comment b { color: var(--color-gold-light); font-weight: 600; }
 
+/* --- Achievement Grid --- */
+#achievement-grid {
+  margin-top: 36px;
+}
+.ach-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+}
+.ach-cell {
+  padding: 8px 14px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.015);
+  font-family: var(--font-body); font-size: 0.75rem;
+  color: rgba(200,190,210,0.25); display: flex; align-items: center; gap: 6px;
+  transition: all 0.3s;
+}
+.ach-cell.done {
+  color: rgba(240,215,140,0.8); border-color: rgba(212,168,83,0.3);
+  background: rgba(240,215,140,0.05);
+}
+.ach-cell-emoji { font-size: 0.9rem; opacity: 0.4; }
+.ach-cell.done .ach-cell-emoji { opacity: 1; }
+.ach-cell-name { white-space: nowrap; }
+
 /* --- Responsive --- */
 @media (max-width: 640px) {
   #summary-cards { flex-direction: column; }

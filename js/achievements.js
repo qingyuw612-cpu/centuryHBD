@@ -116,6 +116,6 @@
   setInterval(checkAll, 5000);
 
   // Export
-  window.CenturyApp.achievements = { checkAll: checkAll };
+  window.CenturyApp.achievements = { checkAll: checkAll, list: ACHIEVEMENTS, getUnlocked: function() { return checked; } };
 
 })();
