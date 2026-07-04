@@ -79,18 +79,20 @@
 
   // ===== Voice (Web Speech API - no API key needed) =====
   // ===== Voice (MP3 playback) =====
-  // Preload first few voice files only (rest lazy-load on first use)
+  // Preload first 5 immediately, rest in background after story starts
   const voiceCache = {};
-  function preloadVoices() {
-    for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 5; i++) {
+    const id = 's' + String(i).padStart(2, '0');
+    const a = new Audio(); a.src = 'assets/voice/' + id + '.mp3'; a.load(); voiceCache[id] = a;
+  }
+  function preloadRemaining() {
+    for (let i = 6; i <= 40; i++) {
       const id = 's' + String(i).padStart(2, '0');
-      const a = new Audio();
-      a.src = 'assets/voice/' + id + '.mp3';
-      a.load();
-      voiceCache[id] = a;
+      if (!voiceCache[id]) {
+        const a = new Audio(); a.src = 'assets/voice/' + id + '.mp3'; a.load(); voiceCache[id] = a;
+      }
     }
   }
-  preloadVoices();
 
   function playVoice(voiceId) {
     if (!voiceId) return;
@@ -168,6 +170,7 @@
 
   // ===== Story: Scene 1 - Room =====
   function scene1_room() {
+    preloadRemaining(); // background download
     setScene('room');
     remainingChoices = ['c1', 'c2', 'c3'];
     showSprite('center', '😿');
