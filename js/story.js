@@ -83,10 +83,30 @@
   voiceEl.volume = 0.55;
   voiceEl.preload = 'auto';
 
+  // Preload all voice files
+  const voiceCache = {};
+  function preloadVoices() {
+    for (let i = 1; i <= 40; i++) {
+      const id = 's' + String(i).padStart(2, '0');
+      const a = new Audio();
+      a.preload = 'auto';
+      a.src = 'assets/voice/' + id + '.mp3';
+      a.load();
+      voiceCache[id] = a;
+    }
+  }
+  preloadVoices();
+
   function playVoice(voiceId) {
     if (!voiceId) return;
-    voiceEl.src = 'assets/voice/' + voiceId + '.mp3';
-    voiceEl.play().catch(err => console.warn('Voice:', voiceId, err.message));
+    var cached = voiceCache[voiceId];
+    if (cached) {
+      cached.currentTime = 0;
+      cached.play().catch(() => {});
+    } else {
+      voiceEl.src = 'assets/voice/' + voiceId + '.mp3';
+      voiceEl.play().catch(() => {});
+    }
   }
 
   // ===== Dialogue =====
