@@ -57,11 +57,11 @@
         case 2: this.x = Math.random() * width; this.y = -40; break;
         case 3: this.x = Math.random() * width; this.y = height + 40; break;
       }
-      this.vx = ((Math.random() - 0.5) * 2) * (30 + Math.random() * 50);
-      this.vy = ((Math.random() - 0.5) * 2) * (30 + Math.random() * 50);
-      // Bias toward center
-      if (Math.abs(this.x - width/2) > width/3) this.vx += (width/2 - this.x) * 0.02;
-      if (Math.abs(this.y - height/2) > height/3) this.vy += (height/2 - this.y) * 0.02;
+      this.vx = ((Math.random() - 0.5) * 2) * (60 + Math.random() * 80);
+      this.vy = ((Math.random() - 0.5) * 2) * (60 + Math.random() * 80);
+      // Strong bias toward center
+      this.vx += (width/2 - this.x) * 0.06;
+      this.vy += (height/2 - this.y) * 0.06;
 
       this.lockProgress = 0;
       this.locked = false;
@@ -149,7 +149,7 @@
   function spawnTarget() {
     // More cameras than bigs (ratio ~3:1)
     const r = Math.random();
-    targets.push(new Target(r < 0.25 ? 'big' : 'camera'));
+    targets.push(new Target(r < 0.45 ? 'big' : 'camera'));
   }
 
   // ===== Game Loop =====
@@ -208,8 +208,8 @@
 
     // Spawn
     spawnTimer += dt;
-    const maxTargets = 10;
-    if (targets.length < maxTargets && spawnTimer > 1.2) {
+    const maxTargets = 15;
+    if (targets.length < maxTargets && spawnTimer > 0.8) {
       spawnTimer = 0;
       spawnTarget();
     }
