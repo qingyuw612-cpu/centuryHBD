@@ -83,15 +83,24 @@
 
   // ===== Target Types =====
   const BIG_IMAGES = [];
+  const CAM_IMAGES = [];
 
-  // Preload Big images — auto-scan: 比格1~20 .png/.jpg/.jpeg/.webp
-  let imagesLoaded = 0;
+  // Preload Big images
   for (let i = 1; i <= 20; i++) {
     ['png', 'jpg', 'jpeg', 'webp'].forEach(ext => {
       const img = new Image();
-      img.onload = () => { imagesLoaded++; BIG_IMAGES.push(img); };
+      img.onload = () => { BIG_IMAGES.push(img); };
       img.onerror = () => {};
       img.src = `assets/bodyguard/比格${i}.${ext}`;
+    });
+  }
+  // Preload camera images
+  for (let i = 1; i <= 5; i++) {
+    ['png', 'jpg', 'jpeg', 'webp'].forEach(ext => {
+      const img = new Image();
+      img.onload = () => { CAM_IMAGES.push(img); };
+      img.onerror = () => {};
+      img.src = `assets/bodyguard/摄像机${i}.${ext}`;
     });
   }
 
@@ -99,8 +108,13 @@
     constructor(type) {
       this.type = type;
       this.r = 28 + Math.random() * 20;
-      this.image = (type === 'big' && BIG_IMAGES.length > 0)
-        ? BIG_IMAGES[Math.floor(Math.random() * BIG_IMAGES.length)] : null;
+      if (type === 'big' && BIG_IMAGES.length > 0) {
+        this.image = BIG_IMAGES[Math.floor(Math.random() * BIG_IMAGES.length)];
+      } else if (type === 'camera' && CAM_IMAGES.length > 0) {
+        this.image = CAM_IMAGES[Math.floor(Math.random() * CAM_IMAGES.length)];
+      } else {
+        this.image = null;
+      }
 
       // Spawn from edge OR inside visible area
       if (Math.random() < 0.5) {
@@ -176,32 +190,15 @@
         ctx.beginPath(); ctx.arc(0, 0, this.r + 6, 0, Math.PI * 2); ctx.fill();
       }
 
-      // Body
-      if (this.type === 'big' && this.image && this.image.complete && this.image.naturalWidth > 0) {
+      // Body — use image if available
+      if (this.image && this.image.complete && this.image.naturalWidth > 0) {
         ctx.save();
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.clip();
         ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
         ctx.restore();
       } else {
-        // Camera: red circle with drawn lens
-        ctx.fillStyle = 'rgba(60,20,20,0.9)';
+        ctx.fillStyle = this.type === 'camera' ? 'rgba(60,20,20,0.9)' : 'rgba(30,20,50,0.85)';
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
-        // Inner lens ring
-        ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(0, 0, this.r * 0.55, 0, Math.PI * 2); ctx.stroke();
-        // Lens dot
-        ctx.fillStyle = 'rgba(255,255,255,0.7)';
-        ctx.beginPath(); ctx.arc(0, 0, this.r * 0.2, 0, Math.PI * 2); ctx.fill();
-        // Flash icon (top-right)
-        ctx.fillStyle = 'rgba(255,200,100,0.8)';
-        var fs = this.r * 0.35;
-        ctx.beginPath();
-        ctx.moveTo(this.r * 0.3, -this.r * 0.3);
-        ctx.lineTo(this.r * 0.5, -this.r * 0.55);
-        ctx.lineTo(this.r * 0.35, -this.r * 0.25);
-        ctx.lineTo(this.r * 0.55, -this.r * 0.45);
-        ctx.closePath(); ctx.fill();
       }
       ctx.strokeStyle = inSight
         ? (this.type === 'big' ? '#f0d78c' : '#ff6060')
@@ -376,7 +373,7 @@
   // Story dialog — wait for images before starting
   if (storyStart) {
     storyStart.addEventListener('click', function startGame() {
-      if (BIG_IMAGES.length === 0) {
+      if (BIG_IMAGES.length === 0 || CAM_IMAGES.length === 0) {
         storyStart.textContent = '加载中...';
         return;
       }
