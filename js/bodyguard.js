@@ -179,19 +179,19 @@
       }
 
       // Body
-      if (this.type === 'big' && this.image && this.image.complete) {
+      if (this.type === 'big' && this.image && this.image.complete && this.image.naturalWidth > 0) {
         ctx.save();
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.clip();
         ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
         ctx.restore();
       } else {
-        ctx.fillStyle = this.type === 'big' ? 'rgba(30,20,50,0.85)' : 'rgba(60,20,20,0.85)';
+        // Fallback: use emoji or styled circle
+        var fallbackEmoji = this.type === 'big' ? '🐻' : (this.emoji || '📸');
+        ctx.fillStyle = this.type === 'big' ? 'rgba(40,30,20,0.8)' : 'rgba(60,20,20,0.85)';
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
-        if (this.emoji) {
-          ctx.font = `${this.r}px serif`;
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(this.emoji, 0, 0);
-        }
+        ctx.font = `${this.r * 0.8}px serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(fallbackEmoji, 0, 0);
       }
       ctx.strokeStyle = inSight
         ? (this.type === 'big' ? '#f0d78c' : '#ff6060')
@@ -233,6 +233,7 @@
 
   function endGame() {
     state = 'over';
+    document.getElementById('game-container').style.cursor = '';
     showResults();
   }
 
