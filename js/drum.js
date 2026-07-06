@@ -37,10 +37,10 @@
 
   // Track config: { key, label, color, sound }
   const TRACKS = [
-    { id: 0, key: 'd', label: '底鼓', color: '#ff6b5b', glowColor: 'rgba(255,100,80,0.6)', sound: 'kick' },
-    { id: 1, key: 'f', label: '军鼓', color: '#f0d78c', glowColor: 'rgba(240,215,140,0.6)', sound: 'snare' },
-    { id: 2, key: 'j', label: '踩镲', color: '#7eb8da', glowColor: 'rgba(126,184,218,0.6)', sound: 'hihat' },
-    { id: 3, key: 'k', label: '吊镲', color: '#b39dda', glowColor: 'rgba(179,157,218,0.6)', sound: 'crash' },
+    { id: 0, key: 'd', label: '底鼓', color: '#ff4466', glowColor: 'rgba(255,68,102,0.6)', sound: 'kick' },
+    { id: 1, key: 'f', label: '军鼓', color: '#ffb800', glowColor: 'rgba(255,184,0,0.6)', sound: 'snare' },
+    { id: 2, key: 'j', label: '踩镲', color: '#00d4aa', glowColor: 'rgba(0,212,170,0.6)', sound: 'hihat' },
+    { id: 3, key: 'k', label: '吊镲', color: '#a855f7', glowColor: 'rgba(168,85,247,0.6)', sound: 'crash' },
   ];
 
   // ===========================================
@@ -228,12 +228,8 @@
       ctx.roundRect(bx - 6, by - 6, barW + 12, NOTE_H + 12, br + 4);
       ctx.fill();
 
-      // Main bar
-      const bodyGrad = ctx.createLinearGradient(0, by, 0, by + NOTE_H);
-      bodyGrad.addColorStop(0, this.track.color);
-      bodyGrad.addColorStop(0.4, this.track.glowColor);
-      bodyGrad.addColorStop(1, this.track.color);
-      ctx.fillStyle = bodyGrad;
+      // Solid bright color
+      ctx.fillStyle = this.track.color;
       ctx.strokeStyle = 'rgba(255,255,255,0.6)';
       ctx.lineWidth = 2;
       ctx.beginPath();
