@@ -37,10 +37,10 @@
 
   // Track config: { key, label, color, sound }
   const TRACKS = [
-    { id: 0, key: 'd', label: '底鼓', color: '#e74c3c', glowColor: 'rgba(231,76,60,0.5)', sound: 'kick' },
-    { id: 1, key: 'f', label: '军鼓', color: '#f39c12', glowColor: 'rgba(243,156,18,0.5)', sound: 'snare' },
-    { id: 2, key: 'j', label: '踩镲', color: '#2ecc71', glowColor: 'rgba(46,204,113,0.5)', sound: 'hihat' },
-    { id: 3, key: 'k', label: '吊镲', color: '#9b59b6', glowColor: 'rgba(155,89,182,0.5)', sound: 'crash' },
+    { id: 0, key: 'd', label: '底鼓', color: '#c97d60', glowColor: 'rgba(201,125,96,0.4)', sound: 'kick' },
+    { id: 1, key: 'f', label: '军鼓', color: '#d4a853', glowColor: 'rgba(212,168,83,0.4)', sound: 'snare' },
+    { id: 2, key: 'j', label: '踩镲', color: '#7a9a8a', glowColor: 'rgba(122,154,138,0.4)', sound: 'hihat' },
+    { id: 3, key: 'k', label: '吊镲', color: '#9888b0', glowColor: 'rgba(152,136,176,0.4)', sound: 'crash' },
   ];
 
   // ===========================================
