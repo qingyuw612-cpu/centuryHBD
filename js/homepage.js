@@ -342,51 +342,42 @@
   setInterval(checkProgress, 2000);
 
   // ===========================================
-  // Click sparkle effect
+  // Click text ring effect
   // ===========================================
-  var sparkles = [];
+  var textRings = [];
+  var ringWord = 'CENTURYROOM';
   document.addEventListener('click', function(e) {
-    for (var i = 0; i < 12; i++) {
-      var angle = Math.random() * Math.PI * 2;
-      var speed = 40 + Math.random() * 80;
-      sparkles.push({
-        x: e.clientX, y: e.clientY,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        life: 0.5 + Math.random() * 0.5,
-        age: 0,
-        size: 2 + Math.random() * 3,
-        color: Math.random() < 0.5 ? '#f0d78c' : '#b39dda'
-      });
-    }
+    textRings.push({ x: e.clientX, y: e.clientY, life: 1.2, age: 0 });
   });
 
-  // Draw sparkles on the starfield canvas
-  var sparkleCtx = document.getElementById('starfield').getContext('2d');
-  function drawSparkles(dt) {
-    for (var i = sparkles.length - 1; i >= 0; i--) {
-      var s = sparkles[i];
-      s.age += dt;
-      if (s.age >= s.life) { sparkles.splice(i, 1); continue; }
-      var alpha = 1 - s.age / s.life;
-      s.x += s.vx * dt;
-      s.y += s.vy * dt;
-      s.vy += 80 * dt;
-      sparkleCtx.fillStyle = s.color;
-      sparkleCtx.globalAlpha = alpha;
-      sparkleCtx.beginPath();
-      sparkleCtx.arc(s.x, s.y, s.size * alpha, 0, Math.PI * 2);
-      sparkleCtx.fill();
+  var ringCtx = document.getElementById('starfield').getContext('2d');
+  function drawTextRings(dt) {
+    ringCtx.textAlign = 'center';
+    ringCtx.textBaseline = 'middle';
+    for (var i = textRings.length - 1; i >= 0; i--) {
+      var r = textRings[i];
+      r.age += dt;
+      if (r.age >= r.life) { textRings.splice(i, 1); continue; }
+      var progress = r.age / r.life;
+      var alpha = 1 - progress;
+      var radius = 20 + progress * 30;
+      ringCtx.globalAlpha = alpha * 0.5;
+      for (var j = 0; j < ringWord.length; j++) {
+        var angle = (j / ringWord.length) * Math.PI * 2 - progress * 2;
+        var lx = r.x + Math.cos(angle) * radius;
+        var ly = r.y + Math.sin(angle) * radius;
+        ringCtx.fillStyle = '#f0d78c';
+        ringCtx.font = 'bold 10px "Cinzel", serif';
+        ringCtx.fillText(ringWord[j], lx, ly);
+      }
     }
-    sparkleCtx.globalAlpha = 1;
+    ringCtx.globalAlpha = 1;
   }
 
-  // Hook into the existing animation loop
   var origAnimate = animate;
   animate = function(time) {
     origAnimate(time);
-    var dt = 0.016;
-    drawSparkles(dt);
+    drawTextRings(0.016);
   };
 
   // ===========================================
