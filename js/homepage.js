@@ -318,13 +318,13 @@
     function spawn() {
       var x = Math.random()*c.width, y = Math.random()*c.height*0.35;
       var col = COL[Math.floor(Math.random()*COL.length)];
-      for (var i=0;i<80;i++) {
-        var a=Math.random()*Math.PI*2, s=3+Math.random()*6;
-        fw.push({x:x,y:y,c:col,vx:Math.cos(a)*s,vy:Math.sin(a)*s,age:0,life:0.8+Math.random()*1.4,sz:2.5+Math.random()*3.5});
+      for (var i=0;i<40;i++) {
+        var a=Math.random()*Math.PI*2, s=2+Math.random()*4;
+        fw.push({x:x,y:y,c:col,vx:Math.cos(a)*s,vy:Math.sin(a)*s,age:0,life:0.7+Math.random()*1,sz:2+Math.random()*2.5});
       }
     }
     function loop() {
-      if (Math.random()<0.04) spawn();
+      if (Math.random()<0.025) spawn();
       ctx.clearRect(0,0,c.width,c.height);
       for (var i=fw.length-1;i>=0;i--) {
         var p=fw[i]; p.age+=0.016; p.x+=p.vx; p.y+=p.vy; p.vy+=0.025;
@@ -348,6 +348,7 @@
   var ringWord = 'CENTURYROOM';
   document.addEventListener('click', function(e) {
     textRings.push({ x: e.clientX, y: e.clientY, life: 1.2, age: 0 });
+    STORE.setBool('click_ring_triggered', true);
   });
 
   var ringCtx = document.getElementById('starfield').getContext('2d');

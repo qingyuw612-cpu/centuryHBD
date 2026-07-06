@@ -47,6 +47,7 @@
     { id:'meta_midnight',emoji:'🦉',text:'夜猫子',    sub:'凌晨访问',          check:()=>{var h=new Date().getHours();return h>=2&&h<=5;} },
     { id:'meta_sidebar',emoji:'📝',text:'侦察兵',     sub:'查看了侧栏',        check:()=>STORE.getBool('sidebar_opened') },
     { id:'meta_return',emoji:'🔄', text:'回头客',     sub:'第3次回到首页',     check:()=>{var v=STORE.getInt('visit_count')||0;return v>=3;} },
+    { id:'meta_click',emoji:'💫', text:'发现彩蛋',   sub:'触发了点击字母环',  check:()=>{return STORE.getBool('click_ring_triggered');} },
   ];
 
   // ===== Toast =====
