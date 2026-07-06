@@ -33,13 +33,13 @@
 
   // Character definitions
   const CHARS = {
-    narrator:  { name: '旁白',  avatar: '📖' },
-    me:        { name: '我',    avatar: '🗡️' },
-    girl:      { name: '女孩',  avatar: '😿' },
-    magician:  { name: '魔术师', avatar: '🧙‍♂️' },
-    sadMush:   { name: '忧郁的蘑菇', avatar: '🍄' },
-    happyMush: { name: '乐观的蘑菇', avatar: '🍄' },
-    cat:       { name: '猫',    avatar: '🐱' },
+    narrator:  { name: '旁白',  avatar: '', img: '' },
+    me:        { name: '我',    avatar: '', img: '' },
+    girl:      { name: '女孩',  avatar: '<img src=\"assets/story/girl.jpg\" class=\"avatar-img\">', img: 'assets/story/girl.jpg' },
+    magician:  { name: '魔术师', avatar: '<img src=\"assets/story/magician.jpg\" class=\"avatar-img\">', img: 'assets/story/magician.jpg' },
+    sadMush:   { name: '忧郁的蘑菇', avatar: '<img src=\"assets/story/sadmush.png\" class=\"avatar-img\">', img: 'assets/story/sadmush.png' },
+    happyMush: { name: '乐观的蘑菇', avatar: '<img src=\"assets/story/happymush.png\" class=\"avatar-img\">', img: 'assets/story/happymush.png' },
+    cat:       { name: '猫',    avatar: '', img: '' },
   };
 
   // ===== Scene =====
@@ -51,10 +51,12 @@
     spawnMotes();
   }
 
-  function showSprite(pos, emoji) {
-    const el = spriteCenter; // all sprites centered
-    [spriteLeft, spriteRight, spriteCenter].forEach(s => s.classList.remove('show'));
-    el.textContent = emoji;
+  function showSprite(pos, imgSrc) {
+    [spriteLeft, spriteRight, spriteCenter].forEach(s => { s.classList.remove('show'); s.innerHTML = ''; });
+    var el = pos === 'right' ? spriteRight : spriteCenter;
+    if (imgSrc) {
+      el.innerHTML = '<img src="' + imgSrc + '" class="sprite-img">';
+    }
     el.className = 'vn-sprite show';
   }
 
@@ -125,7 +127,7 @@
     const ch = CHARS[d.charKey] || CHARS.narrator;
 
     speakerName.textContent = ch.name;
-    avatarEmoji.textContent = ch.avatar;
+    avatarEmoji.innerHTML = ch.avatar || '';
     currentFullText = d.text;
     dialogueText.textContent = '';
     dialogueNext.style.display = 'none';
@@ -175,10 +177,12 @@
     preloadRemaining(); // background download
     setScene('room');
     remainingChoices = ['c1', 'c2', 'c3'];
-    showSprite('center', '😿');
     say('narrator', '空旷的小房间。一个女孩坐在地上哭。');
     say('me', '你为什么在哭？', null, 's02');
-    say('girl', '我的猫变成蘑菇了。', () => showNextChoice(), 's03');
+    say('girl', '我的猫变成蘑菇了。', function() {
+      showSprite('center', 'assets/story/girl.jpg');
+      showNextChoice();
+    }, 's03');
   }
 
   function showNextChoice() {
@@ -215,7 +219,7 @@
   // ===== Story: Scene 2 - Forest =====
   function scene2_forest() {
     setScene('forest');
-    showSprite('right', '🧙‍♂️');
+    showSprite('right', 'assets/story/magician.jpg');
     say('narrator', '你找到了魔术师。他站在一片幽暗的树林中，魔杖散发着冷光。');
     say('me', '你好，魔术师。', null, 's14');
     say('magician', '你好，邋遢的女孩。你的头发过长，请让我帮你改善它。', null, 's15');
@@ -308,7 +312,7 @@
   // ===== Scene 3: Mushroom =====
   function scene3_mushroom() {
     setScene('mushroom');
-    showSprite('center', '🍄');
+    showSprite('center', 'assets/story/sadmush.png');
     say('narrator', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目，在幽暗中微微发光。');
     say('me', '这就是那只猫变的蘑菇吗……', () => {
       showChoices([
@@ -320,7 +324,7 @@
 
   function ending_sad() {
     setScene('mushroom');
-    showSprite('center', '🍄');
+    showSprite('center', 'assets/story/sadmush.png');
     say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。', null, 's25');
     say('sadMush', '所有品尝过我的人都死了。我感到时间的流逝，自然的残忍。我在永无止境的暗夜中踽踽独行，唯有雨水清洗我。月下三更暖，正午半月弯，而我只是千千万万个蘑菇中最普通的一个。你为什么要与我说话？', null, 's26');
     say('me', '我遇到一个比你更加忧郁的女孩，她说她怀念你的猫形态。我见不得他人落泪，因此我长途跋涉而来，杀掉了魔术师，想要带你回去。', null, 's27');
@@ -328,7 +332,7 @@
     say('sadMush', '夜深人静之时，天地都在为我落泪。吹着风的夜晚，黑夜的思绪逐渐飘离。呐，今后该如何是好呢！', null, 's29');
     say('me', '那便不必再骗自己了。蘑菇的欢笑，是你说给自己听的谎言；猫的沉默，才是你唯一诚实的时刻。魔术师已死，他的咒语随他埋进了土里，可我还记得你原本的模样——', null, 's30');
     say('narrator', '法术生效，蘑菇的伞盖缓缓收缩、蜷曲，重新长出软毛与胡须……', () => {
-      showSprite('center', '🐱');
+      showSprite('center', '');
     });
     say('cat', '（吟唱）だから僕はきのこを辞めた。', null, 's32');
     say('me', '和我一起走吧！', () => {
@@ -340,7 +344,7 @@
 
   function ending_happy() {
     setScene('mushroom');
-    showSprite('center', '🍄');
+    showSprite('center', 'assets/story/happymush.png');
     say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。', null, 's34');
     say('happyMush', '我偏爱阴暗潮湿的角落，这里是我的花园。我不用叫，不用舔毛，不用伸懒腰，就可以享受无穷无尽的宁静。自然是造物者之无尽藏，而我只是一个专一的蘑菇。', null, 's35');
     say('happyMush', '每个蘑菇都有自己的造诣。我可以成为猫，让女孩为我尖叫；也可以成为蟑螂，让女孩为我尖叫；也可以成为蘑菇，让女孩为我落泪。猫固然受人追捧，但是唯有蘑菇才享受一片寂静的雨林。我只是宁静地存在，观赏这一切流逝的情绪，而我始终不变。', null, 's36');

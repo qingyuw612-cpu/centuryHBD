@@ -68,18 +68,24 @@
 .vn-sprite {
   position: absolute;
   left: 50%; top: 50%;
-  margin-left: -3.5rem;
-  margin-top: -3.5rem;
-  font-size: 7rem; opacity: 0;
-  transition: opacity 0.6s ease;
-  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5));
-  width: 7rem; height: 7rem;
+  margin-left: -120px; margin-top: -160px;
+  opacity: 0; transition: opacity 0.8s ease;
+  width: 240px; height: 320px;
   display: flex; align-items: center; justify-content: center;
 }
 .vn-sprite.show {
   opacity: 1;
-  animation: spriteSpin 20s linear infinite;
+  animation: spriteBreathe 4s ease-in-out infinite;
 }
+@keyframes spriteBreathe {
+  0%,100% { transform: scale(1); filter: drop-shadow(0 8px 24px rgba(0,0,0,0.5)); }
+  50% { transform: scale(1.03); filter: drop-shadow(0 12px 32px rgba(0,0,0,0.6)); }
+}
+.sprite-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+/* Avatar image */
+.avatar-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+#avatar-frame { overflow: hidden; }
 @keyframes spriteSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
