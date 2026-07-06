@@ -138,11 +138,26 @@ window.CenturyApp.loadSummary = function() {
   var comment = parts.length>0 ? parts.join('。\n')+'。' : '还没有冒险记录。';
   if (totalPlays>0) {
     comment += '\n\n';
-    if (totalPlays>=12) comment += '来来回回折腾了 '+totalPlays+' 次——这份执着，日月可鉴。';
-    else if (totalPlays>6) comment += '前前后后尝试了 '+totalPlays+' 次，越战越勇。';
-    else comment += '一共经历了 '+totalPlays+' 次冒险。';
-    if (drumMaxCombo>=30) comment += ' 最高连击 '+drumMaxCombo+'，鼓都为你颤抖。';
-    if (haircutInsults>=5) comment += ' 被骂了 '+haircutInsults+' 次，顾客已在写投诉信。';
+    // Highlight reel
+    var highlights = [];
+    if (drumMaxCombo>=30) highlights.push('最高连击 '+drumMaxCombo+'，鼓都为你颤抖');
+    if (haircutInsults>=5) highlights.push('被骂了 '+haircutInsults+' 次，顾客已在写投诉信');
+    if (haircutInsults===0 && haircutPlays>0) highlights.push('一次都没被骂——你是理发界的和平鸽');
+    if (phoneBestTime&&phoneBestTime<10) highlights.push('贴膜最快 '+phoneBestTime+' 秒，手速堪比电竞选手');
+    if (drumPlays>=10) highlights.push('打了 '+drumPlays+' 次鼓，鼓棒都冒烟了');
+    if (haircutPlays>=5) highlights.push('上了 '+haircutPlays+' 次理发班，Tony看了都沉默');
+    if (phonePlays>=5) highlights.push('贴了 '+phonePlays+' 次膜，练就了一双无影手');
+    if (bgPlays>=5) highlights.push('上了 '+bgPlays+' 次班，全勤奖非你莫属');
+    if (bgCamera===0&&bgPlays>0) highlights.push('零镜头事故——i人的终极胜利');
+    if (drumGrade==='S'&&(STORE.get('haircut_score')||0)<=100) highlights.push('鼓技封神，理发入门——你能文能武，文武都不行');
+    if (totalPlays>=15) highlights.push('累计 '+totalPlays+' 次——你把这里当全职工作了是吧');
+    if (storyComplete) {
+      var et=STORE.get('story_ending')||'';
+      if (et==='重归猫女') highlights.push('你相信猫可以变回来。这份信念让人动容');
+      if (et==='音乐小子') highlights.push('你尊重了一个蘑菇的选择。格局打开了');
+    }
+    if (highlights.length===0) highlights.push('一共经历了 '+totalPlays+' 次冒险');
+    comment += highlights.join('。\n')+'。';
   }
   document.getElementById('final-comment').innerHTML = comment.replace(/\n/g,'<br>');
 
