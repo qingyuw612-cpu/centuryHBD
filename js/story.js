@@ -118,10 +118,9 @@
     if (isTyping) { finishTypewriter(); return; }
     // Stop current voice
     for (var k in voiceCache) { var a = voiceCache[k]; if (a && !a.paused) { a.pause(); a.currentTime = 0; } }
-    if (dialogueQueue.length === 0) {
-      if (currentCallback) { const cb = currentCallback; currentCallback = null; cb(); }
-      return;
-    }
+    // Fire pending callback before advancing
+    if (currentCallback) { var cb2 = currentCallback; currentCallback = null; cb2(); }
+    if (dialogueQueue.length === 0) return;
 
     const d = dialogueQueue.shift();
     const ch = CHARS[d.charKey] || CHARS.narrator;
