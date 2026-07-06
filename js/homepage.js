@@ -316,15 +316,15 @@
     function rz() { c.width = window.innerWidth; c.height = window.innerHeight; }
     rz(); window.addEventListener('resize', rz);
     function spawn() {
-      var x = Math.random()*c.width, y = Math.random()*c.height*0.35;
+      var x = Math.random()*c.width, y = Math.random()*c.height*0.3;
       var col = COL[Math.floor(Math.random()*COL.length)];
-      for (var i=0;i<60;i++) {
-        var a=Math.random()*Math.PI*2, s=2+Math.random()*5;
-        fw.push({x:x,y:y,c:col,vx:Math.cos(a)*s,vy:Math.sin(a)*s,age:0,life:0.8+Math.random()*1.2,sz:2+Math.random()*3});
+      for (var i=0;i<30;i++) {
+        var a=Math.random()*Math.PI*2, s=1.5+Math.random()*3.5;
+        fw.push({x:x,y:y,c:col,vx:Math.cos(a)*s,vy:Math.sin(a)*s,age:0,life:0.6+Math.random()*0.8,sz:1.5+Math.random()*2});
       }
     }
     function loop() {
-      if (Math.random()<0.03) spawn();
+      if (Math.random()<0.015) spawn();
       ctx.clearRect(0,0,c.width,c.height);
       for (var i=fw.length-1;i>=0;i--) {
         var p=fw[i]; p.age+=0.016; p.x+=p.vx; p.y+=p.vy; p.vy+=0.025;
