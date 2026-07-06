@@ -311,19 +311,21 @@
   // ===== Scene 3: Mushroom =====
   function scene3_mushroom() {
     setScene('mushroom');
-    showSprite('center', 'assets/story/sadmush.png');
+    // Show big "?" before revealing which mushroom
+    showSprite('center', '');
+    var qEl = document.getElementById('sprite-center');
+    if (qEl) { qEl.innerHTML = '<span style="font-size:10rem;opacity:0.4;color:#f0d78c">?</span>'; qEl.classList.add('show'); }
     say('narrator', '魔术师倒下了。在他身后，你发现了那只蘑菇——色彩斑斓，鲜艳夺目，在幽暗中微微发光。');
     say('me', '这就是那只猫变的蘑菇吗……', () => {
       showChoices([
-        { label: '这是一个忧郁的蘑菇', action: () => ending_sad() },
-        { label: '这是一个乐观的蘑菇', action: () => ending_happy() },
+        { label: '这是一个忧郁的蘑菇', action: () => { showSprite('center', 'assets/story/sadmush.png'); ending_sad(); } },
+        { label: '这是一个乐观的蘑菇', action: () => { showSprite('center', 'assets/story/happymush.png'); ending_happy(); } },
       ]);
     }, 's24');
   }
 
   function ending_sad() {
     setScene('mushroom');
-    showSprite('center', 'assets/story/sadmush.png');
     say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。', null, 's25');
     say('sadMush', '所有品尝过我的人都死了。我感到时间的流逝，自然的残忍。我在永无止境的暗夜中踽踽独行，唯有雨水清洗我。月下三更暖，正午半月弯，而我只是千千万万个蘑菇中最普通的一个。你为什么要与我说话？', null, 's26');
     say('me', '我遇到一个比你更加忧郁的女孩，她说她怀念你的猫形态。我见不得他人落泪，因此我长途跋涉而来，杀掉了魔术师，想要带你回去。', null, 's27');
@@ -343,7 +345,6 @@
 
   function ending_happy() {
     setScene('mushroom');
-    showSprite('center', 'assets/story/happymush.png');
     say('me', '你好，蘑菇。即使作为一个蘑菇，你依旧是蘑菇中比较美的。我从未见过这么鲜艳的蘑菇，这么圆润的蘑菇。', null, 's34');
     say('happyMush', '我偏爱阴暗潮湿的角落，这里是我的花园。我不用叫，不用舔毛，不用伸懒腰，就可以享受无穷无尽的宁静。自然是造物者之无尽藏，而我只是一个专一的蘑菇。', null, 's35');
     say('happyMush', '每个蘑菇都有自己的造诣。我可以成为猫，让女孩为我尖叫；也可以成为蟑螂，让女孩为我尖叫；也可以成为蘑菇，让女孩为我落泪。猫固然受人追捧，但是唯有蘑菇才享受一片寂静的雨林。我只是宁静地存在，观赏这一切流逝的情绪，而我始终不变。', null, 's36');
