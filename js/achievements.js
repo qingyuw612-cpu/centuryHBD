@@ -82,17 +82,25 @@
 
   // ===== Check =====
   var checked = {};
+  // Restore from sessionStorage
+  var saved = STORE.get('ach_unlocked');
+  if (saved) {
+    try { checked = JSON.parse(saved); } catch(e) { checked = {}; }
+  }
 
   function checkAll() {
+    var changed = false;
     ACHIEVEMENTS.forEach(function(ach) {
       if (checked[ach.id]) return;
       try {
         if (ach.check()) {
           checked[ach.id] = true;
+          changed = true;
           showToast(ach);
         }
       } catch(e) {}
     });
+    if (changed) STORE.set('ach_unlocked', JSON.stringify(checked));
   }
 
   // Track visit count
