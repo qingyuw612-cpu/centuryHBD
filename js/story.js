@@ -35,8 +35,8 @@
   const CHARS = {
     narrator:  { name: '旁白',  avatar: '', img: '' },
     me:        { name: '我',    avatar: '', img: '' },
-    girl:      { name: '女孩',  avatar: '<img src=\"assets/story/girl.jpg\" class=\"avatar-img\">', img: 'assets/story/girl.jpg' },
-    magician:  { name: '魔术师', avatar: '<img src=\"assets/story/magician.jpg\" class=\"avatar-img\">', img: 'assets/story/magician.jpg' },
+    girl:      { name: '女孩',  avatar: '<img src=\"assets/story/girl.webp\" class=\"avatar-img\">', img: 'assets/story/girl.webp' },
+    magician:  { name: '魔术师', avatar: '<img src=\"assets/story/magician.webp\" class=\"avatar-img\">', img: 'assets/story/magician.webp' },
     sadMush:   { name: '忧郁的蘑菇', avatar: '<img src=\"assets/story/sadmush.png\" class=\"avatar-img\">', img: 'assets/story/sadmush.png' },
     happyMush: { name: '乐观的蘑菇', avatar: '<img src=\"assets/story/happymush.png\" class=\"avatar-img\">', img: 'assets/story/happymush.png' },
     cat:       { name: '猫',    avatar: '', img: '' },
@@ -180,7 +180,7 @@
     say('narrator', '空旷的小房间。一个女孩坐在地上哭。');
     say('me', '你为什么在哭？', null, 's02');
     say('girl', '我的猫变成蘑菇了。', function() {
-      showSprite('center', 'assets/story/girl.jpg');
+      showSprite('center', 'assets/story/girl.webp');
       showNextChoice();
     }, 's03');
   }
@@ -219,7 +219,7 @@
   // ===== Story: Scene 2 - Forest =====
   function scene2_forest() {
     setScene('forest');
-    showSprite('right', 'assets/story/magician.jpg');
+    showSprite('right', 'assets/story/magician.webp');
     say('narrator', '你找到了魔术师。他站在一片幽暗的树林中，魔杖散发着冷光。');
     say('me', '你好，魔术师。', null, 's14');
     say('magician', '你好，邋遢的女孩。你的头发过长，请让我帮你改善它。', null, 's15');
