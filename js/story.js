@@ -177,12 +177,11 @@
     preloadRemaining(); // background download
     setScene('room');
     remainingChoices = ['c1', 'c2', 'c3'];
-    say('narrator', '空旷的小房间。一个女孩坐在地上哭。');
-    say('me', '你为什么在哭？', null, 's02');
-    say('girl', '我的猫变成蘑菇了。', function() {
+    say('narrator', '空旷的小房间。一个女孩坐在地上哭。', function() {
       showSprite('center', 'assets/story/girl.webp');
-      showNextChoice();
-    }, 's03');
+    });
+    say('me', '你为什么在哭？', null, 's02');
+    say('girl', '我的猫变成蘑菇了。', () => showNextChoice(), 's03');
   }
 
   function showNextChoice() {
