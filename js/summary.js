@@ -169,7 +169,7 @@ window.CenturyApp.loadSummary = function() {
     grid.innerHTML = '<h3 style="text-align:center;font-family:var(--font-display);font-size:0.9rem;color:var(--color-gold-light);margin-bottom:16px;letter-spacing:0.06em">成就收集</h3>' +
       '<div class="ach-grid">' + list.map(function(a) {
         var done = !!unlocked[a.id];
-        return '<div class="ach-cell'+(done?' done':'')+'"><span class="ach-cell-emoji">'+a.emoji+'</span><span class="ach-cell-name">'+a.text+'</span></div>';
+        return '<div class="ach-cell'+(done?' done':'')+'"><span class="ach-cell-name">'+a.text+'</span></div>';
       }).join('') + '</div>';
   }
 };
