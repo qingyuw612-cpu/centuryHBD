@@ -282,6 +282,15 @@
     if (charContainer) {
       if (drum && phone && haircut && STORE.getBool('bodyguard_complete')) {
         charContainer.classList.add('lit');
+        if (!window._hintCenturyShown) {
+          window._hintCenturyShown = true;
+          var hc = document.createElement('div');
+          hc.style.cssText = 'position:fixed;top:8%;left:5%;z-index:110;font-family:CormorantGaramond,serif;font-size:1rem;color:#f0d78c;pointer-events:none;text-shadow:0 0 20px rgba(240,215,140,0.6);text-align:left;opacity:0;transition:opacity 1s';
+          hc.innerHTML = 'Century好像有什么话要说……<br>（尝试点击Century）';
+          document.body.appendChild(hc);
+          setTimeout(function() { hc.style.opacity = '1'; }, 300);
+          setTimeout(function() { hc.style.opacity = '0'; }, 7000);
+        }
       } else {
         charContainer.classList.remove('lit');
       }
