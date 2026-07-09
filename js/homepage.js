@@ -285,8 +285,8 @@
         if (!window._hintCenturyShown) {
           window._hintCenturyShown = true;
           var hc = document.createElement('div');
-          hc.style.cssText = 'position:fixed;top:8%;left:5%;z-index:110;font-family:CormorantGaramond,serif;font-size:1rem;color:#f0d78c;pointer-events:none;text-shadow:0 0 20px rgba(240,215,140,0.6);text-align:left;opacity:0;transition:opacity 1s';
-          hc.innerHTML = 'Century好像有什么话要说……<br>（尝试点击Century）';
+          hc.style.cssText = 'position:fixed;top:8%;left:50%;transform:translateX(-50%);z-index:110;pointer-events:none;text-align:center;opacity:0;transition:opacity 1s';
+          hc.innerHTML = '<span style="font-family:CormorantGaramond,serif;font-size:1.1rem;color:#f0d78c;text-shadow:0 0 20px rgba(240,215,140,0.6)">嗯？他好像有话要说。</span><br><span style="font-family:CormorantGaramond,serif;font-size:0.75rem;color:rgba(240,215,140,0.5)">（点击Century）</span>';
           document.body.appendChild(hc);
           setTimeout(function() { hc.style.opacity = '1'; }, 300);
           setTimeout(function() { hc.style.opacity = '0'; }, 7000);
