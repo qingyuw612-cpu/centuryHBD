@@ -190,8 +190,8 @@
         ctx.beginPath(); ctx.arc(0, 0, this.r + 6, 0, Math.PI * 2); ctx.fill();
       }
 
-      // Body — use image if available
-      if (this.image && this.image.complete && this.image.naturalWidth > 0) {
+      // Always draw with image
+      if (this.image && this.image.complete) {
         ctx.save();
         ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.clip();
         ctx.drawImage(this.image, -this.r, -this.r, this.r * 2, this.r * 2);
@@ -224,8 +224,16 @@
   let spawnTimer = 0;
   let floatTimer = 0;
   function spawnTarget(forceType) {
-    const r = Math.random();
-    var type = forceType || (r < 0.55 ? 'big' : 'camera');
+    var type = forceType;
+    if (!type) {
+      // Can only spawn Big if images loaded; camera if camera images loaded
+      var canBig = BIG_IMAGES.length > 0 && BIG_IMAGES[0].complete;
+      var canCam = CAM_IMAGES.length > 0 && CAM_IMAGES[0].complete;
+      if (!canBig && !canCam) return;
+      if (canBig && canCam) type = Math.random() < 0.55 ? 'big' : 'camera';
+      else if (canBig) type = 'big';
+      else type = 'camera';
+    }
     targets.push(new Target(type));
   }
 
@@ -378,8 +386,6 @@
         storyStart.textContent = '加载中...';
         return;
       }
-      var lm = document.getElementById('story-loading-msg');
-      if (lm) lm.style.display = 'none';
       if (storyDialog) storyDialog.classList.add('hidden');
       SoundEngine._ensure();
     });
