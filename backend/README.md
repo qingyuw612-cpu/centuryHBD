@@ -1,6 +1,6 @@
 # Century Room 排班后端
 
-前端沿用现有 Vercel 网站，入口 `/schedule.html`；Cloudflare Worker `centuryroom-api` 使用 D1 `centuryroom-db`，通过 `api.centuryroom.cn` 提供接口。
+前端沿用现有 Vercel 网站，首页和 `/schedule.html` 均为排班入口，生日游戏保留在 `/birthday.html`；Cloudflare Worker `centuryroom-api` 使用 D1 `centuryroom-db`，通过 `api.centuryroom.cn` 提供接口。
 
 新注册账号始终为 `viewer/pending`，管理员批准后只能查看已发布排班。管理员从数据库指定，不会因为第一个注册而自动产生。密码使用独立随机盐与 PBKDF2-SHA512（100,000 次，兼容 Workers Web Crypto），最少 15 字符。会话使用随机令牌，数据库只保存令牌摘要，Cookie 为 HttpOnly、Secure、SameSite=Lax，7 天到期。没有邮件验证或自助找回密码；目前账号以用户名登录。
 

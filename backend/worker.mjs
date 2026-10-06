@@ -15,10 +15,11 @@ export function validateSchedule(value) {
   if (!Array.isArray(value.shows) || value.shows.length!==value.count) fail(400,'场次信息不完整');
   const drummers = ['汤世纪','yoyo','妹宝','小哲','Ben','阿诺','大象'];
   const shows = value.shows.map(s=>{
-    if (!s || !['上午','下午'].includes(s.period) || !Array.isArray(s.drummers) || s.drummers.length!==2 || s.drummers.some(x=>!drummers.includes(x)) || s.drummers[0]===s.drummers[1]) fail(400,'每场需选择时段和两名不同的鼓手');
+    if (!s || !['待确认','上午','下午'].includes(s.period) || !Array.isArray(s.drummers) || s.drummers.length!==2 || s.drummers.some(x=>!drummers.includes(x)) || s.drummers[0]===s.drummers[1]) fail(400,'每场需选择时段和两名不同的鼓手');
     return {period:s.period, drummers:s.drummers};
   });
   const groups = {MC:['欧修远','Curtis','Jason'], 舞者:['Gus','彭俊维'], 小号:['小河','小宏']};
+  if(!Array.isArray(value.roster) || !value.special || typeof value.special!=='object' || Array.isArray(value.special)) fail(400,'岗位或特殊安排格式不正确');
   const roster = Object.entries(groups).flatMap(([group,names])=>names.map(name=>{
     const r = value.roster?.find(x=>x.group===group && x.name===name);
     if (!r || typeof r.shift!=='string' || r.shift.length>40) fail(400,'请填写各岗位安排（休息或待定也需注明）');
@@ -34,6 +35,7 @@ export function validateSchedule(value) {
   if (typeof value.note!=='string' || value.note.length>1000) fail(400,'备注最长 1000 字');
   if (value.published!==true && value.published!==false) fail(400,'请选择草稿或发布');
   if(value.published && roster.some(r=>r.shift==='待定')) fail(400,'待定岗位请确认后再发布');
+  if(value.published && shows.some(s=>s.period==='待确认')) fail(400,'请确认每场的上午或下午时段后再发布');
   return {count:value.count, shows, roster, special:Object.fromEntries(special), note:value.note.trim(), published:value.published};
 }
 async function body(request) {
@@ -92,7 +94,7 @@ export default {
       if(path==='/auth/login' && method==='POST') {
         await rate(env,'loginip:'+await hash(request.headers.get('CF-Connecting-IP')||'unknown'),30,900);
         const b=await body(request);
-        if(typeof b.username!=='string' || typeof b.password!=='string' || b.password.length>128) fail(400,'请输入用户名和密码');
+        if(typeof b.username!=='string' || !/^[a-zA-Z0-9_]{3,32}$/.test(b.username) || typeof b.password!=='string' || b.password.length>128) fail(400,'请输入用户名和密码');
         const username=b.username.toLowerCase();
         await rate(env,'loginuser:'+await hash(username),10,900);
         const u=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();

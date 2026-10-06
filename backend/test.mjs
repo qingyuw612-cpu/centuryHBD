@@ -33,6 +33,7 @@ assert.equal((await request('/schedules/2026-10-06','PUT',{version:0,data},admin
 assert.equal((await request('/schedules/2026-10-06','GET',null,cookie)).body.schedule,null);
 assert.equal((await request('/schedules/2026-10-06','PUT',{version:0,data},admin)).status,409);
 assert.equal((await request('/schedules/2026-10-06','PUT',{version:1,data:{...data,published:true}},admin)).status,200);
+assert.equal((await request('/schedules/2026-10-06','PUT',{version:2,data:{...data,published:true,shows:data.shows.map(s=>({...s,period:'待确认'}))}},admin)).status,400);
 assert.equal((await request('/schedules/2026-10-06','GET',null,cookie)).body.schedule.version,2);
 assert.equal((await request('/schedules/2026-10-06','PUT',{version:1,data},admin)).status,409);
 await request('/auth/logout','POST',{},cookie);assert.equal((await request('/auth/me','GET',null,cookie)).status,401);
