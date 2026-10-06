@@ -362,7 +362,7 @@
       <div class="ending-icon">${icon}</div>
       <div class="ending-title">达成结局：《${title}》</div>
       <div class="ending-subtitle">${subtitle}</div>
-      <a href="index.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('index.html')">返回首页</a>
+      <a href="birthday.html" class="btn" onclick="event.preventDefault(); CenturyApp.navigateTo('birthday.html')">返回首页</a>
     `;
     SoundEngine.playChime();
     STORE.setBool('story_complete', true);

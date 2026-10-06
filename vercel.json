@@ -1,1 +1,67 @@
-{"headers":[{"source":"/schedule.html","headers":[{"key":"Content-Security-Policy","value":"default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://api.centuryroom.cn; frame-ancestors 'none'; form-action 'self'; base-uri 'none'"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"},{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"Cache-Control","value":"no-store"}]}]}
+{
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://api.centuryroom.cn; frame-ancestors 'none'; form-action 'self'; base-uri 'none'",
+          "key": "Content-Security-Policy"
+        },
+        {
+          "value": "strict-origin-when-cross-origin",
+          "key": "Referrer-Policy"
+        },
+        {
+          "value": "nosniff",
+          "key": "X-Content-Type-Options"
+        },
+        {
+          "value": "no-store",
+          "key": "Cache-Control"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://api.centuryroom.cn; frame-ancestors 'none'; form-action 'self'; base-uri 'none'",
+          "key": "Content-Security-Policy"
+        },
+        {
+          "value": "strict-origin-when-cross-origin",
+          "key": "Referrer-Policy"
+        },
+        {
+          "value": "nosniff",
+          "key": "X-Content-Type-Options"
+        },
+        {
+          "value": "no-store",
+          "key": "Cache-Control"
+        }
+      ]
+    },
+    {
+      "source": "/schedule.html",
+      "headers": [
+        {
+          "value": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src https://api.centuryroom.cn; frame-ancestors 'none'; form-action 'self'; base-uri 'none'",
+          "key": "Content-Security-Policy"
+        },
+        {
+          "value": "strict-origin-when-cross-origin",
+          "key": "Referrer-Policy"
+        },
+        {
+          "value": "nosniff",
+          "key": "X-Content-Type-Options"
+        },
+        {
+          "value": "no-store",
+          "key": "Cache-Control"
+        }
+      ]
+    }
+  ]
+}
