@@ -1,0 +1,1 @@
+{"name":"centuryroom-api","main":"worker.mjs","compatibility_date":"2026-10-06","routes":[{"pattern":"api.centuryroom.cn","custom_domain":true}],"d1_databases":[{"binding":"DB","database_name":"centuryroom-db","database_id":"805d76bb-4b19-4dda-92c6-6388ae990a1b"}]}
