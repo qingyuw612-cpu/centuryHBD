@@ -1,13 +1,13 @@
-# Century Room 排班后端
+# 演出排班后端
 
-前端沿用现有 Vercel 网站，首页和 `/schedule.html` 均为排班入口，生日游戏保留在 `/birthday.html`；Cloudflare Worker `centuryroom-api` 使用 D1 `centuryroom-db`，通过 `api.centuryroom.cn` 提供接口。
+前端首页与 /schedule.html 共用排班界面，生日游戏位于 /birthday.html。Vercel 托管前端，Cloudflare Worker centuryroom-api 使用 D1 centuryroom-db，通过 api.centuryroom.cn 提供接口。
 
-新注册账号始终为 `viewer/pending`，管理员批准后只能查看已发布排班。管理员从数据库指定，不会因为第一个注册而自动产生。密码使用独立随机盐与 PBKDF2-SHA512（100,000 次，兼容 Workers Web Crypto），最少 15 字符。会话使用随机令牌，数据库只保存令牌摘要，Cookie 为 HttpOnly、Secure、SameSite=Lax，7 天到期。没有邮件验证或自助找回密码；目前账号以用户名登录。
+每天 4–6 场，每场记录车头、车尾、MC、小号和两名 Dancer，所有位置允许留空。保存后立即对已批准账号可见，没有草稿或发布步骤。个人休息由管理员明确标记，空白不自动算休息。彭俊维、哲的晚场可单独填写鬼或休息，与白天演出互不冲突。演员选项与验证位于 model.mjs，版本 2 排班以 format=2 标记。
 
-`schema.sql` 为可重复执行的建表脚本。`node backend/test.mjs` 使用内存 SQLite 验证注册、审批、角色权限、草稿隔离、修改冲突、日期与搭档校验、注销、限流；不会写入线上数据库。
+新注册账号始终是 viewer/pending；管理员批准后可查看，普通账号不能编辑。管理员由站点负责人在 D1 指定，不会自动授予首个注册账号。现有密码加密、7 天 HttpOnly/Secure 会话、来源限制、登录限流和审批权限保持不变。
 
-管理员保存每天 4/5/6 场演出、每场时段与两名鼓手、其他岗位安排、鼓手休息/鬼屋及备注。只有小哲、Ben 可以设置鼓手鬼屋任务；舞者鬼屋任务可在岗位安排填写。待定岗位只能保存草稿。版本号防止覆盖其他管理员的修改，操作写入审计记录。
+node backend/test.mjs 使用内存 SQLite 检查账号权限、空位保存、Dancer 与鼓手重复、个人休息冲突、晚场独立、旧数据转换、历史备份和版本冲突，不修改线上数据。
 
-首次管理员由站点负责人注册并确认账号后，通过 D1 Console 指定该用户为 `admin/approved`。日常账号审批在网站内进行。涉及账号恢复、管理员变更需由站点负责人在 Cloudflare 管理台处理。请不要在 Git 中保存密码或令牌。
+schema.sql 可重复执行。部署前需建好 schedule_archive 并备份旧数据；保存排班时自动保留前一版本。旧格式在读取时转换，未识别的演员名字不猜测对应关系，原始信息在历史表保留。数据库 published 列保留以兼容历史存储，新界面和接口不再使用它区分可见性。
 
-上线前应先运行测试、执行 schema.sql、部署 Worker，再发布前端。数据库已有表时不要重建或删除。调整前端主域名时同步更新 Worker 的 ORIGINS 与本页 CSP connect-src。
+Worker 支持多文件项目。用 Wrangler 发布 backend/wrangler.json 即可；Cloudflare 网页编辑器部署时，将 model.mjs 去除 export 前缀后放到 worker.mjs 前，并删除 worker.mjs 第一行 import，形成独立模块。

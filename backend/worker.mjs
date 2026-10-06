@@ -1,3 +1,4 @@
+import {validateSchedule, normalizeSchedule} from './model.mjs';
 const ORIGINS = new Set(['https://www.centuryroom.cn', 'https://centuryroom.cn']);
 const COOKIE = '__Host-century_session';
 const encoder = new TextEncoder();
@@ -10,34 +11,6 @@ export async function passwordHash(password, salt) {
 }
 const fail = (status, message) => { throw Object.assign(new Error(message), {status}); };
 const publicUser = u => ({id:u.id, username:u.username, name:u.name, role:u.role, status:u.status});
-export function validateSchedule(value) {
-  if (!value || ![4,5,6].includes(value.count)) fail(400,'每日场次请选择 4、5 或 6 场');
-  if (!Array.isArray(value.shows) || value.shows.length!==value.count) fail(400,'场次信息不完整');
-  const drummers = ['汤世纪','yoyo','妹宝','小哲','Ben','阿诺','大象'];
-  const shows = value.shows.map(s=>{
-    if (!s || !['待确认','上午','下午'].includes(s.period) || !Array.isArray(s.drummers) || s.drummers.length!==2 || s.drummers.some(x=>!drummers.includes(x)) || s.drummers[0]===s.drummers[1]) fail(400,'每场需选择时段和两名不同的鼓手');
-    return {period:s.period, drummers:s.drummers};
-  });
-  const groups = {MC:['欧修远','Curtis','Jason'], 舞者:['Gus','彭俊维'], 小号:['小河','小宏']};
-  if(!Array.isArray(value.roster) || !value.special || typeof value.special!=='object' || Array.isArray(value.special)) fail(400,'岗位或特殊安排格式不正确');
-  const roster = Object.entries(groups).flatMap(([group,names])=>names.map(name=>{
-    const r = value.roster?.find(x=>x.group===group && x.name===name);
-    if (!r || typeof r.shift!=='string' || r.shift.length>40) fail(400,'请填写各岗位安排（休息或待定也需注明）');
-    return {group,name,shift:r.shift.trim()};
-  }));
-  if (roster.some(r=>!r.shift)) fail(400,'请填写各岗位安排');
-  const special = drummers.map(name=>{
-    const shift = value.special?.[name] || '';
-    if (!['','休息','鬼屋'].includes(shift) || (shift==='鬼屋' && !['小哲','Ben'].includes(name))) fail(400,'鼓手特殊安排不正确');
-    if (shift==='休息' && shows.some(s=>s.drummers.includes(name))) fail(400, name+'已安排演出，不能同时休息');
-    return [name,shift];
-  });
-  if (typeof value.note!=='string' || value.note.length>1000) fail(400,'备注最长 1000 字');
-  if (value.published!==true && value.published!==false) fail(400,'请选择草稿或发布');
-  if(value.published && roster.some(r=>r.shift==='待定')) fail(400,'待定岗位请确认后再发布');
-  if(value.published && shows.some(s=>s.period==='待确认')) fail(400,'请确认每场的上午或下午时段后再发布');
-  return {count:value.count, shows, roster, special:Object.fromEntries(special), note:value.note.trim(), published:value.published};
-}
 async function body(request) {
   if (!request.headers.get('Content-Type')?.startsWith('application/json')) fail(415,'请提交 JSON');
   const raw = await request.text();
@@ -138,18 +111,22 @@ export default {
       if(path.startsWith('/schedules/') && method==='GET') {
         const u=await user(request,env,'approved'), day=path.slice('/schedules/'.length); dayValid(day);
         const r=await env.DB.prepare('SELECT * FROM schedules WHERE day=?').bind(day).first();
-        if(!r || (!r.published && u.role!=='admin')) return respond({schedule:null});
-        return respond({schedule:{day,data:JSON.parse(r.data),published:!!r.published,version:r.version,updatedAt:r.updated_at}});
+        if(!r) return respond({schedule:null});
+        return respond({schedule:{day,data:normalizeSchedule(JSON.parse(r.data)),version:r.version,updatedAt:r.updated_at}});
       }
       if(path.startsWith('/schedules/') && method==='PUT') {
         const actor=await user(request,env,'admin'), day=path.slice('/schedules/'.length); dayValid(day);
         const b=await body(request), data=validateSchedule(b.data);
         if(!Number.isInteger(b.version) || b.version<0) fail(400,'请刷新排班后再保存');
         // Version-guarded writes prevent another administrator's update being overwritten.
-        const update=b.version===0 ? env.DB.prepare('INSERT INTO schedules(day,data,published,version,updated_at,updated_by) VALUES(?,?,?,1,?,?) ON CONFLICT(day) DO NOTHING').bind(day,JSON.stringify(data),+data.published,Date.now(),actor.id) : env.DB.prepare('UPDATE schedules SET data=?,published=?,version=version+1,updated_at=?,updated_by=? WHERE day=? AND version=?').bind(JSON.stringify(data),+data.published,Date.now(),actor.id,day,b.version);
-        const r=await update.run();
+        const update=b.version===0 ? env.DB.prepare('INSERT INTO schedules(day,data,published,version,updated_at,updated_by) VALUES(?,?,?,1,?,?) ON CONFLICT(day) DO NOTHING').bind(day,JSON.stringify(data),1,Date.now(),actor.id) : env.DB.prepare('UPDATE schedules SET data=?,published=?,version=version+1,updated_at=?,updated_by=? WHERE day=? AND version=?').bind(JSON.stringify(data),1,Date.now(),actor.id,day,b.version);
+        const results=await env.DB.batch([
+          env.DB.prepare('INSERT INTO schedule_archive(day,version,data,published,updated_at,updated_by,archived_at) SELECT day,version,data,published,updated_at,updated_by,? FROM schedules WHERE day=? AND version=? ON CONFLICT(day,version) DO NOTHING').bind(Date.now(),day,b.version),
+          update
+        ]);
+        const r=results[1];
         if(!r.meta.changes) fail(409,'排班已被其他操作更新，请刷新后重试');
-        await env.DB.prepare('INSERT INTO audit VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor.id,'schedule:'+ (data.published?'publish':'draft'),day,Date.now()).run();
+        await env.DB.prepare('INSERT INTO audit VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor.id,'schedule:save',day,Date.now()).run();
         return respond({ok:true,version:b.version+1});
       }
       fail(404,'页面不存在');
