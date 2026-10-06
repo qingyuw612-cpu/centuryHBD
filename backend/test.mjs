@@ -20,6 +20,8 @@ await request('/auth/register','POST',{username:'test_admin',name:'测试管理�
 db.exec("UPDATE users SET status='approved',role='admin' WHERE username='test_admin'");
 const admin=(await request('/auth/login','POST',{username:'test_admin',password:account.password})).cookie;
 const viewer=db.prepare('SELECT id FROM users WHERE username=?').get(account.username).id;
+env.OWNER_ID=db.prepare("SELECT id FROM users WHERE username='test_admin'").get().id;
+assert.equal((await request('/admin/users','GET',null,admin)).body.canManageRoles,true);
 assert.equal((await request('/admin/users/'+viewer,'PUT',{status:'approved'},admin)).status,200);
 assert.equal((await request('/auth/me','GET',null,cookie)).status,401);
 cookie=(await request('/auth/login','POST',account)).cookie;
@@ -50,6 +52,19 @@ const migrated=normalizeSchedule(legacy);assert.equal(migrated.shows[0].head,'�
 db.prepare('INSERT INTO schedules VALUES(?,?,?,?,?,?)').run('2026-10-05',JSON.stringify(legacy),0,1,Date.now(),'legacy');
 assert.equal((await request('/schedules/2026-10-05','GET',null,cookie)).body.schedule.data.format,2);
 await request('/auth/logout','POST',{},cookie);assert.equal((await request('/auth/me','GET',null,cookie)).status,401);
+assert.equal((await request('/admin/users/'+viewer,'PUT',{role:'admin',status:'approved'},admin)).status,200);
+cookie=(await request('/auth/login','POST',account)).cookie;
+assert.equal((await request('/auth/me','GET',null,cookie)).body.user.role,'admin');
+assert.equal((await request('/schedules/2026-10-07','PUT',{version:0,data},cookie)).status,200);
+assert.equal((await request('/admin/users/'+env.OWNER_ID,'PUT',{role:'viewer'},cookie)).status,400);
+assert.equal((await request('/admin/users/'+viewer,'PUT',{role:'viewer'},cookie)).status,403);
+assert.equal((await request('/admin/users/'+viewer,'PUT',{role:'viewer'},admin)).status,200);
+assert.equal((await request('/auth/me','GET',null,cookie)).status,401);
+const chinese={username:'中文账号',name:'中文姓名',password:'一'};
+assert.equal((await request('/auth/register','POST',chinese)).status,201);
+assert.equal((await request('/auth/login','POST',chinese)).status,200);
+assert.equal((await request('/auth/register','POST',{username:'长密码',name:'测试',password:'长'.repeat(256)})).status,201);
+assert.equal((await request('/auth/login','POST',{username:'长密码',password:'长'.repeat(256)})).status,200);
 for(let i=0;i<10;i++)await request('/auth/login','POST',{username:'nonexistent',password:'wrong'});
 assert.equal((await request('/auth/login','POST',{username:'nonexistent',password:'wrong'})).status,429);
 assert.ok(db.prepare('SELECT COUNT(*) AS n FROM audit').get().n>=3);

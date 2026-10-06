@@ -1,6 +1,8 @@
 import {validateSchedule, normalizeSchedule} from './model.mjs';
 const ORIGINS = new Set(['https://www.centuryroom.cn', 'https://centuryroom.cn']);
 const COOKIE = '__Host-century_session';
+const usernameValid = s => typeof s==='string' && /^[\p{L}\p{N}_-]{1,32}$/u.test(s);
+const isOwner = (u,env) => u.id === (env.OWNER_ID || '7410a01b-dae6-4ecb-af77-044eeef0f6d8');
 const encoder = new TextEncoder();
 const random = () => [...crypto.getRandomValues(new Uint8Array(32))].map(v=>v.toString(16).padStart(2,'0')).join('');
 const hex = a => [...new Uint8Array(a)].map(v=>v.toString(16).padStart(2,'0')).join('');
@@ -54,9 +56,9 @@ export default {
       if(path==='/auth/register' && method==='POST') {
         await rate(env,'register:'+await hash(request.headers.get('CF-Connecting-IP')||'unknown'),5,3600);
         const b=await body(request);
-        if(typeof b.username!=='string' || !/^[a-zA-Z0-9_]{3,32}$/.test(b.username)) fail(400,'用户名需为 3–32 位英文字母、数字或下划线');
+        if(!usernameValid(b.username)) fail(400,'用户名支持 1–32 位中文、字母、数字、下划线或短横线');
         if(typeof b.name!=='string' || !b.name.trim() || b.name.trim().length>40) fail(400,'姓名需为 1–40 字');
-        if(typeof b.password!=='string' || b.password.length<15 || b.password.length>128) fail(400,'密码需为 15–128 个字符');
+        if(typeof b.password!=='string' || !b.password.length) fail(400,'请输入密码');
         const username=b.username.toLowerCase(), salt=random(), id=crypto.randomUUID();
         if(await env.DB.prepare('SELECT id FROM users WHERE username=?').bind(username).first()) fail(409,'用户名已被使用');
         const password_hash=await passwordHash(b.password,salt);
@@ -67,7 +69,7 @@ export default {
       if(path==='/auth/login' && method==='POST') {
         await rate(env,'loginip:'+await hash(request.headers.get('CF-Connecting-IP')||'unknown'),30,900);
         const b=await body(request);
-        if(typeof b.username!=='string' || !/^[a-zA-Z0-9_]{3,32}$/.test(b.username) || typeof b.password!=='string' || b.password.length>128) fail(400,'请输入用户名和密码');
+        if(!usernameValid(b.username) || typeof b.password!=='string' || !b.password.length) fail(400,'请输入用户名和密码');
         const username=b.username.toLowerCase();
         await rate(env,'loginuser:'+await hash(username),10,900);
         const u=await env.DB.prepare('SELECT * FROM users WHERE username=?').bind(username).first();
@@ -91,20 +93,24 @@ export default {
         return respond({ok:true},200,{'Set-Cookie':`${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`});
       }
       if(path==='/admin/users' && method==='GET') {
-        await user(request,env,'admin');
+        const actor=await user(request,env,'admin');
         const r=await env.DB.prepare('SELECT id,username,name,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 500').all();
-        return respond({users:r.results});
+        return respond({users:r.results,canManageRoles:isOwner(actor,env),ownerId:env.OWNER_ID || '7410a01b-dae6-4ecb-af77-044eeef0f6d8'});
       }
       if(path.startsWith('/admin/users/') && method==='PUT') {
         const actor=await user(request,env,'admin'), id=path.slice('/admin/users/'.length), b=await body(request);
-        if(!['approved','disabled','pending'].includes(b.status)) fail(400,'状态无效');
-        const target=await env.DB.prepare('SELECT id,role FROM users WHERE id=?').bind(id).first();
+        const target=await env.DB.prepare('SELECT id,role,status FROM users WHERE id=?').bind(id).first();
         if(!target) fail(404,'账号不存在');
-        if(target.role==='admin') fail(400,'管理员账号需由站点负责人维护');
+        if(isOwner(target,env)) fail(400,'站点负责人账号不可修改');
+        const role=b.role===undefined?target.role:b.role, status=b.status===undefined?target.status:b.status;
+        if(!['admin','viewer'].includes(role)) fail(400,'权限无效');
+        if(!['approved','disabled','pending'].includes(status)) fail(400,'状态无效');
+        if((b.role!==undefined || target.role==='admin') && !isOwner(actor,env)) fail(403,'仅站点负责人可以设置管理员');
+        if(role==='admin' && status!=='approved') fail(400,'管理员需为已批准账号');
         await env.DB.batch([
-          env.DB.prepare('UPDATE users SET status=? WHERE id=?').bind(b.status,id),
+          env.DB.prepare('UPDATE users SET status=?,role=? WHERE id=?').bind(status,role,id),
           env.DB.prepare('DELETE FROM sessions WHERE user_id=?').bind(id),
-          env.DB.prepare('INSERT INTO audit VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor.id,'user:'+b.status,id,Date.now())
+          env.DB.prepare('INSERT INTO audit VALUES(?,?,?,?,?)').bind(crypto.randomUUID(),actor.id,'user:'+status+':'+role,id,Date.now())
         ]);
         return respond({ok:true});
       }
