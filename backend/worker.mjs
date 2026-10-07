@@ -122,7 +122,13 @@ export default {
       }
       if(path.startsWith('/schedules/') && method==='PUT') {
         const actor=await user(request,env,'admin'), day=path.slice('/schedules/'.length); dayValid(day);
-        const b=await body(request), data=validateSchedule(b.data);
+        const b=await body(request);
+        const previous=await env.DB.prepare('SELECT data FROM schedules WHERE day=?').bind(day).first();
+        const prior=previous?normalizeSchedule(JSON.parse(previous.data)):null;
+        // Retain old unnamed performers in place, without allowing new unnamed assignments.
+        if(Array.isArray(b.data?.shows)&&b.data.shows.some((s,i)=>Array.isArray(s?.dancers)&&s.dancers.some((name,j)=>name==='其他'&&prior?.shows[i]?.dancers[j]!=='其他'))) fail(400,'请选择具体 Dancer');
+        if(Array.isArray(b.data?.rest?.其他)&&b.data.rest.其他.some((mark,i)=>mark&&!prior?.rest?.其他?.[i])) fail(400,'请选择具体 Dancer');
+        const data=validateSchedule(b.data,{legacyOther:!!prior});
         if(!Number.isInteger(b.version) || b.version<0) fail(400,'请刷新排班后再保存');
         // Version-guarded writes prevent another administrator's update being overwritten.
         const update=b.version===0 ? env.DB.prepare('INSERT INTO schedules(day,data,published,version,updated_at,updated_by) VALUES(?,?,?,1,?,?) ON CONFLICT(day) DO NOTHING').bind(day,JSON.stringify(data),1,Date.now(),actor.id) : env.DB.prepare('UPDATE schedules SET data=?,published=?,version=version+1,updated_at=?,updated_by=? WHERE day=? AND version=?').bind(JSON.stringify(data),1,Date.now(),actor.id,day,b.version);

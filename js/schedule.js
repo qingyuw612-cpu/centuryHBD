@@ -1,10 +1,10 @@
 'use strict';
 const API='https://api.centuryroom.cn';
 const $=id=>document.getElementById(id);
-const groups={鼓手:['汤','妹','yo','哲','本','项','诺'],MC:['远','豆','狮','森'],小号:['河','宏'],Dancer:['Gus','彭俊维','其他']};
-const actors=Object.values(groups).flat(),ghostActors=['彭俊维','哲'];
+const groups={鼓手:['汤','妹','yo','哲','本','项','诺'],MC:['远','豆','狮','森','Carlos'],小号:['河','宏'],Dancer:['Gus','彭俊维','刘俊龙','小熊','小咖喱','Igor']};
+const actors=Object.values(groups).flat(),ghostActors=['彭俊维','哲','本'];
 const blankShow=()=>({head:'',tail:'',mc:'',trumpet:'',dancers:['','']});
-const blankSchedule=(count=4)=>({format:2,count,shows:Array.from({length:count},blankShow),rest:{},night:{'彭俊维':'','哲':''}});
+const blankSchedule=(count=4)=>({format:2,count,shows:Array.from({length:count},blankShow),rest:{},night:{'彭俊维':'','哲':'','本':''}});
 const copy=value=>JSON.parse(JSON.stringify(value));
 let currentUser=null,registration=false,version=0,loadedDay=null,sequence=0,data=blankSchedule(),working=null,personal=false,editing=false,dirty=false,saving=false;
 function node(tag,text,className){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;return e;}
@@ -12,7 +12,7 @@ function message(text,error=false){$('message').hidden=!text;$('message').textCo
 async function api(path,method='GET',body){let r;try{r=await fetch(API+path,{method,credentials:'include',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});}catch{throw Error('连接失败，请重试');}const result=await r.json();if(!r.ok){if(r.status===401&&!['/auth/login','/auth/register'].includes(path)){currentUser=null;renderAccount();}throw Error(result.message||'操作失败');}return result;}
 function actorOptions(select){for(const [group,names] of Object.entries(groups)){const optgroup=node('optgroup');optgroup.label=group;for(const name of names){const option=node('option',name);option.value=name;optgroup.append(option);}select.append(optgroup);}}
 actorOptions($('actor'));actorOptions($('record-actor'));
-function choice(values,value,label){const s=node('select');s.setAttribute('aria-label',label);for(const v of values){const option=node('option',v);option.value=v;s.append(option);}s.value=value||'';return s;}
+function choice(values,value,label){const s=node('select');s.setAttribute('aria-label',label);for(const v of values){const option=node('option',v);option.value=v;s.append(option);}if(value==='其他'&&!values.includes(value)){const old=node('option','其他（旧记录）');old.value=value;old.disabled=true;s.append(old);}s.value=value||'';return s;}
 function table(headers,rows,className){const wrap=node('div',undefined,'table-wrap'),t=node('table',undefined,className),head=node('thead'),h=node('tr');headers.forEach(v=>h.append(node('th',v)));head.append(h);t.append(head);const body=node('tbody');rows.forEach(values=>{const r=node('tr');values.forEach(v=>{const cell=node('td');cell.append(v instanceof Node?v:document.createTextNode(v==null?'':String(v)));r.append(cell);});body.append(r);});t.append(body);wrap.append(t);return wrap;}
 function roles(show,actor){return [show.head===actor?'车头':'',show.tail===actor?'车尾':'',show.mc===actor?'MC':'',show.trumpet===actor?'小号':'',show.dancers.includes(actor)?'Dancer':''].filter(Boolean);}
 function dateString(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
